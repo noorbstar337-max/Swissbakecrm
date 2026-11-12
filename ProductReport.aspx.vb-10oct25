@@ -1,0 +1,374 @@
+﻿
+Partial Class ProductReport
+	Inherits System.Web.UI.Page
+	Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+		Try
+
+			If Not IsPostBack Then
+                'Dim tempDate As Date = Date.Now.AddMonths(-1).ToString("yyyy-MM-dd")
+                Dim tempDate As Date = Date.Now.ToString("yyyy-MM-dd")
+				Dim startOfMonth As New DateTime(tempDate.Year, tempDate.Month, 1)
+                'Dim endOfMonth As DateTime = startOfMonth.AddMonths(1).AddDays(-1)
+                Dim endOfMonth As DateTime = Date.Now.ToString("yyyy-MM-dd")
+				txtfrom.Text = startOfMonth.ToString("yyyy-MM-dd")
+				txtto.Text = endOfMonth.ToString("yyyy-MM-dd")
+
+				'pnldemo.Visible = False
+				'' btndashboard_Click(New Object(), New EventArgs())
+
+				'FillddlCompany()
+				'ddlUser_SelectedIndexChanged(Nothing, Nothing)
+				''ddlCompany_SelectedIndexChanged(Nothing, Nothing)
+				'fillgridview()
+                FillddlUser()
+                ddlUser_SelectedIndexChanged(Nothing, Nothing)
+                FillddlCatagory()
+				FillddlProduct()
+				fillgridview()
+			End If
+		Catch ex As Exception
+			Dim error1 As String = ex.Message.Replace(Chr(34), "")
+			error1 = error1.Replace(Chr(39), "")
+			ExecptionBLL.Insert("Report_DSR", "Page_Load", error1, Session("UserId"))
+			ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+		End Try
+	End Sub
+#Region "FillDropdowns"
+	Public Sub FillddlUser()
+		Try
+			'MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+			Dim ds As DataSet
+			' If MainID = 0 Then
+			ds = reportBLL.UserDropdown("UserDropDown")
+			ddlUser.DataSource = ds.Tables(0)
+			ddlUser.DataTextField = "Name"
+			ddlUser.DataValueField = "ID"
+			ddlUser.DataBind()
+			ddlUser.Items.Insert(0, New ListItem("All", "0"))
+            FillddlCompany()
+		Catch ex As Exception
+			Dim error1 As String = ex.Message.Replace(Chr(34), "")
+			error1 = error1.Replace(Chr(39), "")
+
+			Throw ex
+		End Try
+	End Sub
+	Public Sub FillddlCatagory()
+		Try
+			'MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+			Dim ds As DataSet
+			' If MainID = 0 Then
+			ds = DSRReportBLL.UserDropdown("ProductCatagoryDropDown")
+			ddlCatagory.DataSource = ds.Tables(0)
+			ddlCatagory.DataTextField = "Name"
+			ddlCatagory.DataValueField = "ID"
+			ddlCatagory.DataBind()
+			ddlCatagory.Items.Insert(0, New ListItem("All", "0"))
+			''FillddlCompany()
+		Catch ex As Exception
+			Dim error1 As String = ex.Message.Replace(Chr(34), "")
+			error1 = error1.Replace(Chr(39), "")
+
+			Throw ex
+		End Try
+	End Sub
+	Public Sub FillddlCompany()
+		Try
+			Dim ds As DataSet
+			'If ddlUser.SelectedValue = 0 And ddcompanytype.SelectedValue = "All" Then
+			'	ds = DSRReportBLL.CompanyDropdownById("CompanyDropDown", 1)
+			'ElseIf ddcompanytype.SelectedValue <> "All" Then
+			'	ds = DSRReportBLL.CompanyDropdownById("CompanyDropDownbytype", 1, ddcompanytype.SelectedValue)
+			'Else
+			'	ds = DSRReportBLL.CompanyDropdownById("CompanyDropDown", ddlCatagory.SelectedValue)
+			'End If
+			If ddlUser.SelectedValue = 0 Then
+				ds = reportBLL.CompanyDropdownById("ProductReportCompanyDropDown", 1)
+			Else
+				ds = reportBLL.CompanyDropdownById("ProductReportCompanyDropDown", ddlUser.SelectedValue)
+			End If
+			ddlCompany.DataSource = ds.Tables(0)
+			ddlCompany.DataTextField = "Acc_Name"
+			ddlCompany.DataValueField = "ID"
+			ddlCompany.DataBind()
+			ddlCompany.Items.Insert(0, New ListItem("All", "0"))
+
+		Catch ex As Exception
+			Dim error1 As String = ex.Message.Replace(Chr(34), "")
+			error1 = error1.Replace(Chr(39), "")
+			Throw ex
+		End Try
+	End Sub
+	Public Sub FillddlProduct()
+		Try
+			Dim ds As DataSet
+			If ddlCatagory.SelectedValue = 0 Then
+				ds = reportBLL.DropdownByID("ProductReportDropDown", 0)
+			Else
+				ds = reportBLL.DropdownByID("ProductReportDropDown", ddlCatagory.SelectedValue)
+			End If
+			'ds = DSRReportBLL.Dropdown("ProductDropDown")
+			ddlProduct.DataSource = ds.Tables(0)
+			ddlProduct.DataTextField = "Product_Name"
+			ddlProduct.DataValueField = "Product_Id"
+			ddlProduct.DataBind()
+			ddlProduct.Items.Insert(0, New ListItem("All", "0"))
+
+		Catch ex As Exception
+			Dim error1 As String = ex.Message.Replace(Chr(34), "")
+			error1 = error1.Replace(Chr(39), "")
+
+			Throw ex
+		End Try
+	End Sub
+#End Region
+    Public Sub fillgridview()
+        Try
+            Dim ds As DataSet
+           
+
+            ds = reportBLL.FillProductReport(ddlUser.SelectedValue, txtfrom.Text, txtto.Text, ddlCompany.SelectedValue, ddlCatagory.SelectedValue, ddlProduct.SelectedValue, ddlStage.SelectedValue, "ProductReportGridview")
+            rpgridview.DataSource = ds
+            rpgridview.DataBind()
+            If ds.Tables(0).Rows.Count = Nothing Then
+                tblGrid.Visible = False
+                div1.Visible = False
+                div2.Visible = False
+                div3.Visible = False
+                div4.Visible = False
+                '  trFooter.Visible = False
+                lblfoot.Visible = True
+            Else
+                tblGrid.Visible = True
+                If ddcompanytype.SelectedValue = "All" And ddlProduct.SelectedItem.Text = "All" And ddlCompany.SelectedItem.Text = "All" And ddlCatagory.SelectedItem.Text = "All" Then
+                    litlead.Text = "Total"
+                    'liaccount.Text = "Account"
+                    'liprospect.Text = "Prospect"
+
+                    lblleadtotal.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(OrDetail_Qty)", "")))
+                    lblleadamt.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(total)", ""))).ToString("N2")
+
+                    'lblPtotal.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(OrDetail_Qty)", "SampleRequest_Type = 'Prospect'")))
+                    'lblpamt.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(Samplerate)", "SampleRequest_Type = 'Prospect'"))).ToString("N2")
+                    'lblatotal.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(qty)", "SampleRequest_Type = 'Account'")))
+                    'lblaamt.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(Samplerate)", "SampleRequest_Type = 'Account'"))).ToString("N2")
+                    'lbaatotal.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(qty)", "")))
+                    'labamtt1.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(Samplerate)", ""))).ToString("N2")
+                    div1.Visible = True
+                    div2.Visible = False
+                    div3.Visible = False
+                    div4.Visible = False
+                ElseIf ddcompanytype.SelectedItem.Text <> "All" Then
+                    litlead.Text = ddcompanytype.SelectedItem.Text
+                    lblleadtotal.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(OrDetail_Qty)", "")))
+                    lblleadamt.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(total)", ""))).ToString("N2")
+                ElseIf ddlCompany.SelectedItem.Text <> "All" Then
+                    litlead.Text = ddlCompany.SelectedItem.Text
+                    lblleadtotal.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(OrDetail_Qty)", "")))
+                    lblleadamt.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(total)", ""))).ToString("N2")
+                ElseIf ddlProduct.SelectedItem.Text <> "All" Then
+                    litlead.Text = ddlProduct.SelectedItem.Text
+                    lblleadtotal.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(OrDetail_Qty)", "")))
+                    lblleadamt.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(total)", ""))).ToString("N2")
+                ElseIf ddlCatagory.SelectedItem.Text <> "All" Then
+                    litlead.Text = ddlCatagory.SelectedItem.Text
+                    lblleadtotal.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(OrDetail_Qty)", "")))
+                    lblleadamt.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(total)", ""))).ToString("N2")
+                Else
+
+                    div1.Visible = True
+                    div4.Visible = False
+                    lblleadtotal.Text = Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(OrDetail_Qty)", "")))
+                    lblleadamt.Text = (Convert.ToDouble(DynamicparcelDataManipulation.FixNullFromDB(ds.Tables(0).Compute("SUM(total)", "")))).ToString("N2")
+                    div2.Visible = False
+                    div3.Visible = False
+                    If ddlCompany.SelectedValue <> "0" Then
+                        litlead.Text = ddlCompany.SelectedItem.Text
+                    ElseIf ddlProduct.SelectedValue <> "0" Then
+                        litlead.Text = ddlProduct.SelectedItem.Text
+                    Else
+                        litlead.Text = "Total"
+                    End If
+                End If
+
+
+            End If
+            Dim FooterTemplate As Control = rpgridview.Controls(rpgridview.Controls.Count - 1).Controls(0)
+            Dim trFooter As HtmlTableRow = TryCast(FooterTemplate.FindControl("trFooter"), HtmlTableRow)
+            Dim lblQty As Label = TryCast(FooterTemplate.FindControl("lblQty"), Label)
+            Dim lblrate As Label = TryCast(FooterTemplate.FindControl("lblrate"), Label)
+            Dim lblprice As Label = TryCast(FooterTemplate.FindControl("lblprice"), Label)
+
+            If ds.Tables(0).Rows.Count > 0 Then
+                lblQty.Text = ds.Tables(0).Compute("Sum(OrDetail_Qty)", String.Empty)
+                lblrate.Text = CDbl(ds.Tables(0).Compute("Sum(OrDetail_Rate)", String.Empty)).ToString("N2")
+                lblprice.Text = CDbl(ds.Tables(0).Compute("Sum(total)", String.Empty)).ToString("N2")
+            Else
+                trFooter.Visible = False
+                lblfoot.Visible = True
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            'ExecptionBLL.Insert("Activity", "fillLead", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+
+    End Sub
+	Protected Sub btndashboard_Click(sender As Object, e As EventArgs) Handles btndashboard.Click
+		Try
+			fillgridview()
+		Catch ex As Exception
+			Dim error1 As String = ex.Message.Replace(Chr(34), "")
+			error1 = error1.Replace(Chr(39), "")
+			'ExecptionBLL.Insert("Activity", "fillLead", error1, Session("UserId"))
+			ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+		End Try
+	End Sub
+
+	'Private Sub ddcompanytype_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddcompanytype.SelectedIndexChanged
+	'	FillddlCompany()
+	'End Sub
+
+    'Protected Sub btnExportExcel_Click(sender As Object, e As ImageClickEventArgs) Handles btnExportExcel.Click
+    '	Try
+    '		Response.Clear()
+    '		Response.Buffer = True
+    '		Response.AddHeader("content-disposition", "attachment;filename=" + ddlProduct.SelectedItem.Text + ".xls")
+    '		Response.Charset = ""
+    '		Response.ContentType = "application/vnd.ms-excel"
+    '		Dim sw As New StringWriter()
+    '		Dim hw As New HtmlTextWriter(sw)
+
+    '		Dim GRD As New GridView
+
+    '		'Dim UserID1 As Integer
+    '		'If ddlCatagory.SelectedValue = 0 Then
+    '		'	UserID1 = 0
+    '		'Else
+    '		'	UserID1 = ddlCatagory.SelectedValue
+    '		'End If
+    '		'Dim str As String = ddlCompany.SelectedValue
+    '		'Dim strArr() As String
+    '		'strArr = str.Split("-")
+    '		'Dim CompanyID As Integer = strArr(0)
+    '		'Dim Type As String
+    '		'If CompanyID <> 0 Then
+    '		'	Type = strArr(1)
+    '		'ElseIf ddcompanytype.SelectedValue = "All" Then
+    '		'	Type = "None"
+    '		'Else
+    '		'	Type = ddcompanytype.SelectedValue
+    '		'End If
+    '		'Dim ProdID As Integer = ddlProduct.SelectedValue
+
+    '		GRD.DataSource = reportBLL.FillProductReport(ddlUser.SelectedValue, txtfrom.Text, txtto.Text, ddlCompany.SelectedValue, ddlCatagory.SelectedValue, ddlProduct.SelectedValue, ddlStage.SelectedValue, "ProductReportGridview")
+    '		GRD.DataBind()
+    '		GRD.AllowPaging = False
+    '		GRD.DataBind()
+    '		GRD.RenderControl(hw)
+    '		Dim style As String = "<style> .textmode { mso-number-format:\@; } </style>"
+    '		Response.Write(style)
+    '		Response.Output.Write(sw.ToString())
+    '		Response.Flush()
+    '		Response.End()
+    '	Catch ex As Exception
+    '		Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '		error1 = error1.Replace(Chr(39), "")
+    '		ExecptionBLL.Insert("SearchControlWithId", "btnExportExcel_Click", error1, Session("UserId"))
+    '		ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '	End Try
+    'End Sub
+
+	Private Sub ddlCatagory_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddlCatagory.SelectedIndexChanged
+		FillddlProduct()
+	End Sub
+
+    Private Sub ddlUser_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddlUser.SelectedIndexChanged
+        Try
+            If ddlUser.SelectedValue = 0 Then
+                divCompany.Visible = False
+            Else
+                divCompany.Visible = True
+                FillddlCompany()
+            End If
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
+    Protected Sub btnExport_Click(sender As Object, e As EventArgs) Handles btnExport.Click
+        Try
+
+            Response.Clear()
+            Response.Buffer = True
+            Response.AddHeader("content-disposition", "attachment;filename=Product Report.xls")
+            Response.Charset = ""
+            Response.ContentType = "application/vnd.ms-excel"
+            Dim sw As New StringWriter()
+            Dim hw As New HtmlTextWriter(sw)
+
+            Dim Gridview2 As New GridView
+
+            Dim dt As New DataSet()
+            'dt = MainBLL.SearchGridViewByID(txtSearch.Text.Trim, Session("UserId"), hfExcel.Value)
+            dt = reportBLL.FillProductReport(ddlUser.SelectedValue, txtfrom.Text, txtto.Text, ddlCompany.SelectedValue, ddlCatagory.SelectedValue, ddlProduct.SelectedValue, ddlStage.SelectedValue, "ProductReportExcel")
+
+            Dim dtExc As DataTable = dt.Tables(0)
+            'dtExc.Columns.Remove("Order_ID")
+            'dtExc.Columns.Remove("U_ID")
+            'dtExc.Columns.Remove("Industry_Name")
+            'dtExc.Columns.Remove("Industry_Id")
+            'dtExc.Columns.Remove("Order_CustId")
+            ''dtExc.Columns.Remove("RowNumber")
+            dtExc.Columns("RowNumber").ColumnName = "Sr No."
+            dtExc.Columns("Acc_Name").ColumnName = "Company"
+            dtExc.Columns("PrdCategory_Name").ColumnName = "Category"
+            dtExc.Columns("Product_Name").ColumnName = "Product Name"
+            dtExc.Columns("OrDetail_Qty").ColumnName = "Quantity (KG)"
+            dtExc.Columns("OrDetail_Rate").ColumnName = "Rate / KG (Rs)"
+            dtExc.Columns("total").ColumnName = "Price (Rs)"
+            dtExc.Columns("U_FirstName").ColumnName = "Owner"
+            dtExc.Columns("Acc_Code").ColumnName = "Company Code"
+            dtExc.Columns("Product_Code").ColumnName = "Product Code"
+            dtExc.Columns("Invoice_Number").ColumnName = "Invoice Code"
+            dtExc.Columns("OrderAddr_City").ColumnName = "City"
+            dtExc.Columns("StateName").ColumnName = "State"
+            dtExc.Columns("Contact_ContactPerson").ColumnName = "Contact Person"
+            dtExc.Columns("Contact_Email").ColumnName = "Email"
+            dtExc.Columns("Contact_Mobile").ColumnName = "Mobile"
+            dtExc.Columns("Sr No.").SetOrdinal(0)
+            dtExc.Columns("Company").SetOrdinal(1)
+            dtExc.Columns("Company Code").SetOrdinal(2)
+            dtExc.Columns("Contact Person").SetOrdinal(3)
+            dtExc.Columns("Quantity (KG)").SetOrdinal(4)
+            dtExc.Columns("Product Code").SetOrdinal(7)
+            'dtExc.Columns("Assignto").SetOrdinal(10)
+
+            Gridview2.DataSource = dtExc
+            'Gridview2.DataBind()
+            Gridview2.AllowPaging = False
+            Gridview2.DataBind()
+            Gridview2.RenderControl(hw)
+
+            'style to format numbers to string
+            Dim style As String = "<style> .textmode { mso-number-format:\@; } </style>"
+            Response.Write(style)
+            Response.Output.Write(sw.ToString())
+            Response.Flush()
+            Response.End()
+            ' ''Dim html2 As String = Regex.Replace(sw.ToString(), "(<img\/?[^>]+>)", "", RegexOptions.IgnoreCase)
+            '' ''html2 = Regex.Replace(html2, "(<input class=""checkbox""\/?[^>]+>)", "", RegexOptions.IgnoreCase)
+            ' ''html2 = Regex.Replace(html2, "(<a \/?[^>]+>)", "", RegexOptions.IgnoreCase)
+            ' ''html2 = Regex.Replace(html2, "(<i \/?[^>]+>)", "(INR)", RegexOptions.IgnoreCase)
+            ' ''Response.Write(html2.ToString())
+            ' ''Response.Flush()
+            ' ''Response.End()
+
+            'DoValidate.closeConn(_conn)
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
+End Class

@@ -1,0 +1,152 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MainPage.master" EnableEventValidation="false" AutoEventWireup="false" CodeFile="OutStandingReport.aspx.vb" Inherits="Lead" %>
+
+<%--<%@ Register TagPrefix="asp" Namespace="AjaxControlToolkit" Assembly="AjaxControlToolkit" %>--%>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+    <script>
+        function search() {
+            document.getElementById('<%= btnadd.ClientID%>').click();
+        }
+</script>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+
+    <asp:UpdatePanel ID="UpdatePanel2" runat="server" UpdateMode="Conditional" >
+        <ContentTemplate>
+            <div class="content-header">
+                <div class="header-section">
+                    <h1>
+                        <i class="gi gi-parents" style="margin: -8px"></i>Outstanding Report<br>
+                    </h1>
+                </div>
+            </div>
+            <ul class="breadcrumb breadcrumb-top">
+                <li><a href="index.aspx">Home</a></li>
+                <li><a href="MIS.aspx">MIS</a></li>
+                <li>Outstanding Report</li>
+            </ul>
+            <div class="block">
+                <div class="block-title">
+                    <h2><strong>Outstanding Report</strong></h2>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="">
+                        <label class="col-md-4 control-label" for="example-hf-email">Start Date<span class="text-danger"></span></label>
+                        <div class="col-md-8">
+                            <asp:TextBox ID="txtstartdate" runat="server" placeholder="Enter Start Date" data-toggle="tooltip" title="Enter Start Date"
+                                CssClass="form-control input-datepicker" data-date-format="dd/mm/yyyy"></asp:TextBox>
+                            <asp:RequiredFieldValidator ID="releadname" runat="server" ControlToValidate="txtstartdate" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                ErrorMessage="Please enter start date" Display="Dynamic" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="">
+                        <label class="col-md-4 control-label" for="example-hf-password">End Date<span class="text-danger"></span></label>
+                        <div class="col-md-8">
+                            <asp:TextBox ID="txtEndDate" runat="server" placeholder="Enter End Date" data-toggle="tooltip" title="Enter End Date"
+                                CssClass="form-control input-datepicker" data-date-format="dd/mm/yyyy"></asp:TextBox>
+                            <asp:RequiredFieldValidator ID="releaddate" runat="server" ControlToValidate="txtEndDate" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                ErrorMessage="Please enter end date" Display="Dynamic" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                            <asp:CompareValidator ID="CompareValidator1" runat="server" ControlToValidate="txtEndDate" ControlToCompare="txtstartdate" Operator="GreaterThanEqual" Type="Date" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                ErrorMessage="Please enter valid date" Display="Dynamic" SetFocusOnError="true"></asp:CompareValidator>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="">
+                        <label class="col-md-4 control-label" for="example-hf-email">Search<span class="text-danger"></span></label>
+                        <div class="col-md-8">
+                            <asp:TextBox ID="txtsearch" runat="server" placeholder="Enter Text" data-toggle="tooltip" title="Enter Text"
+                                CssClass="form-control" onKeyUp="search();"></asp:TextBox>
+                            <%-- <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ControlToValidate="txtstartdate" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                ErrorMessage="Please enter start date" Display="Dynamic" SetFocusOnError="true"></asp:RequiredFieldValidator>--%>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="pull-right">
+                        <asp:ImageButton ID="btnExportExcel" data-toggle="tooltip" title="Export Excel" Style="margin-right: 23px" Width="33px" ImageAlign="Right" runat="server" ImageUrl="~/images/excel.gif" />
+                        <asp:LinkButton Text="Report" runat="server" Style="margin-right: 15px;" ID="btnadd" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Reporting...';"
+                            UseSubmitBehavior="false" class="btn btn-alt btn-sm btn-primary" ValidationGroup="MasterGroup"><i class="fa fa-line-chart"></i>  Report</asp:LinkButton>
+                        <asp:LinkButton Text="Show All" runat="server" Style="margin-right: 15px;" ID="btnshowall" class="btn btn-alt btn-sm btn-primary"><i class="gi gi-refresh"></i>  Show All</asp:LinkButton>
+                    </div>
+                </div>
+                <br />
+                <br />
+                <br />
+                <%--<User:SearchBarByID ID="SearchControl" runat="server" />--%>
+                <%--Search User Control End--%>
+                <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Conditional">
+                    <ContentTemplate>
+                        <asp:HiddenField ID="hfsearch" runat="server" />
+                       
+                        <div class="table-responsive">
+                            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="Acc_Id"
+                                CssClass="table table-striped table-vcenter" OnSorting="GridView1_Sorting" GridLines="None"
+                                AllowSorting="True">
+                                <Columns>
+                                    <asp:TemplateField HeaderText="ID" HeaderStyle-CssClass="" Visible="false" ItemStyle-CssClass="" SortExpression="Acc_Id">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lbluId" runat="server" Text='<%#DynamicparcelGridview.HighlightText(Eval("Acc_Id"), txtsearch)%>' EnableViewState="false" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Account Code" ItemStyle-CssClass="" HeaderStyle-CssClass="" SortExpression="Acc_Code">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lblCustomerCode" runat="server" Text='<%#DynamicparcelGridview.HighlightText(Eval("Acc_Code"), txtsearch)%>' EnableViewState="false" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Account Name" ItemStyle-CssClass="" HeaderStyle-CssClass="" SortExpression="Acc_Name">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lblaccname" runat="server" Text='<%#DynamicparcelGridview.HighlightText(Eval("Acc_Name"), txtsearch)%>' EnableViewState="false" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="City" ItemStyle-CssClass="" HeaderStyle-CssClass="" SortExpression="AccAddr_City">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="lblcity" runat="server" Text='<%#DynamicparcelGridview.HighlightText(Eval("AccAddr_City"), txtsearch)%>' EnableViewState="false" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="AssignTo" ItemStyle-CssClass="" HeaderStyle-CssClass="" SortExpression="AssignTo">
+                                        <ItemTemplate>
+                                            <asp:Label ID="lblassignto" runat="server" Text='<%#DynamicparcelGridview.HighlightText(Eval("AssignTo"), txtsearch)%>' EnableViewState="false" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Outstanding  Amount" ItemStyle-CssClass="" HeaderStyle-CssClass="" SortExpression="Balance">
+                                        <ItemTemplate>
+                                            <asp:Literal ID="blsalesamount" runat="server" Text='<%#DynamicparcelGridview.HighlightText(Eval("Balance"), txtsearch)%>' EnableViewState="false" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                                <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="left" BackColor="White" />
+                                <FooterStyle HorizontalAlign="left" BackColor="White" />
+                                <PagerSettings PageButtonCount="4" />
+                                <EmptyDataTemplate>
+                                    <asp:Label ID="s" runat="server" Text="No Record Found"></asp:Label><br />
+                                    <br />
+                                </EmptyDataTemplate>
+                                <EmptyDataRowStyle HorizontalAlign="Center" />
+                            </asp:GridView>
+                        </div>
+                    </ContentTemplate>
+                    <Triggers>
+                        <asp:AsyncPostBackTrigger ControlID="GridView1" />
+                       <%-- <asp:PostBackTrigger ControlID="btnadd" />--%>
+                        <asp:AsyncPostBackTrigger ControlID="btnadd" />
+                        <%-- <asp:AsyncPostBackTrigger ControlID="btnadd" />
+                        <asp:AsyncPostBackTrigger ControlID ="btnshowall" />--%>
+                        <asp:PostBackTrigger ControlID="btnExportExcel" />
+                    </Triggers>
+                </asp:UpdatePanel>
+            </div>
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    <asp:UpdateProgress ID="UpdateProgress1" AssociatedUpdatePanelID="" runat="server" DisplayAfter="0">
+        <ProgressTemplate>
+            <br />
+            <div class="divWaiting">
+                <i class="fa fa-sun-o fa-spin" id="LoadingUpadatePanel"></i>
+            </div>
+        </ProgressTemplate>
+    </asp:UpdateProgress>
+</asp:Content>
+

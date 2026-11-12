@@ -1,0 +1,362 @@
+﻿<%@ Page Language="VB" MasterPageFile="~/MainPage.master" AutoEventWireup="false" CodeFile="ProductReport.aspx.vb" Inherits="ProductReport" %>
+
+<%--<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">--%>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+      <style>
+        .table-responsive{
+            overflow-x:auto;
+        }
+    </style>
+    <script type="text/javascript">
+        var tableToExcel = (function () {
+            var uri = 'data:application/vnd.ms-excel;base64,'
+                , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table border="1px"><tr bgcolor="#394263">{table}</table></body></html>'
+                , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+            return function (table, name) {
+                if (!table.nodeType) table = document.getElementById(table)
+                table: table.innerHTML.replace(/<\s*img[^>]*>/gi, '');
+                var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML, }
+                window.location.href = uri + base64(format(template, ctx))
+            }
+        })()
+    </script>
+    <script type="text/javascript">
+        function fnExcelReport() {
+            var tab_text = "<table border='2px'><tr bgcolor='#394263'>";
+            var textRange; var j = 0;
+            tab = document.getElementById('example-datatable'); // id of table
+
+            for (j = 0 ; j < tab.rows.length ; j++) {
+                tab_text = tab_text + tab.rows[j].innerHTML + "</tr>";
+                //tab_text=tab_text+"</tr>";
+            }
+
+            tab_text = tab_text + "</table>";
+            tab_text = tab_text.replace(/<A[^>]*>|<\/A>/g, "");//remove if u want links in your table
+            tab_text = tab_text.replace(/<img[^>]*>/gi, ""); // remove if u want images in your table
+            tab_text = tab_text.replace(/<input[^>]*>|<\/input>/gi, ""); // reomves input params
+
+            var ua = window.navigator.userAgent;
+            var msie = ua.indexOf("MSIE ");
+
+            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))      // If Internet Explorer
+            {
+                txtArea1.document.open("txt/html", "replace");
+                txtArea1.document.write(tab_text);
+                txtArea1.document.close();
+                txtArea1.focus();
+                sa = txtArea1.document.execCommand("SaveAs", true, "Say Thanks to Sumit.xls");
+            }
+            else                 //other browser not tested on IE 11
+                sa = window.open('data:application/vnd.ms-excel,' + encodeURIComponent(tab_text));
+
+            return (sa);
+        }
+    </script>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" runat="Server">
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <asp:HiddenField ID="hfExcelmode" runat="server" />
+    <div class="content-header">
+        <div class="header-section">
+            <h1>
+                <i class="hi hi-tasks" style="margin: -8px"></i>Product Report<br>
+            </h1>
+        </div>
+    </div>
+    <ul class="breadcrumb breadcrumb-top">
+        <li><a href="index.aspx">Home</a></li>
+        <li>Product Report</li>
+    </ul>
+
+    <div class="row">
+        <div class="col-sm-6 col-lg-3" runat="server" id="div1">
+            <!-- Widget -->
+            <a href="#" class="widget widget-hover-effect1">
+                <div class="widget">
+                    <div class="widget-extra themed-background-dark text-center" style="color: #B31616;">
+                        <h3 class="widget-content-light">
+                            <small>
+                                <asp:Literal runat="server" ID="litlead"></asp:Literal>
+                            </small>
+                            <br />
+                            <br />
+                            <asp:Label runat="server" ID="lblleadtotal"></asp:Label>
+                            kg (&#x20B9;
+                            <asp:Label runat="server" ID="lblleadamt"></asp:Label>)                                
+                        </h3>
+                    </div>
+                </div>
+            </a>
+            <!-- END Widget -->
+        </div>
+        <div class="col-sm-6 col-lg-3" runat="server" id="div2">
+            <!-- Widget -->
+            <a href="#" class="widget widget-hover-effect1">
+                <div class="widget">
+                    <div class="widget-extra themed-background-dark-amethyst text-center" style="color: #B31616;">
+                        <h3 class="widget-content-light">
+                            <small>
+                                <asp:Literal runat="server" ID="liprospect"></asp:Literal></small><br />
+                            <br />
+                            <asp:Label runat="server" ID="lblPtotal"></asp:Label>
+                            kg (&#x20B9;
+                            <asp:Label runat="server" ID="lblpamt"></asp:Label>)                              
+                        </h3>
+                    </div>
+                </div>
+            </a>
+            <!-- END Widget -->
+        </div>
+        <div class="col-sm-6 col-lg-3" runat="server" id="div3">
+            <!-- Widget -->
+            <a href="#" class="widget widget-hover-effect1">
+                <div class="widget">
+                    <div class="widget-extra themed-background-autumn text-center" style="color: #B31616;">
+                        <h3 class="widget-content-light">
+                            <small>
+                                <asp:Literal runat="server" ID="liaccount"></asp:Literal></small><br />
+                            <br />
+                            <asp:Label runat="server" ID="lblatotal"></asp:Label>
+                            kg (&#x20B9;
+                            <asp:Label runat="server" ID="lblaamt"></asp:Label>)                              
+                        </h3>
+                    </div>
+                </div>
+            </a>
+            <!-- END Widget -->
+        </div>
+        <div class="col-sm-6 col-lg-3" runat="server" id="div4">
+            <!-- Widget -->
+            <a href="#" class="widget widget-hover-effect1">
+                <div class="widget">
+                    <div class="widget-extra themed-background-dark-fire text-center" style="color: #B31616;">
+                        <h3 class="widget-content-light">
+                            <small>Total</small><br />
+                            <br />
+                            <asp:Label runat="server" ID="lbaatotal"></asp:Label>
+                            kg (&#x20B9;
+                            <asp:Label runat="server" ID="labamtt1"></asp:Label>)                              
+                        </h3>
+                    </div>
+                </div>
+            </a>
+            <!-- END Widget -->
+        </div>
+    </div>
+
+
+    <div class="block">
+        <div class="block-title">
+            <h2><strong>Product Report</strong> Detail</h2>
+        </div>
+        <div class="row">
+            <div class="form-horizontal form-bordered">
+
+                <div class="col-md-12">
+                    <div class="col-md-3">
+                        <label class="col-md-3 control-label">From</label>
+                        <div class="col-md-9">
+                            <asp:TextBox ID="txtfrom" runat="server" class="form-control" placeholder="Enter From Date" TextMode="Date" />
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator3" runat="server" ControlToValidate="txtfrom" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                ErrorMessage="Enter From date" Display="Dynamic"></asp:RequiredFieldValidator>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="col-md-3 control-label">To</label>
+                        <div class="col-md-9">
+                            <asp:TextBox ID="txtto" runat="server" class="form-control" placeholder="Enter To Date" TextMode="Date" />
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ControlToValidate="txtto" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                ErrorMessage="Enter To date" Display="Dynamic"></asp:RequiredFieldValidator>
+                            <asp:CompareValidator ID="CompareValidator1" runat="server" Display="Dynamic" ErrorMessage="Enter Valid date" CssClass="MasterValidationCSS" ControlToCompare="txtfrom" ControlToValidate="txtto" Operator="GreaterThanEqual" ValidationGroup="MasterGroup"></asp:CompareValidator>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="col-md-3 control-label">Catagory</label>
+                        <div class="col-md-9">
+                            <asp:DropDownList ID="ddlCatagory" runat="server" AutoPostBack="true" class="form-control select-chosen">
+                            </asp:DropDownList>
+
+                        </div>
+                    </div>
+                    <asp:UpdatePanel runat="server">
+                        <Triggers>
+                            <asp:PostBackTrigger ControlID="ddlCatagory" />
+                        </Triggers>
+                        <ContentTemplate>
+                            <div class="col-md-3">
+                                <label class="col-md-3 control-label">Product</label>
+                                <div class="col-md-9">
+                                    <asp:DropDownList ID="ddlProduct" runat="server" class="form-control select-chosen">
+                                    </asp:DropDownList>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+
+                    </asp:UpdatePanel>
+                </div>
+
+                <div style="clear: both"></div>
+                <br />
+                <div class="col-md-12">
+                    <%--<div class="col-md-12" runat="server" id="divemp">--%>
+                    <div class="col-md-3">
+                        <label class="col-md-3 control-label">Owner</label>
+                        <div class="col-md-9">
+                            <asp:DropDownList ID="ddlUser" runat="server" AutoPostBack="true" class="select-chosen">
+                            </asp:DropDownList>
+
+                        </div>
+                    </div>
+                    <div class="col-md-3" style="display: none;">
+                        <label class="col-md-3 control-label">Company Type</label>
+                        <div class="col-md-9">
+                            <asp:DropDownList ID="ddcompanytype" runat="server" AutoPostBack="true" class="select-chosen">
+                                <asp:ListItem>All</asp:ListItem>
+                                <asp:ListItem>Lead</asp:ListItem>
+                                <asp:ListItem>Prospect</asp:ListItem>
+                                <asp:ListItem>Account</asp:ListItem>
+                            </asp:DropDownList>
+                        </div>
+                    </div>
+                    <asp:UpdatePanel runat="server">
+                        <ContentTemplate>
+                            <div class="col-md-3" id="divCompany" runat="server">
+                                <label class="col-md-3 control-label">Company</label>
+                                <div class="col-md-9">
+                                    <asp:DropDownList ID="ddlCompany" runat="server" class="form-control select-chosen">
+                                    </asp:DropDownList>
+
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                        <Triggers>
+                            <asp:PostBackTrigger ControlID="ddcompanytype" />
+                            <asp:PostBackTrigger ControlID="ddlUser" />
+                        </Triggers>
+                    </asp:UpdatePanel>
+                    <%--</div>--%>
+                    <div class="col-md-3" style="display: none;">
+                        <label class="col-md-3 control-label">Stage</label>
+                        <div class="col-md-9">
+                            <asp:DropDownList ID="ddlStage" runat="server" class="select-chosen">
+                                <asp:ListItem>None</asp:ListItem>
+                                <asp:ListItem>Requested</asp:ListItem>
+                                <asp:ListItem>Dispatched</asp:ListItem>
+                                <asp:ListItem>Approved</asp:ListItem>
+                                <asp:ListItem>Authorized</asp:ListItem>
+                                <asp:ListItem>Rejected</asp:ListItem>
+                            </asp:DropDownList>
+
+                        </div>
+                    </div>
+                    <div class="col-md-2 pull-right">
+                        <asp:Button ID="btndashboard" ValidationGroup="MasterGroup" runat="server" Text="Submit" CssClass="btn btn-sm btn-primary" />
+
+                        <%--<input type="button" onclick="tableToExcel('example-datatable', 'W3C Example Table')" class="btn btn-sm btn-success" value="Export to Excel" />--%>
+                        <asp:Button ID="btnExport" runat="server" CssClass="btn btn-alt btn-sm btn-success" CausesValidation="false" Text="Export to Excel" />
+                    </div>
+                    <%--  <div class="col-md-1 pull-right"  >
+                        <asp:ImageButton ID="btnExportExcel"  data-toggle="tooltip" title="Export Excel" Style="margin-right: 50px" Width="33px" ImageAlign="Right" runat="server" ImageUrl="~/img/excel.gif" />
+                  </div> --%>
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="row" id="divsumary" runat="server" style="display: none;">
+            <div class="col-md-12">
+                <div class="col-sm-1">
+                </div>
+                <div class="col-sm-10">
+                    <div class="widget">
+                        <div class="widget-extra themed-background-fire text-center">
+                            <h3 class="widget-content-light animation-hatch">
+                                <strong>
+                                    <asp:Label ID="lblamt" runat="server"></asp:Label></strong>
+                                <br>
+                                <a href="#.aspx"><small>Total Account</small></a>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-1">
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive" id="tblGrid" runat="server">
+            <asp:Panel ID="pnldemo" runat="server">
+                <table id="example-datatable" class=" MultiDatatable table table-vcenter table-condensed table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 60px">Sr No.</th>
+                            <%--<th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Order NO</th>--%>
+                            <th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Company</th>
+                            <th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Contact Person</th>
+                            <th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Email</th>
+                            <th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Mobile</th>
+                            <th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Category</th>
+                            <th class="text-center mydate" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Product Name</th>
+                            <th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Quantity</th>
+                            <th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Rate / KG</th>
+                            <th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Price</th>
+                            <th class="text-center" style="font-size: 14px; font-weight: 600; color: #1bbae1; width: 100px">Owner</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <asp:Repeater ID="rpgridview" runat="server">
+                            <ItemTemplate>
+                                <tr>
+                                    <td class="text-center" style="width: 60px"><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("RowNumber"))%></td>
+                                    <%--<td class="text-center" style="width: 100px"><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("Order_Code"))%></td>--%>
+                                    <td class="text-center" style="width: 100px"><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("Acc_Name"))%></td>
+                                    <td class="text-center" style="width: 100px"><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("Contact_ContactPerson"))%></td>
+                                    <td class="text-center" style="width: 100px"><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("Contact_Email"))%></td>
+                                    <td class="text-center" style="width: 100px"><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("Contact_Mobile"))%></td>
+                                    <td class="text-center" style="width: 100px"><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("PrdCategory_Name"))%></td>
+                                    <td class="text-center" style="width: 100px"><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("Product_Name"))%></td>
+                                    <td class="text-center" style="width: 100px"><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("OrDetail_Qty"))%> KG</td>
+                                    <td class="text-center" style="width: 100px"><i class="fa fa-inr " /><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("OrDetail_Rate"))%></td>
+                                    <td class="text-center" style="width: 100px"><i class="fa fa-inr " /><%#DynamicparcelDataManipulation.FixNullFromDB(CInt(Eval("total")).ToString("N2"))%></td>
+                                    <td class="text-center" style="width: 100px"><%#DynamicparcelDataManipulation.FixNullFromDB(Eval("U_FirstName"))%>
+                                         
+                                    </td>
+                                </tr>
+                            </ItemTemplate>
+                            <FooterTemplate>
+                                <tr style="font-size: 16px; font: bold;" id="trFooter" runat="server">
+                                    <td class="text-center" style="width: 100px;" colspan="7">Total</td>
+                                    <td class="text-center" style="width: 100px">
+                                        <asp:Label ID="lblQty" runat="server" />&nbsp;<i class="fa">KG</i></td>
+                                    <td class="text-center" style="width: 100px"><i class="fa fa-inr " style="display:none;"/>&nbsp;<asp:Label ID="lblrate" runat="server" Visible="false"/></td>
+                                    <td class="text-center" style="width: 100px"><i class="fa fa-inr " />&nbsp;<asp:Label ID="lblprice" runat="server" /></td>
+                                    <td class="text-center" style="width: 100px;" ></td>
+
+                                </tr>
+                                </table>
+                            </FooterTemplate>
+                        </asp:Repeater>
+                    </tbody>
+                    <tfoot>
+                    </tfoot>
+                    <%-- <tfoot>
+                        <tr>
+                            <th class="text-center">Order ID</th>                           
+                            <th class="text-center">Emplyoee Name</th>                          
+                            <th class="text-center">Product Name</th>
+                            <th class="text-center">Quantity(KG)</th>
+                            <th class="text-center">Amount</th>
+                        </tr>
+                    </tfoot>--%>
+                </table>
+                <asp:Label ID="lblfoot" Text="No records found" Visible="false" runat="server"></asp:Label>
+            </asp:Panel>
+        </div>
+    </div>
+</asp:Content>

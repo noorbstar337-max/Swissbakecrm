@@ -1,0 +1,1853 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MainPage.master" AutoEventWireup="false" CodeFile="ModifyQuotation.aspx.vb" Inherits="ModifyQuotation" MaintainScrollPositionOnPostback="true" %>
+
+<%@ Register TagPrefix="asp" Namespace="AjaxControlToolkit" Assembly="AjaxControlToolkit" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+    <script src="js/vendor/jquery-1.11.1.min.js"></script>
+    <style>
+        /*body{
+            padding:0;
+            margin:0;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+        }*/ .pd-b-10 {
+            padding-bottom: 17px;
+        }
+
+        .btnCalC {
+        }
+
+        .calt {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 8px 12px;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 99999999;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .popup {
+            position: fixed;
+            z-index: 999999999;
+            top: 25%;
+            left: 35%;
+            width: 30%;
+            background: #f9f9f9;
+            padding: 40px 25px 15px;
+        }
+
+            .popup ul {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+            }
+
+                .popup ul li {
+                    margin: 15px 0;
+                    float: left;
+                    width: 88%;
+                }
+
+                    .popup ul li span {
+                        margin-top: 8px;
+                        float: left;
+                    }
+
+                    .popup ul li input {
+                        float: right;
+                    }
+        /*.popup ul li:first-child input{
+            margin-left:23px;
+        }
+        .popup ul li:nth-child(3)  span:first-child{
+            margin-right:114px;
+        }*/
+        .close {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .pophead {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: #7187d6;
+        }
+        /*.CalC{
+            border:1px solid #1bbae1;
+            background:none;
+            padding:5px 10px;
+            color:#1bbae1;
+            cursor:pointer;
+        }
+        .CalC:hover{
+            border:1px solid #1bbae1;
+            background:#1bbae1;
+            color:#fff;
+        }*/
+        .Calculate {
+            background: none;
+            padding: 5px 10px !important;
+            margin: 0 20px 0 0;
+            cursor: pointer;
+        }
+
+            .Calculate:first-child {
+                border: 1px solid #1bbae1;
+                color: #1bbae1;
+            }
+
+                .Calculate:first-child:hover {
+                    border: 1px solid #1bbae1;
+                    background: #1bbae1;
+                    color: #fff;
+                }
+
+            .Calculate:last-child {
+                border: 1px solid #e74c3c;
+                color: #e74c3c;
+            }
+
+                .Calculate:last-child:hover {
+                    border: 1px solid #e74c3c;
+                    background: #e74c3c;
+                    color: #fff;
+                }
+    </style>
+    <script>
+        $(document).ready(function () {
+            $('.CalC').click(function () {
+                $('.modal').css("display", "block");
+            });
+            $('.close').click(function () {
+                $('.modal').removeAttr("style");
+            });
+            $('.close, .Calculate').click(function () {
+                $('.reset').val('');
+                $('.sclr').text('');
+            });
+        });
+
+<%--        $(document).ready(function () {
+            var grdcellcount = $('.mT>tbody>tr>th').length - 1;
+
+            var total = 0;
+            var vat = 0;
+            var grandtoatal = 0;
+            var totalkg = 0;
+            var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+            var Freight = document.getElementById('<%= txtfreight.ClientID %>');
+            for (var row = 1; row < Grid_Table.rows.length - 1; row++) {
+                // document.getElementById('txtquantity').focus();
+                Grid_Table.rows[row].cells[grdcellcount - 3].focus();
+                var id = 'ContentPlaceHolder1_grditemproduct_txtquantity_' + total;
+                $(id).focus();
+                total = total + 1;
+            }
+        });--%>
+    </script>
+    <style>
+        .control-label {
+            padding: 6px;
+        }
+
+        .col-md-4 > . {
+            padding-bottom: 0px;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            $(window).load(function () {
+
+                var grdcellcount = $('.mT>tbody>tr>th').length - 1;
+                var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+                if (grdcellcount > 0) {
+                    for (var row = 0; row < Grid_Table.rows.length - 2; row++) {
+                        var id1 = 'ContentPlaceHolder1_grditemproduct_txtquantity_' + row;
+                        calculateFinalPrice1(id1, 'hfkg');
+
+                    }
+                }
+            });
+            //alert("Window Loaded 1");
+        });
+
+        //note below was to used to call on change after txtfreight full postback
+      <%--  $(document).ready(function () {
+            $(window).load(function () {
+                ;debugger
+                //insert all your ajax callback code here. 
+                var total = 0;
+                var grdcellcount = $('.mT>tbody>tr>th').length - 1;
+                var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+                if (grdcellcount > 0) {
+                    for (var row = 0; row < Grid_Table.rows.length - 1; row++) {
+
+                        //   Grid_Table.rows[row].cells[grdcellcount - 4].focus();
+                        var id = '#ContentPlaceHolder1_grditemproduct_txtquantity_' + row;
+                        var id1 = 'ContentPlaceHolder1_grditemproduct_txtquantity_' + row;
+                        calculateFinalPrice1( id1, 'hfkg');
+                        $(id).focus();
+                        id = '#ContentPlaceHolder1_grditemproduct_txtquantity_0';
+                        $(id).focus();
+                        id = '#ContentPlaceHolder1_grditemproduct_txtquantity_' + row;
+                        $(id).focus();
+                        // total = total + 1
+                        //   return;
+
+                    }
+                    var id = '#ContentPlaceHolder1_grditemproduct_txtquantity_' + ((Grid_Table.rows.length - 1) - 2);
+                    $(id).focus();
+                    var tmpStr = $(id).val();
+                    $(id).val('');
+                    $(id).val(tmpStr);
+                    if (Grid_Table.rows.length == 3) {
+                        var txtFreight = document.getElementById('<%= txtFreight.ClientID%>');
+                        id = '#ContentPlaceHolder1_grditemproduct_txtquantity_0';
+                        $(id).focus();
+                        id = '#ContentPlaceHolder1_grditemproduct_txtquantity_1';
+                        $(id).focus();
+                    }
+                }
+            });
+            //alert("Window Loaded 1");
+        });--%>
+
+        jQuery(function ($) {
+            var focusedElementId = "";
+            var prm = Sys.WebForms.PageRequestManager.getInstance();
+
+            prm.add_beginRequest(function (source, args) {
+
+                var fe = document.activeElement;
+                if (fe != null) {
+                    focusedElementId = fe.id;
+                } else {
+                    focusedElementId = "";
+                }
+            });
+
+            prm.add_endRequest(function (source, args) {
+                debugger;
+                var total = 0;
+                var grdcellcount = $('.mT>tbody>tr>th').length - 1;
+                var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+                if (grdcellcount > 0) {
+                    for (var row = 0; row < Grid_Table.rows.length - 2; row++) {
+
+                        //   Grid_Table.rows[row].cells[grdcellcount - 4].focus();
+
+                        var id1 = 'ContentPlaceHolder1_grditemproduct_txtquantity_' + row;
+                        calculateFinalPrice1(id1, 'hfkg');
+
+                        // total = total + 1
+                        //   return;
+
+                    }
+                }
+           <%-- var total = 0;
+              var grdcellcount = $('.mT>tbody>tr>th').length - 1;
+                var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+                if (grdcellcount > 0) { 
+                for (var row = 0; row < Grid_Table.rows.length - 1; row++) {
+                 //   Grid_Table.rows[row].cells[grdcellcount - 4].focus();
+                    var id = '#ContentPlaceHolder1_grditemproduct_txtquantity_' + row;
+                    $(id).focus();
+                    id = '#ContentPlaceHolder1_grditemproduct_txtquantity_0';
+                    $(id).focus();
+                      id = '#ContentPlaceHolder1_grditemproduct_txtquantity_' + row;
+                    $(id).focus();
+                   // total = total + 1
+                 //   return;
+
+                }
+             
+                var id = '#ContentPlaceHolder1_grditemproduct_txtquantity_' + ((Grid_Table.rows.length-1)-2);
+                $(id).focus();
+                var tmpStr = $(id).val();
+                $(id).val('');
+                $(id).val(tmpStr);
+                if (Grid_Table.rows.length == 3) {
+                    var txtFreight = document.getElementById('<%= txtFreight.ClientID%>');
+                    id = '#ContentPlaceHolder1_grditemproduct_txtquantity_0';
+                    $(id).focus();
+                    id = '#ContentPlaceHolder1_grditemproduct_txtquantity_1';
+                    $(id).focus();
+                   
+                }
+                } --%>
+                //id = '#ContentPlaceHolder1_grditemproduct_txtquantity_' + ((Grid_Table.rows.length - 1)-1);
+                //$(id).focus();
+                if (focusedElementId != "") {
+
+                    $("#" + focusedElementId).focus();
+                    var tmpStr = $("#" + focusedElementId).val();
+                    $("#" + focusedElementId).val('');
+                    $("#" + focusedElementId).val(tmpStr);
+
+
+                }
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        function checkdelete() {
+            if (confirm('Are you Sure want to Delete?')) {
+                document.getElementById('<%=deletestatus.ClientID %>').value = "yes";
+                return true
+            }
+            else {
+                document.getElementById('<%=deletestatus.ClientID %>').value = "no";
+                return true
+            }
+        }
+
+        function calculateFinalPrice(txtquantity, hfkg) {
+            debugger;
+            var type = document.getElementById('<%=qtntype.ClientID%>').value
+            var grdcellcount = $('.mT>tbody>tr>th').length - 1;
+            if (type == "Domestic") {
+                var hfPacking_Weight = document.getElementById(txtquantity.id.replace('txtquantity', 'hfkg'))
+                var ltrate = document.getElementById(txtquantity.id.replace('txtquantity', 'ltrate'))
+                var lblvat = document.getElementById(txtquantity.id.replace('txtquantity', 'lblvat'))
+                var lblvatinrs = document.getElementById(txtquantity.id.replace('txtquantity', 'lblvatinrs'))
+                var ltdisamount = document.getElementById(txtquantity.id.replace('txtquantity', 'ltdisamount'))
+                var ltkg = document.getElementById(txtquantity.id.replace('txtquantity', 'ltkg'))
+                var hfltamount = document.getElementById(txtquantity.id.replace('txtquantity', 'hfltamount'))
+                var hflblvatinrs = document.getElementById(txtquantity.id.replace('txtquantity', 'hflblvatinrs'))
+
+                //ltkg.textContent = hfPacking_Weight.value * txtquantity.value***MUBYN
+                ltkg.textContent = parseFloat(hfPacking_Weight.value * txtquantity.value).toFixed(2);
+                var amount = 0
+                var vatinr = 0
+                amount = parseFloat(ltrate.textContent.replace(/,/g, '')) * parseFloat(ltkg.textContent.replace(/,/g, ''));
+                vatinr = amount * parseFloat(lblvat.textContent.replace(/,/g, '')) / 100;
+                hfltamount.value = Math.round(amount);
+                //hflblvatinrs.value = Math.round(vatinr);*********MUBYN
+                hflblvatinrs.value = (vatinr);
+                ltdisamount.textContent = Math.round(parseFloat(ltrate.textContent.replace(/,/g, '')) * parseFloat(ltkg.textContent.replace(/,/g, ''))).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                //lblvatinrs.textContent = Math.round(vatinr).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');*********MUBYN
+                lblvatinrs.textContent = (vatinr).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                // Read_Data();
+
+                ; debugger
+
+
+                var total = 0;
+                var vat = 0;
+                var grandtoatal = 0;
+                var totalkg = 0;
+                var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+                var Freight = document.getElementById('<%= txtfreight.ClientID %>');
+                for (var row = 1; row < Grid_Table.rows.length - 1; row++) {
+
+                    vat = parseFloat(vat) + parseFloat(Grid_Table.rows[row].cells[grdcellcount - 2].textContent.split("(")[0].replace(/[^0-9.]/g, ""));
+                    total = parseFloat(total) + parseFloat(Grid_Table.rows[row].cells[grdcellcount].textContent.replace(/[^0-9.]/g, ""));
+                    totalkg = parseFloat(totalkg) + parseFloat(Grid_Table.rows[row].cells[6].textContent.replace(/[^0-9.]/g, ""));
+                }
+                if (!Freight.value.length > 0) {
+                    Freight.value = 0;
+                }
+                var Freighttaxper = '<%= System.Configuration.ConfigurationManager.AppSettings("freightvalue").ToString()%>';
+                var FreightAmt = parseFloat(Freight.value) * Freighttaxper / 100;
+
+                grandtoatal = vat + total + parseFloat(Freight.value) + parseFloat(FreightAmt)
+                //grandtoatal = vat + total + parseFloat(Freight.value)
+                //  Grid_Table.rows[row].cells[6].innerHTML = "<b>" + totalkg + " Kg</b>";
+                //Grid_Table.rows[row].cells[grdcellcount].innerHTML = "<b><i class='fa fa-rupee'></i> " + Math.round(vat + parseFloat(FreightAmt)).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight.value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + Math.round(grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";************MUBYN
+                Grid_Table.rows[row].cells[grdcellcount].innerHTML = "<b><i class='fa fa-rupee'></i> " + (vat + parseFloat(FreightAmt)).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight.value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + Math.round(grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";
+                document.getElementById('<%=hftotalvat.ClientID%>').value = vat;
+                document.getElementById('<%=hfgrandtotal.ClientID%>').value = grandtoatal - parseFloat(Freight.value);
+                return false;
+            }
+
+            else {
+                var hfPacking_Weight = document.getElementById(txtquantity.id.replace('txtquantity', 'hfkg'))
+                var ltrate = document.getElementById(txtquantity.id.replace('txtquantity', 'ltrate'))
+                var lblvat = 0// document.getElementById(txtquantity.id.replace('txtquantity', 'lblvat'))
+                var lblvatinrs = 0//document.getElementById(txtquantity.id.replace('txtquantity', 'lblvatinrs'))
+                var ltdisamount = document.getElementById(txtquantity.id.replace('txtquantity', 'ltdisamount'))
+                var ltkg = document.getElementById(txtquantity.id.replace('txtquantity', 'ltkg'))
+                var hfltamount = document.getElementById(txtquantity.id.replace('txtquantity', 'hfltamount'))
+                //var hflblvatinrs = document.getElementById(txtquantity.id.replace('txtquantity', 'hflblvatinrs'))
+
+                //ltkg.textContent = hfPacking_Weight.value * txtquantity.value
+                parseFloat(hfPacking_Weight.value * txtquantity.value).toFixed(2);
+                var amount = 0
+                var vatinr = 0
+                amount = parseFloat(ltrate.textContent.replace(/,/g, '')) * parseFloat(ltkg.textContent.replace(/,/g, ''));
+
+                //hfltamount.value = Math.round(amount);
+                hfltamount.value = (amount);
+
+                //ltdisamount.textContent = Math.round(parseFloat(ltrate.textContent.replace(/,/g, '')) * parseFloat(ltkg.textContent.replace(/,/g, ''))).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                ltdisamount.textContent = (parseFloat(ltrate.textContent.replace(/,/g, '')) * parseFloat(ltkg.textContent.replace(/,/g, ''))).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                lblvatinrs.textContent = 0
+                    //  Read_Data();
+                    ; debugger
+                var total = 0;
+                var vat = 0;
+                var grandtoatal = 0;
+                var totalkg = 0;
+                var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+                var LocFreight = document.getElementById('<%= txtfreight.ClientID %>');
+                var docclear = document.getElementById('<%= txtdocnclr.ClientID%>');
+                var ocFreight = document.getElementById('<%= txtocfrei.ClientID%>');
+                var Insurance = document.getElementById('<%= txtinsurance.ClientID%>');
+                //   var Freight = (parseFloat(LocFreight.value) + parseFloat(docclear.value) + parseFloat(ocFreight.value) + parseFloat(Insurance.value));
+                var Freight = (parseFloat(LocFreight == null || LocFreight == '' ? 0 : LocFreight.value) + parseFloat(docclear == null || docclear == '' ? 0 : docclear.value) + parseFloat(ocFreight == null || ocFreight == '' ? 0 : ocFreight.value) + parseFloat(Insurance == null || Insurance == '' ? 0 : Insurance.value));
+
+                for (var row = 1; row < Grid_Table.rows.length - 1; row++) {
+
+                    //  vat = parseFloat(vat) + parseFloat(Grid_Table.rows[row].cells[grdcellcount - 2].textContent.split("(")[0].replace(/[^0-9.]/g, ""));
+                    total = parseFloat(total) + parseFloat(Grid_Table.rows[row].cells[grdcellcount].textContent.replace(/[^0-9.]/g, ""));
+                    //totalkg = parseFloat(totalkg) + parseFloat(Grid_Table.rows[row].cells[6].textContent.replace(/[^0-9.]/g, ""));
+                }
+                //if (!Freight.value.length > 0) {
+                //    Freight.value = 0;
+                //}
+                if (!Freight.value > 0) {
+                    Freight.value = 0;
+                }
+                grandtoatal = vat + total + (Freight)
+
+                //Grid_Table.rows[row].cells[grdcellcount].innerHTML = "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + Math.round(grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";
+                Grid_Table.rows[row].cells[grdcellcount].innerHTML = "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + (grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";
+                document.getElementById('<%=hftotalvat.ClientID%>').value = vat;
+                document.getElementById('<%=hfgrandtotal.ClientID%>').value = grandtoatal - parseFloat(Freight.value);
+                return false;
+
+            }
+
+        }
+
+        //  strt
+        function calculateFinalPrice1(txtquantity, hfkg) {
+            debugger;
+            var type = document.getElementById('<%=qtntype.ClientID%>').value
+            var grdcellcount = $('.mT>tbody>tr>th').length - 1;
+            if (type == "Domestic") {
+                var txtquantity = document.getElementById(txtquantity);//document.getElementById(txtquantity.replace('txtquantity', 'hfkg'))
+                var hfPacking_Weight = document.getElementById(txtquantity.id.replace('txtquantity', 'hfkg'))
+                var ltrate = document.getElementById(txtquantity.id.replace('txtquantity', 'ltrate'))
+                var lblvat = document.getElementById(txtquantity.id.replace('txtquantity', 'lblvat'))
+                var lblvatinrs = document.getElementById(txtquantity.id.replace('txtquantity', 'lblvatinrs'))
+                var ltdisamount = document.getElementById(txtquantity.id.replace('txtquantity', 'ltdisamount'))
+                var ltkg = document.getElementById(txtquantity.id.replace('txtquantity', 'ltkg'))
+                var hfltamount = document.getElementById(txtquantity.id.replace('txtquantity', 'hfltamount'))
+                var hflblvatinrs = document.getElementById(txtquantity.id.replace('txtquantity', 'hflblvatinrs'))
+
+                //ltkg.textContent = hfPacking_Weight.value * txtquantity.value
+                ltkg.textContent = parseFloat(hfPacking_Weight.value * txtquantity.value).toFixed(2);
+                var amount = 0
+                var vatinr = 0
+                amount = parseFloat(ltrate.textContent.replace(/,/g, '')) * parseFloat(ltkg.textContent.replace(/,/g, ''));
+                vatinr = amount * parseFloat(lblvat.textContent.replace(/,/g, '')) / 100;
+                hfltamount.value = Math.round(amount);
+                //hflblvatinrs.value = Math.round(vatinr);*****************MUBYN
+                hflblvatinrs.value = (vatinr);
+                ltdisamount.textContent = Math.round(parseFloat(ltrate.textContent.replace(/,/g, '')) * parseFloat(ltkg.textContent.replace(/,/g, ''))).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                //lblvatinrs.textContent = Math.round(vatinr).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');*****************MUBYN
+                lblvatinrs.textContent = (vatinr).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                // Read_Data();
+
+                ; debugger
+
+
+                var total = 0;
+                var vat = 0;
+                var grandtoatal = 0;
+                var totalkg = 0;
+                var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+                var Freight = document.getElementById('<%= txtfreight.ClientID %>');
+                for (var row = 1; row < Grid_Table.rows.length - 1; row++) {
+
+                    vat = parseFloat(vat) + parseFloat(Grid_Table.rows[row].cells[grdcellcount - 2].textContent.split("(")[0].replace(/[^0-9.]/g, ""));
+                    total = parseFloat(total) + parseFloat(Grid_Table.rows[row].cells[grdcellcount].textContent.replace(/[^0-9.]/g, ""));
+                    totalkg = parseFloat(totalkg) + parseFloat(Grid_Table.rows[row].cells[6].textContent.replace(/[^0-9.]/g, ""));
+                }
+                if (!Freight.value.length > 0) {
+                    Freight.value = 0;
+                }
+                var Freighttaxper = '<%= System.Configuration.ConfigurationManager.AppSettings("freightvalue").ToString()%>';
+                var FreightAmt = parseFloat(Freight.value) * Freighttaxper / 100;
+
+                grandtoatal = vat + total + parseFloat(Freight.value) + parseFloat(FreightAmt)
+                //grandtoatal = vat + total + parseFloat(Freight.value)
+                //  Grid_Table.rows[row].cells[6].innerHTML = "<b>" + totalkg + " Kg</b>";
+                //Grid_Table.rows[row].cells[grdcellcount].innerHTML = "<b><i class='fa fa-rupee'></i> " + Math.round(vat + parseFloat(FreightAmt)).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight.value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + Math.round(grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";**************MUBYN
+                //Grid_Table.rows[row].cells[grdcellcount].innerHTML = "<b><i class='fa fa-rupee'></i> " + (vat + parseFloat(FreightAmt)).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight.value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + Math.round(grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";
+                document.getElementById('<%=hftotalvat.ClientID%>').value = vat;
+                document.getElementById('<%=hfgrandtotal.ClientID%>').value = grandtoatal - parseFloat(Freight.value);
+                return false;
+            }
+
+            else {
+                var txtquantity = document.getElementById(txtquantity);
+                var hfPacking_Weight = document.getElementById(txtquantity.id.replace('txtquantity', 'hfkg'))
+                var ltrate = document.getElementById(txtquantity.id.replace('txtquantity', 'ltrate'))
+                var lblvat = 0// document.getElementById(txtquantity.id.replace('txtquantity', 'lblvat'))
+                var lblvatinrs = 0//document.getElementById(txtquantity.id.replace('txtquantity', 'lblvatinrs'))
+                var ltdisamount = document.getElementById(txtquantity.id.replace('txtquantity', 'ltdisamount'))
+                var ltkg = document.getElementById(txtquantity.id.replace('txtquantity', 'ltkg'))
+                var hfltamount = document.getElementById(txtquantity.id.replace('txtquantity', 'hfltamount'))
+                //var hflblvatinrs = document.getElementById(txtquantity.id.replace('txtquantity', 'hflblvatinrs'))
+
+                //ltkg.textContent = hfPacking_Weight.value * txtquantity.value
+                ltkg.textContent = parseFloat(hfPacking_Weight.value * txtquantity.value).toFixed(2);
+                var amount = 0
+                var vatinr = 0
+                amount = parseFloat(ltrate.textContent.replace(/,/g, '')) * parseFloat(ltkg.textContent.replace(/,/g, ''));
+
+                //hfltamount.value = Math.round(amount);
+                hfltamount.value = (amount);
+
+                //ltdisamount.textContent = Math.round(parseFloat(ltrate.textContent.replace(/,/g, '')) * parseFloat(ltkg.textContent.replace(/,/g, ''))).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                ltdisamount.textContent = (parseFloat(ltrate.textContent.replace(/,/g, '')) * parseFloat(ltkg.textContent.replace(/,/g, ''))).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                lblvatinrs.textContent = 0
+                    //  Read_Data();
+                    ; debugger
+                var total = 0;
+                var vat = 0;
+                var grandtoatal = 0;
+                var totalkg = 0;
+                var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+                var LocFreight = document.getElementById('<%= txtfreight.ClientID %>');
+                var docclear = document.getElementById('<%= txtdocnclr.ClientID%>');
+                var ocFreight = document.getElementById('<%= txtocfrei.ClientID%>');
+                var Insurance = document.getElementById('<%= txtinsurance.ClientID%>');
+                var Freight = (parseFloat(LocFreight == null || LocFreight == '' ? 0 : LocFreight.value) + parseFloat(docclear == null || docclear == '' ? 0 : docclear.value) + parseFloat(ocFreight == null || ocFreight == '' ? 0 : ocFreight.value) + parseFloat(Insurance == null || Insurance == '' ? 0 : Insurance.value));
+
+                for (var row = 1; row < Grid_Table.rows.length - 1; row++) {
+
+                    //  vat = parseFloat(vat) + parseFloat(Grid_Table.rows[row].cells[grdcellcount - 2].textContent.split("(")[0].replace(/[^0-9.]/g, ""));
+                    total = parseFloat(total) + parseFloat(Grid_Table.rows[row].cells[grdcellcount].textContent.replace(/[^0-9.]/g, ""));
+                    //totalkg = parseFloat(totalkg) + parseFloat(Grid_Table.rows[row].cells[6].textContent.replace(/[^0-9.]/g, ""));
+                }
+                //if (!Freight.value.length > 0) {
+                //    Freight.value = 0;
+                //}
+                if (!Freight.value > 0) {
+                    Freight.value = 0;
+                }
+                grandtoatal = vat + total + (Freight)
+
+                //Grid_Table.rows[row].cells[grdcellcount].innerHTML = "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + Math.round(grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";
+                //Grid_Table.rows[row].cells[grdcellcount].innerHTML = "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + (grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";
+                document.getElementById('<%=hftotalvat.ClientID%>').value = vat;
+                document.getElementById('<%=hfgrandtotal.ClientID%>').value = grandtoatal - parseFloat(Freight.value);
+                return false;
+
+            }
+
+        }
+        //end
+            <%--function Read_Data() {
+                ; debugger
+                var grdcellcount = $('.mT>tbody>tr>th').length - 1;
+                if (type == "Domestic") {
+                    var total = 0;
+                    var vat = 0;
+                    var grandtoatal = 0;
+                    var totalkg = 0;
+                    var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+                    var Freight = document.getElementById('<%= txtfreight.ClientID %>');
+                    for (var row = 1; row < Grid_Table.rows.length - 1; row++) {
+
+                        vat = parseFloat(vat) + parseFloat(Grid_Table.rows[row].cells[grdcellcount - 2].textContent.split("(")[0].replace(/[^0-9.]/g, ""));
+                        total = parseFloat(total) + parseFloat(Grid_Table.rows[row].cells[grdcellcount].textContent.replace(/[^0-9.]/g, ""));
+                        totalkg = parseFloat(totalkg) + parseFloat(Grid_Table.rows[row].cells[6].textContent.replace(/[^0-9.]/g, ""));
+                    }
+                    if (!Freight.value.length > 0) {
+                        Freight.value = 0;
+                    }
+                    grandtoatal = vat + total + parseFloat(Freight.value)
+                    //  Grid_Table.rows[row].cells[6].innerHTML = "<b>" + totalkg + " Kg</b>";
+                    Grid_Table.rows[row].cells[grdcellcount].innerHTML = "<b><i class='fa fa-rupee'></i> " + Math.round(vat).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight.value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + Math.round(grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";
+                    document.getElementById('<%=hftotalvat.ClientID%>').value = vat;
+                    document.getElementById('<%=hfgrandtotal.ClientID%>').value = grandtoatal - parseFloat(Freight.value);
+                    return false;
+                }
+                else {
+                    var total = 0;
+                    var vat = 0;
+                    var grandtoatal = 0;
+                    var totalkg = 0;
+                    var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+                    var Freight = document.getElementById('<%= txtfreight.ClientID %>');
+                    for (var row = 1; row < Grid_Table.rows.length - 1; row++) {
+
+                        //  vat = parseFloat(vat) + parseFloat(Grid_Table.rows[row].cells[grdcellcount - 2].textContent.split("(")[0].replace(/[^0-9.]/g, ""));
+                        total = parseFloat(total) + parseFloat(Grid_Table.rows[row].cells[grdcellcount].textContent.replace(/[^0-9.]/g, ""));
+                        //totalkg = parseFloat(totalkg) + parseFloat(Grid_Table.rows[row].cells[6].textContent.replace(/[^0-9.]/g, ""));
+                    }
+                    if (!Freight.value.length > 0) {
+                        Freight.value = 0;
+                    }
+                    grandtoatal = vat + total + parseFloat(Freight.value)
+                    //  Grid_Table.rows[row].cells[6].innerHTML = "<b>" + totalkg + " Kg</b>";
+                    Grid_Table.rows[row].cells[grdcellcount].innerHTML = "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight.value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + Math.round(grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";
+                    document.getElementById('<%=hftotalvat.ClientID%>').value = vat;
+                    document.getElementById('<%=hfgrandtotal.ClientID%>').value = grandtoatal - parseFloat(Freight.value);
+                    return false;
+                }
+            }--%>
+        function calculatekg(txtOrderQty) {
+            // debugger;
+            var hfPacking_Weight = document.getElementById(txtOrderQty.id.replace('txtOrderQty', 'hfPacking_Weight'))
+            var txtOrderKG = document.getElementById(txtOrderQty.id.replace('txtOrderQty', 'txtOrderKG'))
+            var txtOrderQty = document.getElementById(txtOrderQty.id.replace('txtOrderQty', 'txtOrderQty'))
+
+            if (txtOrderQty.value != "" && txtOrderQty.value != "0") {
+                if (!isNaN(txtOrderQty.value)) {
+                    var txtOrderKG = document.getElementById(txtOrderQty.id.replace('txtOrderQty', 'txtOrderKG'))
+                    var kg = (hfPacking_Weight.value * txtOrderQty.value);
+
+                    document.getElementById(txtOrderQty.id.replace('txtOrderQty', 'txtOrderKG')).value = kg;
+                    var qty = (kg / hfPacking_Weight.value);
+                    //var kg = (hfPacking_Weight.value * txtOrderQty.value).toFixed(2);
+
+                    //  txtOrderQty.textContent = (txtOrderKG.textContent / hfPacking_Weight.value).toFixed(2);
+                    document.getElementById(txtOrderQty.id.replace('txtOrderQty', 'txtOrderQty')).value = qty;
+                }
+            }
+        }
+        function calculateqty(txtOrderKG) {
+            //  debugger;
+            var hfPacking_Weight = document.getElementById(txtOrderKG.id.replace('txtOrderKG', 'hfPacking_Weight'))
+            var txtOrderKG = document.getElementById(txtOrderKG.id.replace('txtOrderKG', 'txtOrderKG'))
+            var txtOrderQty = document.getElementById(txtOrderKG.id.replace('txtOrderKG', 'txtOrderQty'))
+
+            if (txtOrderKG.value != "" && txtOrderKG.value != "0") {
+                if (!isNaN(txtOrderKG.value)) {
+
+                    var qty = (txtOrderKG.value / hfPacking_Weight.value);
+                    if (qty < 1) {
+                        qty = 1;
+                        document.getElementById(txtOrderQty.id.replace('txtOrderKG', 'txtOrderQty')).value = Math.round(qty);
+                    }
+                    else {
+
+                        document.getElementById(txtOrderQty.id.replace('txtOrderKG', 'txtOrderQty')).value = Math.round(qty);
+                    }
+                    calculatekg(txtOrderQty)
+                    //  var kg = (hfPacking_Weight.value * qty);
+
+                    //document.getElementById(txtOrderKG.id.replace('txtOrderKG', 'txtOrderKG')).value = kg;
+                    //  txtOrderQty.textContent = (txtOrderKG.textContent / hfPacking_Weight.value).toFixed(2);
+                }
+            }
+        }
+
+        function calculatesp(txtcalSP) {
+            // debugger;
+            var lblcalmargin = document.getElementById(txtcalSP.id.replace('txtcalSP', 'lblcalmargin'))
+            var txtcalSP = document.getElementById(txtcalSP.id.replace('txtcalSP', 'txtcalSP'))
+            var txtcalCP = document.getElementById(txtcalSP.id.replace('txtcalSP', 'txtcalCP'))
+            var txtdollarrate = document.getElementById(txtcalSP.id.replace('txtcalSP', 'txtCurrencyRate'))
+
+
+            if (txtcalSP.value != "" && txtcalSP.value != "0" && txtcalCP.value != "" && txtcalCP.value != "0") {
+                if (!isNaN(txtcalSP.value)) {
+
+                    var sp = txtdollarrate.value * txtcalSP.value;
+
+                    var margin = ((sp - txtcalCP.value) / sp) * 100;
+
+
+                    lblcalmargin.textContent = (margin).toFixed(2);
+                    //if (qty < 1) {
+                    //    qty = 1;
+                    //    document.getElementById(txtOrderQty.id.replace('txtOrderKG', 'txtOrderQty')).value = Math.round(qty);
+                    //}
+                    //else {
+
+                    //    document.getElementById(txtOrderQty.id.replace('txtOrderKG', 'txtOrderQty')).value = Math.round(qty);
+                    //}
+                    // calculatekg(txtOrderQty)
+                    //  var kg = (hfPacking_Weight.value * qty);
+
+                    //document.getElementById(txtOrderKG.id.replace('txtOrderKG', 'txtOrderKG')).value = kg;
+                    //  txtOrderQty.textContent = (txtOrderKG.textContent / hfPacking_Weight.value).toFixed(2);
+                }
+            }
+        }
+        function calculatecp(txtcalCP) {
+            // ; debugger
+            // var lblcalmargin = document.getElementById(txtcalCP.id.replace('txtcalCP', 'lblcalmargin'))
+            var txtcalSP = document.getElementById(txtcalCP.id.replace('txtcalCP', 'txtcalSP'))
+            var txtcalCP = document.getElementById(txtcalCP.id.replace('txtcalCP', 'txtcalCP'))
+            //  var txtdollarrate = document.getElementById(txtcalCP.id.replace('txtcalCP', 'txtCurrencyRate'))
+
+            calculatesp(txtcalSP)
+        }
+    </script>
+
+    <script>
+        function ChangeNoOfPack(txtQty) {
+            debugger;
+            var txtQty = document.getElementById(txtQty.id.replace('txtQty', 'txtQty'));
+            var ltrate = document.getElementById(txtQty.id.replace('txtQty', 'ltrate'));
+            var lblvatinrs = document.getElementById(txtQty.id.replace('txtQty', 'lblvatinrs'));
+            var lblsubtotal = document.getElementById(txtQty.id.replace('txtQty', 'lblsubtotal'));
+            //var lblrate = document.getElementById(txtOrderQty.id.replace('txtQty', 'Literal1'));
+            //var lblpackweight = document.getElementById(txtOrderQty.id.replace('txtQty', 'lblpackweight'));
+
+            if (txtQty.value != "" && txtQty.value != "0") {
+                if (!isNaN(txtQty.value)) {
+                    //  lblkgs.textContent = (parseFloat(txtQty.value) * parseFloat(txtRate.value)).toFixed(2);
+                    //  lbltotalamount1.textContent = (parseFloat(lblkgs.textContent) * parseFloat(lblrate.textContent.replace(',', ''))).toFixed(2);
+                    //  lbltotalamount1.textContent = lbltotalamount1.textContent.replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+                    var Amount = 0;
+                    var tax = 0;
+                    var subtotal = 0;
+                    subtotal = ((parseFloat(txtQty.value) * parseFloat(ltrate.value))).toFixed(2);
+
+                    tax = (subtotal * (parseFloat(lblvatinrs.value) / 100)).toFixed(2);
+                    lblsubtotal.textContent = (parseFloat(tax) + parseFloat(subtotal)).toFixed(2);
+                    // alert(Amount);
+                }
+                //    else {
+                //        lblkgs.textContent = "-";
+                //        lbltotalamount1.textContent = "-";
+                //    }
+                //}
+                //else {
+                //    lblkgs.textContent = "-";
+                //    lbltotalamount1.textContent = "-";
+            }
+        };
+    </script>
+    <script type="text/javascript">
+        function DiscountRate(txtdiscount) {
+            debugger;
+            var txtCurrencyRate = document.getElementById("<%= txtCurrencyRate.ClientID%>");
+            var txtDiscountedRate = document.getElementById(txtdiscount.id.replace('txtdiscount', 'txtDiscountedRate'));
+            var txtdiscount = document.getElementById(txtdiscount.id.replace('txtdiscount', 'txtdiscount'));
+            var lblRate = document.getElementById(txtdiscount.id.replace('txtdiscount', 'lblRate'));
+
+            txtDiscountedRate.value = ((lblRate.innerText - (lblRate.innerText * txtdiscount.value) / 100) / txtCurrencyRate.value).toFixed(2);
+
+        };</script>
+    <script type="text/javascript">
+        function DiscountPercent(txtDiscountedRate) {
+            debugger;
+
+            var txtCurrencyRate = document.getElementById("<%= txtCurrencyRate.ClientID%>");
+            var txtDiscountedRate = document.getElementById(txtDiscountedRate.id.replace('txtDiscountedRate', 'txtDiscountedRate'));
+            var txtdiscount = document.getElementById(txtDiscountedRate.id.replace('txtDiscountedRate', 'txtdiscount'));
+            var lblRate = document.getElementById(txtDiscountedRate.id.replace('txtDiscountedRate', 'lblRate'));
+
+            txtdiscount.value = ((lblRate.innerText - (txtDiscountedRate.value * txtCurrencyRate.value)) / lblRate.innerText * 100).toFixed(2);
+
+        };
+
+    </script>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <asp:HiddenField ID="hfMainID" runat="server" />
+    <asp:HiddenField ID="deletestatus" runat="server" />
+    <asp:HiddenField ID="tablecheck" runat="server" />
+    <asp:HiddenField ID="hfFreightTaxPer" runat="server" />
+    <asp:HiddenField ID="hffreight" runat="server" />
+    <asp:HiddenField ID="hfdocclear" runat="server" />
+    <asp:HiddenField ID="hfocfreight" runat="server" />
+    <asp:HiddenField ID="hfinsurance" runat="server" />
+    <asp:HiddenField ID="hfchkqif" runat="server" />
+
+    <asp:HiddenField ID="hfcurrencyrate" runat="server" />
+    <asp:HiddenField ID="qtntype" runat="server" />
+    <div class="row">
+        <div class="col-md-12">
+            <div class="content-header">
+                <div class="header-section">
+                    <h1 style="font-weight: 400;">
+                        <%-- <i class="fa fa-cubes" style="margin: -8px"></i>Modify Quotation<br>--%>
+                        <asp:Label ID="lbltitle1" runat="server"></asp:Label><br>
+                    </h1>
+                </div>
+            </div>
+            <ul class="breadcrumb breadcrumb-top">
+                <li><a href="index.aspx">Home</a></li>
+                <li><a href="Quotation.aspx">Quotation</a></li>
+                <li>
+                    <asp:Label ID="lbltitle2" runat="server"></asp:Label></li>
+                <%--<li>Modify Quotation</li>--%>
+            </ul>
+
+            <div class="col-md-12" style="margin-bottom: 11px; display: table; margin-top: -8px">
+                <div class="pull-right">
+                    <%--  <asp:Button Text="Create New Version" runat="server" ID="Button12" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Creating Version...';"
+                        UseSubmitBehavior="false" class="btn btn-alt btn-sm btn-warning" ValidationGroup="MasterGroup" OnClick="btnversion_Click" />--%>
+                    <asp:Button Text="Save" runat="server" ID="Button1" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                        UseSubmitBehavior="false" class="btn btn-alt btn-sm btn-primary" ValidationGroup="MasterGroup" OnClick="btnadd_Click" />
+                    <asp:LinkButton ID="HyperLink1" CausesValidation="false" Text="Cancel" runat="server" NavigateUrl="~/Quotation.aspx" class="btn btn-alt btn-sm btn-danger" OnClick="hfcancel_Click" />
+                </div>
+            </div>
+
+            <div class="col-md-12">
+                <div class="widget">
+                    <div class="widget-extra themed-background-dark">
+                        <h4 class="widget-content-light">
+                            <strong>Quotation</strong> Information&nbsp;<asp:Label ID="lblQNo" runat="server" Font-Bold="true"></asp:Label>
+                            <small>
+                                <span class="pull-right" id="modifyspan" runat="server">By&nbsp;<a style="text-decoration: none;"><asp:Label ID="lblmodifiedname" runat="server" Font-Bold="true"></asp:Label></a>&nbsp;on&nbsp;<a style="text-decoration: none;"><asp:Label ID="lblmodifieddate" Font-Bold="true" runat="server" Font-Italic="true"></asp:Label></a>
+                                </span>
+                            </small>
+                        </h4>
+                    </div>
+                    <div class="widget-extra-full">
+                        <div class="form-horizontal form-bordered">
+                            <div>
+                                <div class="col-md-12">
+                                    <br />
+                                    <div class="col-md-4 pd-b-10">
+                                        <label class="col-md-4 control-label" for="example-hf-email">Quotation Date<span class="text-danger"> *</span></label>
+                                        <div class="col-md-8">
+                                            <asp:TextBox ID="txtQuotationdate" runat="server" placeholder="Enter Quotation Name" data-toggle="tooltip" title="Enter Quotation Name" TextMode="Date"
+                                                CssClass="form-control"></asp:TextBox>
+                                            <asp:RequiredFieldValidator ID="remembername" runat="server" Display="Dynamic" ControlToValidate="txtQuotationdate" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                ErrorMessage="Please enter date" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-password">Status</label>
+                                            <div class="col-md-8">
+                                                <asp:DropDownList ID="ddstatus" runat="server" CssClass="form-control">
+                                                    <asp:ListItem Text="New" Value="New"></asp:ListItem>
+                                                    <asp:ListItem Text="Negotiation/Review" Value="Negotiation/Review"></asp:ListItem>
+                                                    <asp:ListItem Text="Repeated Order" Value="Repeated Order"></asp:ListItem>
+                                                    <asp:ListItem Text="Closed Won" Value="Closed Won"></asp:ListItem>
+                                                    <asp:ListItem Text="Closed Lost" Value="Closed Lost"></asp:ListItem>
+                                                </asp:DropDownList>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator1" Display="Dynamic" runat="server" ControlToValidate="ddstatus" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please select status" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-password">Validity (days)<span class="text-danger"> *</span></label>
+                                            <div class="col-md-8">
+                                                <asp:TextBox ID="txtvalidity" runat="server" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');" placeholder="Enter Validity" data-toggle="tooltip" title="Enter Validity" TextMode="Number" min="1"
+                                                    CssClass="form-control"></asp:TextBox>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator4" Display="Dynamic" runat="server" ControlToValidate="txtvalidity" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please enter days" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10">
+                                        <label class="col-md-4 control-label" for="example-hf-password">Type<span class="text-danger"> *</span></label>
+                                        <div class="col-md-8">
+                                            <asp:DropDownList ID="ddrelatedtype" runat="server" AutoPostBack="true" data-toggle="tooltip" title="Related Type" CssClass="form-control">
+                                                <%--<asp:ListItem Value="None">None</asp:ListItem>--%>
+                                                <asp:ListItem Value="Prospect">Prospect</asp:ListItem>
+                                                <asp:ListItem Value="Account">Account</asp:ListItem>
+                                            </asp:DropDownList>
+                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator2" Display="Dynamic" runat="server" ControlToValidate="ddrelatedtype" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                ErrorMessage="Please select type" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10">
+                                        <label class="col-md-4 control-label" for="example-hf-password">Quotation Type<span class="text-danger"> *</span></label>
+                                        <div class="col-md-8">
+                                            <asp:DropDownList ID="ddQuotationType" runat="server" AutoPostBack="true" data-toggle="tooltip" Enabled="false" title="Quotation Type" CssClass="form-control">
+                                                <%--<asp:ListItem Value="None">None</asp:ListItem>--%>
+                                                <asp:ListItem Value="Domestic">Domestic</asp:ListItem>
+                                                <asp:ListItem Value="Export">Export</asp:ListItem>
+                                            </asp:DropDownList>
+                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator13" Display="Dynamic" runat="server" ControlToValidate="ddQuotationType" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                ErrorMessage="Please select Quotation Type" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10">
+                                        <div class="">
+                                            <asp:Label class="col-md-4 control-label" for="example-hf-password" ID="lbltypeid" runat="server">None</asp:Label>
+                                            <div class="col-md-8">
+                                                <asp:DropDownList ID="ddrelatedtypeid" runat="server" AutoPostBack="true" name="example-chosen" class="select-chosen" data-toggle="tooltip" title="Related Type ID"></asp:DropDownList>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator3" Display="Dynamic" runat="server" ControlToValidate="ddrelatedtypeid" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please select type id" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 pd-b-10">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-password">Auth.Signatory</label>
+                                            <div class="col-md-8">
+                                                <asp:TextBox ID="txtsign" runat="server" placeholder="Enter Auth Signatory" data-toggle="tooltip" title="Enter Auth Signatory"
+                                                    CssClass="form-control"></asp:TextBox>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator5" Display="Dynamic" runat="server" ControlToValidate="txtsign" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please enter signatory" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-password">Quotation Terms</label>
+                                            <div class="col-md-8">
+                                                <asp:TextBox ID="txtpayment" runat="server" placeholder="Enter Quotation Terms" data-toggle="tooltip" title="Enter Quotation Terms"
+                                                    CssClass="form-control"></asp:TextBox>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator6" Display="Dynamic" runat="server" ControlToValidate="txtpayment" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please enter mode of Quotation Terms" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-password">Terms of Del <span class="text-danger">*</span></label>
+                                            <div class="col-md-8">
+                                                <asp:DropDownList ID="dddelivery" runat="server" CssClass="form-control" AutoPostBack="true">
+                                                    <asp:ListItem Text="EXW" Value="EXW"></asp:ListItem>
+                                                    <asp:ListItem Text="FOB" Value="FOB"></asp:ListItem>
+                                                    <asp:ListItem Text="CNF" Value="CNF"></asp:ListItem>
+                                                    <asp:ListItem Text="CIF" Value="CIF"></asp:ListItem>
+                                                </asp:DropDownList>
+                                                <asp:TextBox ID="txtdomdelterms" runat="server" placeholder="Enter Terms of Del" data-toggle="tooltip" title="Enter Terms of Del"
+                                                    CssClass="form-control"></asp:TextBox>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator7" Display="Dynamic" runat="server" ControlToValidate="txtdomdelterms" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please Terms of Del" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-password">Dispatch Through</label>
+                                            <div class="col-md-8">
+                                                <asp:TextBox ID="txtdispath" runat="server" placeholder="Enter Dispatch Through" data-toggle="tooltip" title="Enter Dispatch Through"
+                                                    CssClass="form-control"></asp:TextBox>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator8" Display="Dynamic" runat="server" ControlToValidate="txtQuotationdate" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please enter date" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10" id="expclosing" runat="server" visible="false">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-email">Exp Closinge</label>
+                                            <div class="col-md-8">
+                                                <asp:TextBox ID="txtclosing" runat="server" placeholder="Enter Exp Closing" data-toggle="tooltip" title="Enter Exp Closing" TextMode="Date"
+                                                    CssClass="form-control"></asp:TextBox>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator9" Display="Dynamic" runat="server" ControlToValidate="txtQuotationdate" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please enter date" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-password">Owner</label>
+                                            <div class="col-md-8">
+                                                <asp:DropDownList ID="ddowner" runat="server" name="example-chosen" class="select-chosen" data-toggle="tooltip" title="Related Type ID"></asp:DropDownList>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator10" Display="Dynamic" runat="server" ControlToValidate="txtQuotationdate" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please enter date" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10" style="display: none;">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-email">Amount</label>
+                                            <div class="col-md-8">
+                                                <asp:TextBox ID="txtamount" runat="server" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');" placeholder="Enter Exp Closing" data-toggle="tooltip" title="Enter Exp Closing"
+                                                    CssClass="form-control"></asp:TextBox>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator11" Display="Dynamic" runat="server" ControlToValidate="txtQuotationdate" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please enter amount" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-email">Currency</label>
+                                            <div class="col-md-8">
+                                                <asp:DropDownList ID="ddCurrency" runat="server" CssClass="form-control" Enabled="false">
+                                                    <asp:ListItem Text="INR" Value="INR"></asp:ListItem>
+                                                    <asp:ListItem Text="USD" Value="USD"></asp:ListItem>
+                                                    <asp:ListItem Text="EURO" Value="EURO"></asp:ListItem>
+                                                </asp:DropDownList>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 pd-b-10" id="divCurrencyRate" runat="server" visible="false">
+                                        <div class="">
+                                            <label class="col-md-4 control-label" for="example-hf-email">Currency Rate</label>
+                                            <div class="col-md-8">
+                                                <asp:TextBox ID="txtCurrencyRate" runat="server" AutoPostBack="true" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');" placeholder="Enter Currency Rate" data-toggle="tooltip" title="Enter Currency Rate"
+                                                    CssClass="form-control"></asp:TextBox>
+                                                <asp:RequiredFieldValidator ID="reqCurrencyRate" Display="Dynamic" runat="server" ControlToValidate="txtCurrencyRate" Text="65.0" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please Enter Currency Rate" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <asp:UpdatePanel runat="server">
+                                        <ContentTemplate>
+                                            <div class="col-md-4 pd-b-10">
+                                                <div class="">
+                                                    <label class="col-md-4 control-label" for="example-hf-email">Local Freight</label>
+                                                    <div class="col-md-8">
+                                                        <asp:TextBox ID="txtFreight" runat="server" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');" placeholder="Enter Local Freight" data-toggle="tooltip" title="Enter Local Freight"
+                                                            CssClass="form-control"></asp:TextBox>
+                                                        <asp:RequiredFieldValidator ID="RequiredFieldValidator12" Display="Dynamic" runat="server" ControlToValidate="txtQuotationdate" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                            ErrorMessage="Enter Local Freight" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 pd-b-10">
+                                                <div class="">
+                                                    <label class="col-md-4 control-label" for="example-hf-email">Bank</label>
+                                                    <div class="col-md-8">
+                                                        <asp:DropDownList ID="ddlBank" runat="server" name="example-chosen" class="select-chosen">
+                                                        </asp:DropDownList>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 pd-b-10">
+                                                <div class="col-md-4">
+                                                    <div id="dvTCS" runat="server" class="label label-danger label-TCS">TCS Applicable</div>
+                                                </div>
+                                            </div>
+                                        </ContentTemplate>
+                                        <Triggers>
+                                            <asp:AsyncPostBackTrigger ControlID="dddelivery" />
+                                        </Triggers>
+                                    </asp:UpdatePanel>
+                                    <div id="divDomestic" runat="server">
+                                        <asp:UpdatePanel runat="server">
+                                            <ContentTemplate>
+                                                <div class="col-md-4 pd-b-10" id="divdocnclr" runat="server">
+                                                    <div class="">
+                                                        <label class="col-md-4 control-label" for="example-hf-email">Doc.& Clearance</label>
+                                                        <div class="col-md-8">
+                                                            <asp:TextBox ID="txtdocnclr" AutoPostBack="true" runat="server" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');" placeholder="Enter Document and Clearance Charges" data-toggle="tooltip" title="Enter Document and Clearance Charges"
+                                                                CssClass="form-control"></asp:TextBox>
+                                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator16" Display="Dynamic" runat="server" ControlToValidate="txtdocnclr" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                                ErrorMessage="Enter Document and Clearance charges" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </ContentTemplate>
+                                            <Triggers>
+                                                <asp:AsyncPostBackTrigger ControlID="dddelivery" />
+                                            </Triggers>
+                                        </asp:UpdatePanel>
+                                        <asp:UpdatePanel runat="server">
+                                            <ContentTemplate>
+                                                <div class="col-md-4 pd-b-10" id="divocnfre" runat="server">
+                                                    <div class="">
+                                                        <label class="col-md-4 control-label" for="example-hf-email">Ocean Freight</label>
+                                                        <div class="col-md-8">
+                                                            <asp:TextBox ID="txtocfrei" AutoPostBack="true" runat="server" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');" placeholder="Enter Ocean Freight Charges" data-toggle="tooltip" title="Enter Ocean Freight Charges"
+                                                                CssClass="form-control"></asp:TextBox>
+                                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator17" Display="Dynamic" runat="server" ControlToValidate="txtocfrei" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                                ErrorMessage="Enter Ocean Freight" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </ContentTemplate>
+                                            <Triggers>
+                                                <asp:AsyncPostBackTrigger ControlID="dddelivery" />
+                                            </Triggers>
+                                        </asp:UpdatePanel>
+                                        <asp:UpdatePanel runat="server">
+                                            <ContentTemplate>
+                                                <div class="col-md-4 pd-b-10" id="divins" runat="server">
+                                                    <div class="">
+                                                        <label class="col-md-4 control-label" for="example-hf-email">Insurance</label>
+                                                        <div class="col-md-8">
+                                                            <asp:TextBox ID="txtinsurance" AutoPostBack="true" runat="server" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');" placeholder="Enter Insurance charges" data-toggle="tooltip" title="Enter Insurance charges"
+                                                                CssClass="form-control"></asp:TextBox>
+                                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator18" Display="Dynamic" runat="server" ControlToValidate="txtinsurance" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                                ErrorMessage="Enter Insurance charges" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </ContentTemplate>
+                                            <Triggers>
+                                                <asp:AsyncPostBackTrigger ControlID="dddelivery" />
+                                            </Triggers>
+                                        </asp:UpdatePanel>
+                                        <div class="col-md-4 pd-b-10">
+                                            <label class="col-md-4 control-label" for="example-hf-email">Mode Of Transport</label>
+                                            <div class="col-md-8">
+                                                <%--<asp:TextBox ID="txtModeOfTransport" runat="server"   placeholder="Enter Mode Of Transport" data-toggle="tooltip" title="Enter Mode Of Transport"
+                                            CssClass="form-control"></asp:TextBox>--%>
+                                                <asp:DropDownList ID="ddModeOfTransport" runat="server" CssClass="form-control" AutoPostBack="true">
+                                                    <asp:ListItem Text="Sea" Value="Sea"></asp:ListItem>
+                                                    <asp:ListItem Text="Air" Value="Air"></asp:ListItem>
+                                                    <asp:ListItem Text="Road" Value="Road"></asp:ListItem>
+                                                </asp:DropDownList>
+                                                <%--<asp:RequiredFieldValidator ID="reqModeTransport" runat="server" ControlToValidate="txtModeOfTransport" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                            ErrorMessage="Please Enter Mode Of Transport" SetFocusOnError="true"></asp:RequiredFieldValidator>--%>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 pd-b-10">
+                                            <label class="col-md-4 control-label" for="example-hf-email">Port Of Loading</label>
+                                            <div class="col-md-8">
+                                                <asp:TextBox ID="txtPortLoading" runat="server" placeholder="Enter Port Of Loading" data-toggle="tooltip" title="Enter Port Of Loading"
+                                                    CssClass="form-control"></asp:TextBox>
+                                                <asp:RequiredFieldValidator ID="reqPortLoading" runat="server" Display="Dynamic" ControlToValidate="txtPortLoading" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please Enter Port Of Loading" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 pd-b-10">
+                                            <label class="col-md-4 control-label" for="example-hf-email">Port Of Discharge</label>
+                                            <div class="col-md-8">
+                                                <asp:TextBox ID="txtPortDischarge" runat="server" placeholder="Enter Port Of Discharge" data-toggle="tooltip" title="Enter Port Of Discharge"
+                                                    CssClass="form-control"></asp:TextBox>
+                                                <asp:RequiredFieldValidator ID="reqPortDischarge" runat="server" Display="Dynamic" ControlToValidate="txtPortDischarge" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="Please Enter Port Of Discharge" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 pd-b-10">
+                                            <label class="col-md-4 control-label" for="example-hf-email">Country Of Origin</label>
+                                            <div class="col-md-8">
+                                                <asp:DropDownList ID="ddlcountrybillCOO" runat="server" name="example-chosen" class="select-chosen"></asp:DropDownList>
+                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator14" Display="Dynamic" runat="server" InitialValue="0" ControlToValidate="ddlcountrybillCOO" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="select country" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 pd-b-10">
+                                            <label class="col-md-5 control-label" for="example-hf-email">Country Of Final Destination</label>
+                                            <div class="col-md-7">
+                                                <asp:DropDownList ID="ddlcountrybill" runat="server" name="example-chosen" class="select-chosen" AutoPostBack="true"></asp:DropDownList>
+                                                <asp:RequiredFieldValidator ID="recountrybill" runat="server" Display="Dynamic" InitialValue="0" ControlToValidate="ddlcountrybill" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="select country" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 pd-b-10">
+                                            <label class="col-md-4 control-label" for="example-hf-email">Final Destination</label>
+                                            <div class="col-md-8">
+                                                <asp:DropDownList ID="ddlstatebill" runat="server" name="example-chosen" class="select-chosen"></asp:DropDownList>
+                                                <asp:RequiredFieldValidator ID="restatebill" InitialValue="0" Display="Dynamic" runat="server" ControlToValidate="ddlstatebill" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                    ErrorMessage="select state" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                            </div>
+                                        </div>
+                                        <asp:UpdatePanel ID="uptop" runat="server" UpdateMode="Always">
+                                            <ContentTemplate>
+                                                <div class="col-md-4 pd-b-10">
+                                                    <label class="col-md-5 control-label" for="example-hf-email">Terms Of Payments</label>
+                                                    <div class="col-md-7">
+                                                        <asp:DropDownList ID="ddPaymentTerms" runat="server" CssClass="form-control" AutoPostBack="true">
+                                                            <asp:ListItem Text="Pre Payment" Value="Pre Payment"></asp:ListItem>
+                                                            <asp:ListItem Text="Payment Against Document" Value="Payment Against Document"></asp:ListItem>
+                                                            <asp:ListItem Text="Credit" Value="Credit"></asp:ListItem>
+                                                        </asp:DropDownList>
+                                                        <%--<asp:TextBox ID="txtPaymentTerms" runat="server"  placeholder="Enter Terms Of Payments" data-toggle="tooltip" title="Enter Terms Of Payments"
+                                            CssClass="form-control"></asp:TextBox>
+                                        <asp:RequiredFieldValidator ID="reqPaymentTerms" runat="server" ControlToValidate="txtPaymentTerms" ValidationGroup="MasterGroup1" CssClass="MasterValidationCSS"
+                                            ErrorMessage="Please Enter Terms Of Payments" SetFocusOnError="true"></asp:RequiredFieldValidator>--%>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 pd-b-10" id="divmop" runat="server" visible="false">
+                                                    <label class="col-md-4 control-label" for="example-hf-email">
+                                                        <asp:Label ID="lbmopsub" runat="server"></asp:Label></label>
+                                                    <div class="col-md-8">
+                                                        <asp:TextBox ID="txtmopsub" runat="server" data-toggle="tooltip"
+                                                            CssClass="form-control" TextMode="MultiLine" Rows="2"></asp:TextBox>
+                                                        <asp:RequiredFieldValidator ID="RequiredFieldValidator15" Display="Dynamic" runat="server" ControlToValidate="txtmopsub" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                            ErrorMessage="This field is required" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                    </div>
+                                                </div>
+                                            </ContentTemplate>
+                                            <Triggers>
+                                                <asp:AsyncPostBackTrigger ControlID="ddPaymentTerms" />
+                                            </Triggers>
+                                        </asp:UpdatePanel>
+                                        <div class="col-md-4 pd-b-10">
+                                            <label class="col-md-4 control-label" for="example-hf-email">Print In</label>
+                                            <div class="col-md-8">
+                                                <asp:DropDownList ID="ddlPrint" runat="server" OnSelectedIndexChanged="ddlPrint_SelectedIndexChanged" AutoPostBack="true" CssClass="form-control">
+                                                    <asp:ListItem Text="USD" Value="USD"></asp:ListItem>
+                                                    <%--<asp:ListItem Text="INR" Value="INR"></asp:ListItem>--%>
+                                                    <asp:ListItem Text="EURO" Value="EURO"></asp:ListItem>
+                                                </asp:DropDownList>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="clear: both"></div>
+                                    <asp:UpdatePanel runat="server">
+                                        <ContentTemplate>
+                                            <div class="col-md-4" id="divinclude" runat="server">
+                                                <div class="">
+                                                    <label class="col-md-4 control-label" for="example-hf-email">Qtn. Includes Freight</label>
+                                                    <div class="col-md-8">
+                                                        <asp:CheckBox ID="chkqif" runat="server" AutoPostBack="true" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ContentTemplate>
+                                        <Triggers>
+                                            <asp:AsyncPostBackTrigger ControlID="dddelivery" />
+                                        </Triggers>
+                                    </asp:UpdatePanel>
+
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <User:AssignControl ID="assigncontrol" runat="server" />
+                                <%--<User:ItemDetailControl ID="itemdtcontrol" runat="server" />--%>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="" id="divadditem" runat="server">
+                                    <div class="panel-body">
+
+                                        <asp:LinkButton ID="btnShow" Text="" runat="server" />
+                                        <asp:LinkButton ID="btnShow1" Text="" runat="server" />
+                                        <asp:LinkButton ID="btnopen" Text="Add Item" runat="server" class="btn btn-alt btn-xs btn-primary" />
+                                        <asp:LinkButton ID="btndiscount" Text="Add Discount" runat="server" class="btn btn-alt btn-xs btn-primary" />
+                                        <div id="divcalc" visible="false" runat="server" style="width: 45px; float: left; margin-left: 74px; margin-right: -132px;">
+                                            <input type="button" runat="server" class="btn btn-alt btn-xs btn-warning CalC" value="Calculator" />
+                                            <div style="position: fixed; z-index: 999999999;">
+                                                <div class="modal">
+                                                    <div class="popup">
+                                                        <div class="pophead">
+                                                            <span class="calt">Calculator</span>
+                                                            <span class="close">X</span>
+                                                        </div>
+                                                        <ul>
+                                                            <li>
+                                                                <asp:Label runat="server" Text="Selling Price/KG $ :"></asp:Label><asp:TextBox ID="txtcalSP" onblur="this.value=this.value.replace(/[^0-9$.,]/g, '');calculatesp(this)" CssClass="reset" runat="server"></asp:TextBox>
+                                                            </li>
+                                                            <li>
+                                                                <asp:Label runat="server" Text="Cost Price INR :"></asp:Label><asp:TextBox ID="txtcalCP" onblur="this.value=this.value.replace(/[^0-9$.,]/g, '');calculatecp(this)" CssClass="reset" runat="server"></asp:TextBox>
+                                                            </li>
+                                                            <%--<li>
+																<asp:Label runat="server" text="3 Number :"></asp:Label><asp:TextBox ID="TextBox1" runat="server"></asp:TextBox>
+																</li>--%>
+                                                            <li>
+                                                                <asp:Label runat="server" Text="Margin % :"></asp:Label><asp:Label runat="server" ID="lblcalmargin" CssClass="sclr" Style="margin-left: 90px;"></asp:Label>
+                                                            </li>
+                                                            <li>
+                                                                <%--<asp:Button runat="server" ID="btnCalculate" CssClass="Calculate" Text="Submit"/>--%>
+                                                                <button type="button" class="Calculate">Reset</button>
+                                                            </li>
+                                                        </ul>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <br />
+                                        <br />
+                                        <%--  <asp:UpdatePanel ID="UpdatePanel2" runat="server" UpdateMode="Conditional">
+                                            <ContentTemplate>--%>
+                                        <asp:HiddenField ID="hftotalvat" runat="server" />
+                                        <asp:HiddenField ID="hfgrandtotal" runat="server" />
+                                        <div class="table-responsive">
+                                            <asp:GridView ID="grditemproduct" ShowFooter="true" GridLines="None" CssClass="table table-striped table-vcenter mT" HeaderStyle-Width="100" HeaderStyle-Font-Bold="true" HeaderStyle-Font-Size="Smaller" CellPadding="0" CellSpacing="0" runat="server" AutoGenerateColumns="false">
+                                                <Columns>
+                                                    <asp:TemplateField ItemStyle-Width="" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink1" runat="server"></asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <div class="btn-group btn-group-xs">
+                                                                <asp:LinkButton ID="lnkdelete" data-toggle="tooltip" title="Delete" class="btn btn-xs btn-danger" runat="server" OnClientClick="checkdelete();"
+                                                                    CommandName="deletelink" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>">Delete</asp:LinkButton>
+                                                            </div>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="Product Name" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink11" runat="server">Product Name</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="ltproductname" runat="server" Text='<%#Eval("Product_Name")%>'></asp:Label>
+                                                            <asp:Label ID="ltProductId" runat="server" Text='<%#Eval("ProductId")%>' Visible="false"></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+
+                                                    <asp:TemplateField HeaderText="Product Code" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink12" runat="server">Product Code</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="ltproductcode" runat="server" Text='<%#Eval("Product_Code")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="SKU" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink13" runat="server">SKU</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="ltproductWeight" runat="server" Text='<%#Eval("Packing_Weight")%>' Visible="false"></asp:Label>
+                                                            <asp:Label ID="ltpackingpacking" runat="server" Text='<%#Eval("Packing_Packing")%>'></asp:Label>
+                                                            <asp:HiddenField ID="hfkg" runat="server" Value='<%#Eval("Packing_Weight")%>' />
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="Rate" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink15" runat="server">Rate/kg</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-rupee"></i>&nbsp;
+                                                                         
+                                                                              <asp:Label ID="ltproductrate" runat="server" Text='<%#Eval("Product_Rate")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="Discount" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink15" runat="server">Discounted Rate/kg</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-rupee"></i>&nbsp;
+                                                                             <asp:Label ID="ltrate" runat="server" Text='<%#Eval("ItemDt_Rate")%>'></asp:Label>
+                                                            <%--  <asp:TextBox ID="txtdisount" runat="server"  Height="25" data-toggle="tooltip" title="Enter Qunatity"
+                                                                                    CssClass="form-control"></asp:TextBox>--%>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+
+                                                    <asp:TemplateField HeaderText="Margin" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink15" runat="server">Product Cost</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+
+                                                            <asp:Label ID="ltmarginp" runat="server" Visible="false" Text='<%#Eval("Product_Margin")%>'></asp:Label>
+                                                            <i class="fa fa-rupee"></i>&nbsp;
+                                                                                  <asp:Label ID="lblprductcost" runat="server" Text='<%#Eval("Product_Cost")%>'></asp:Label>
+                                                            <asp:Label ID="lblproductskucost" runat="server" Visible="false" Text='<%#Eval("Product_CostSKU")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="Desired Margin" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink15" runat="server">Desired Margin% /kg</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+
+                                                            <asp:TextBox ID="txtdmarginp" runat="server" onfocus="this.value = this.value;" Height="25" Width="50" data-toggle="tooltip" title="Enter desired margin%" class="Mandardecimal"
+                                                                OnTextChanged="txtdmarginp_TextChanged" Text='<%#Eval("ItemDt_DesiredMargin")%>' AutoPostBack="true" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');"
+                                                                CssClass="form-control"></asp:TextBox>
+
+                                                            <%--  <asp:TextBox ID="txtdmarginp" runat="server" Height="25" Width="50" data-toggle="tooltip" title="Enter desired margin%" 
+                                                                        OnTextChanged="txtdmarginp_TextChanged" Text='<%#Eval("ItemDt_DesiredMargin")%>'  onblur="calculateFinalPrice(this,'hfkg')"
+                                                                        CssClass="form-control"></asp:TextBox>--%>
+
+
+                                                            <%--faisal edited column--%>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+
+                                                    <asp:TemplateField HeaderText="$ Rate" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink15" runat="server">$Rate/kg</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-dollar "></i>&nbsp;
+                                                                            <asp:Label ID="ltdollarrate" runat="server" Text='<%#(CDbl(Eval("ItemDt_Rate")) / CDbl(txtCurrencyRate.Text)).ToString("N2")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+
+                                                    <asp:TemplateField HeaderText="$ Rate/SKU" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink15" runat="server">$Rate/SKU</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-dollar"></i>&nbsp;
+                                                            <asp:Label ID="ltDrateSKU" runat="server" Text='<%#((CDbl(Eval("Product_CostSKU")) / CDbl(txtCurrencyRate.Text))).ToString("N2")%>'></asp:Label>
+                                                            <asp:Label ID="ltrateSKU" Visible="false" runat="server" Text='<%#(Eval("Product_CostSKU"))%>'></asp:Label>
+
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+
+                                                    <asp:TemplateField HeaderText="€ Rate" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink15" runat="server">€ Rate/kg</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-euro"></i>&nbsp;
+                                                            <asp:Label ID="lteurorate" runat="server" Text='<%#(CDbl(Eval("ItemDt_Rate")) / CDbl(txtCurrencyRate.Text)).ToString("N2")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="€ Rate/SKU" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink15" runat="server">€ Rate/SKU</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-euro"></i>&nbsp;
+                                                             <asp:Label ID="ltDrateeuroSKU" runat="server" Text='<%#((CDbl(Eval("Product_CostSKU")) / CDbl(txtCurrencyRate.Text))).ToString("N2")%>'></asp:Label>
+                                                            <asp:Label ID="ltrateeuroSKU" Visible="false" runat="server" Text='<%#(Eval("Product_CostSKU"))%>'></asp:Label>
+
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+
+                                                    <asp:TemplateField HeaderText="No.Of Pack" ItemStyle-Width="100px" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink14" runat="server">No.Of Pack</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <div class="col-md-12">
+                                                                <%--  <asp:TextBox ID="txtquantity" runat="server" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');" OnTextChanged="txtquantity_TextChanged" AutoPostBack="true" Text='<%#Eval("ItemDt_Qty")%>' Height="25" data-toggle="tooltip" title="Enter Quantity"
+                                                                            CssClass="form-control"></asp:TextBox>--%>
+                                                                <asp:TextBox ID="txtquantity" runat="server" onkeyup="" onblur="this.value=this.value.replace(/\D/g,'');calculateFinalPrice(this,'hfkg')" Text='<%#Eval("ItemDt_Qty")%>' Height="25" data-toggle="tooltip" title="Enter Qunatity"
+                                                                    CssClass="form-control" MaxLength="3" TabIndex="12"></asp:TextBox>
+
+                                                                <asp:Label ID="ltquantity" runat="server" Visible="false" Text='<%#Eval("ItemDt_Qty")%>'></asp:Label>
+                                                            </div>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="GST" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink17" runat="server">GST</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-rupee"></i>&nbsp;
+                                                                    <asp:HiddenField ID="hflblvatinrs" runat="server" />
+                                                            <asp:Label ID="lblvatinrs" runat="server" Text='<%#Eval("Product_Vat")%>' />
+                                                            (<asp:Label ID="lblvat" runat="server" Text='<%#Eval("Product_Vat")%>' />%)
+                                                        </ItemTemplate>
+
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="KG" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink17" runat="server">Qty</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="ltkg" Text='<%#Eval("Packing_Weight")%>' runat="server"></asp:Label>
+                                                            kg
+                                            <%-- <asp:label ID="lblvat" runat="server" Text='<%#Eval("Product_Vat")%>' Visible="false" />--%>
+                                                        </ItemTemplate>
+                                                        <FooterTemplate>
+                                                            <div runat="server" id="divfootvat">
+                                                                Total GST:<br />
+                                                                <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" />
+                                                            </div>
+                                                            Total Freight:<br /><br />
+                                                            <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" />
+                                                            <div id="divTcs" runat="server" visible="false">
+																TCS Amount:<br />
+																<hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" />
+															</div>
+                                                            Total Amount:
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+
+                                                    <asp:TemplateField HeaderText="Amount" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink18" runat="server">Amount</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="ltamtdollar" runat="server" Visible="false"> <i class="fa fa-dollar"></i>&nbsp;</asp:Label>
+                                                            <asp:Label ID="ltamtrupee" runat="server" Visible="false"><i class="fa fa-rupee"></i>&nbsp;</asp:Label>
+                                                            <asp:HiddenField ID="hfltamount" runat="server" />
+                                                            <asp:Label ID="ltamount" Text='<%#Eval("ItemDt_Amount")%>' runat="server" Visible="false"></asp:Label>
+                                                            <asp:Label ID="ltdisamount" Text='<%#Eval("ItemDt_Amount")%>' runat="server"></asp:Label>
+                                                        </ItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--Total Amount:<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--%>
+                                                            <div runat="server" id="divfootvatamt">
+                                                                <b><i class="fa fa-rupee"></i>&nbsp;
+                                                                                <asp:Label ID="lttotalvat" Text='78500' runat="server"></asp:Label></b><br />
+                                                                <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" />
+                                                            </div>
+                                                            <b>
+																<div id="INRdivfreight" runat="server" visible="false">
+                                                                    <i class="fa fa-rupee"></i>&nbsp;
+                                                                    <asp:Label ID="lblfreight" runat="server"></asp:Label>
+                                                                </div>
+                                                                <div id="USDdivfreight" runat="server" visible="false">
+                                                                    <i class="fa fa-dollar"></i>&nbsp;
+                                                                    <asp:Label ID="USDlblfreight" runat="server"></asp:Label>
+                                                                </div>
+                                                                <div id="Eurodivfreight" runat="server" visible="false">
+                                                                    <i class="fa fa-euro"></i>&nbsp;
+                                                                    <asp:Label ID="Eurolblfreight" runat="server"></asp:Label>
+                                                                </div>
+
+                                                            </b>
+                                                            <br />
+                                                            <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" />
+                                                            <div id="divTcsAmount" runat="server" visible="false">
+																<b>
+																	<i class="fa fa-rupee"></i>&nbsp;
+																	<asp:Label ID="LblTcsAmount" runat="server"></asp:Label>
+																</b>
+																<br />
+																<hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" />
+															</div>
+                                                            <b>																
+                                                                <div id="INRdivtotalamount" runat="server" visible="false">
+                                                                    <i class="fa fa-rupee"></i>&nbsp;
+                                                                    <asp:Label ID="lttotalamount" Text='78500' runat="server"></asp:Label>
+                                                                </div>
+                                                                <div id="USDdivtotalamount" runat="server" visible="false">
+                                                                    <i class="fa fa-dollar"></i>&nbsp;
+                                                                    <asp:Label ID="USDtotalamount" Text='78500' runat="server"></asp:Label>
+                                                                </div>
+                                                                <div id="Eurodivtotalamount" runat="server" visible="false">
+                                                                    <i class="fa fa-euro"></i>&nbsp;
+                                                                    <asp:Label ID="EUROtotalamount" Text='78500' runat="server"></asp:Label>
+                                                                </div>                                                            
+															</b>
+
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <%--<asp:TemplateField ItemStyle-Width="" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                                        <HeaderTemplate>
+                                                                            <asp:HyperLink ID="HyperLink1" runat="server"></asp:HyperLink>
+                                                                        </HeaderTemplate>
+                                                                        <ItemTemplate>
+                                                                            <div class="btn-group btn-group-xs">
+                                                                                <asp:LinkButton ID="lkupdate" data-toggle="tooltip" title="Update" Visible="false" runat="server" class="btn btn-primary"
+                                                                                    CommandName="updatelink" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>">Update</asp:LinkButton>
+                                                                                <asp:LinkButton ID="lnkedit" data-toggle="tooltip" title="Edit" runat="server" class="btn btn-primary"
+                                                                                    CommandName="Editlink" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>">Edit</asp:LinkButton>
+
+                                                                                <asp:LinkButton ID="lnkdelete" data-toggle="tooltip" title="Delete" class="btn btn-xs btn-danger" runat="server" OnClientClick="checkdelete();"
+                                                                                    CommandName="deletelink" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>">Delete</asp:LinkButton>
+                                                                            </div>
+                                                                        </ItemTemplate>
+                                                                    </asp:TemplateField>--%>
+                                                </Columns>
+                                                <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="left" BackColor="White" />
+                                                <FooterStyle HorizontalAlign="left" BackColor="White" />
+                                                <PagerSettings PageButtonCount="4" />
+                                                <EmptyDataTemplate>
+                                                    <asp:Label ID="s" runat="server" Text="No Item Found"></asp:Label><br />
+                                                    <br />
+                                                </EmptyDataTemplate>
+                                                <EmptyDataRowStyle HorizontalAlign="Center" />
+                                            </asp:GridView>
+                                        </div>
+
+                                        <%-- </ContentTemplate>
+                                            <Triggers>
+                                                <asp:AsyncPostBackTrigger ControlID="GridView1" />
+                                                <asp:AsyncPostBackTrigger ControlID="btnsave" />
+                                                <asp:AsyncPostBackTrigger ControlID="grditemproduct" />
+                                                <asp:AsyncPostBackTrigger ControlID="txtFreight" />
+
+                                                <asp:AsyncPostBackTrigger ControlID="txtdocnclr" />
+                                                <asp:AsyncPostBackTrigger ControlID="txtocfrei" />
+                                                <asp:AsyncPostBackTrigger ControlID="txtinsurance" />
+
+
+                                                <asp:AsyncPostBackTrigger ControlID="dddelivery" />
+                                                <asp:AsyncPostBackTrigger ControlID="txtCurrencyRate" />
+                                            </Triggers>
+                                        </asp:UpdatePanel>--%>
+                                        <asp:ModalPopupExtender ID="mpe" runat="server" PopupControlID="pnlPopup" TargetControlID="btnShow"
+                                            CancelControlID="btnNo">
+                                        </asp:ModalPopupExtender>
+                                        <asp:Panel ID="pnlPopup" runat="server" Style="display: none">
+                                            <div class="modal-dialog modal-lg" style="overflow-y: scroll; position: fixed; top: 0; bottom: 0; left: 0; right: 0; overflow: auto;">
+                                                <div class="modal-content" style="top: 1%; overflow-x: hidden; overflow-y: auto; outline: none; margin-top: 0; overflow: visible;">
+                                                    <div class="modal-header">
+                                                        <asp:LinkButton ID="btnNo" class="close" Style="background-color: red; color: white;" runat="server">&times;</asp:LinkButton>
+                                                        <h3 class="modal-title">Add Product</h3>
+                                                    </div>
+                                                    <div class="modal-body" style="overflow: auto">
+                                                        <div class="table-options clearfix">
+                                                            <div class="col-sm-3 col-xs-4">
+                                                                <div class="dataTables_length" id="example-datatable_length">
+                                                                    <%--  <asp:DropDownList ID="ddpagesize" AutoPostBack="true" runat="server" CssClass="form-control">
+                                                <asp:ListItem Text="10" Value="10"></asp:ListItem>
+                                                <asp:ListItem Text="20" Value="20"></asp:ListItem>
+                                                <asp:ListItem Text="30" Value="30"></asp:ListItem>
+                                            </asp:DropDownList>--%>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-4 col-xs-12">
+                                                                <div id="example-datatable_filter" class="dataTables_filter">
+                                                                    <label>
+                                                                        <div class="input-group">
+                                                                            <asp:TextBox ID="txtsearch" runat="server" class="form-control" placeholder="Search" /><span class="input-group-addon">
+                                                                                <i class="fa fa-search"></i></span>
+                                                                        </div>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-3 col-xs-12">
+                                                                <asp:Button ID="btnshowall" EnableViewState="false" runat="server" Text="Show All" CssClass="btn btn-alt btn-sm btn-info" />
+                                                            </div>
+                                                            <div class="col-sm-2 col-xs-12">
+                                                                <%-- <asp:Button ID="Button3" runat="server" OnClientClick="if (!Page_ClientValidate('ProductItemGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                                    UseSubmitBehavior="false" class="btn btn-sm btn-primary" ValidationGroup="ProductItemGroup" Text="Save" OnClick="btnonlysave_Click"></asp:Button>--%>
+                                                                <asp:Button ID="Button2" runat="server" OnClientClick="if (!Page_ClientValidate('ProductItemGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                                    UseSubmitBehavior="false" class="btn btn-sm btn-primary" ValidationGroup="ProductItemGroup" Text="Save  & Close" OnClick="btnsave_Click"></asp:Button>
+                                                            </div>
+                                                        </div>
+                                                        <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Always">
+                                                            <ContentTemplate>
+                                                                <div class="table-responsive">
+                                                                    <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="Product_Id"
+                                                                        CssClass="table table-striped table-vcenter table-hover" OnSorting="GridView1_Sorting" GridLines="None" AllowSorting="True">
+                                                                        <Columns>
+                                                                            <%-- <asp:TemplateField HeaderText="Select" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="Product_Id">
+                                                                                <ItemTemplate>
+                                                                                    <asp:CheckBox ID="ckselect" runat="server" />
+                                                                                    
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>--%>
+                                                                            <asp:TemplateField HeaderText="No of Pack" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-Width="101">
+                                                                                <ItemTemplate>
+
+                                                                                    <asp:TextBox ID="txtOrderQty" runat="server" onblur="this.value=this.value.replace(/\D/g,'');calculatekg(this)" Style="width: 54px;" min="0"></asp:TextBox>
+
+                                                                                    <asp:Label ID="lblProductId" runat="server" Text='<%#Eval("Product_Id")%>' Visible="false" />
+                                                                                    <asp:Label ID="lbldiscount" runat="server" Text='<%#Eval("Discount_Discount")%>' Visible="false"></asp:Label>
+                                                                                    <asp:Label ID="ltdisounted" runat="server" Text='<%#Eval("Discounted_Rate")%>' Visible="false"></asp:Label>
+                                                                                    <asp:Label ID="ltproductmargin" runat="server" Text='<%#Eval("Product_Margin")%>' Visible="false"></asp:Label>
+                                                                                    <asp:Label ID="ltproductcost" runat="server" Text='<%#Eval("Product_Cost")%>' Visible="false"></asp:Label>
+                                                                                    <asp:Label ID="ltproductSKUcost" runat="server" Text='<%#Eval("Product_CostSKU")%>' Visible="false"></asp:Label>
+
+                                                                                    <asp:Label ID="lblrate" runat="server" Text='<%#Eval("Product_Rate")%>' Visible="false" />
+                                                                                    <asp:Label ID="lblproductrate" runat="server" Text='<%#Eval("Product_Rate")%>' Visible="false" />
+                                                                                    <asp:Label ID="lblvat" runat="server" Text='<%#Eval("Product_Vat")%>' Visible="false" />
+                                                                                    <asp:Label ID="lblunit" runat="server" Text='<%#Eval("Packing_weight")%>' Visible="false" />
+                                                                                    <asp:HiddenField ID="hfPacking_Weight" runat="server" Value='<%#Eval("Packing_Weight")%>' />
+                                                                                    <asp:Label ID="ltproductcode" runat="server" Text='<%#Eval("Product_Code")%>' Visible="false" />
+                                                                                    <asp:Label ID="ltpacking" runat="server" Text='<%#Eval("Packing_Packing")%>' Visible="false" />
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="KG" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem">
+                                                                                <ItemTemplate>
+                                                                                    <%--<asp:TextBox ID="txtOrderKG" runat="server" onkeyup="this.value=this.value.replace(/\D/g,'');calculateqty(this)"  Style="width: 54px;" min="0"></asp:TextBox>--%>
+                                                                                    <asp:TextBox ID="txtOrderKG" runat="server" onblur="this.value=this.value.replace(/\D/g,'');calculateqty(this)" Style="width: 54px;" min="0"></asp:TextBox>
+
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Product SKU" ItemStyle-CssClass="MasterGridviewItem" HeaderStyle-CssClass="MasterGridviewHeader" SortExpression="Product_CostSKU">
+                                                                                <ItemTemplate>
+                                                                                    <asp:Label ID="lblsku" runat="server" Text='<%#DynamicparcelGridview.HighlightText(DynamicparcelDisplayFunctions.TruncateDescription(Eval("Packing_Packing"), "100"), txtsearch)%>' />
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Product Name" ItemStyle-CssClass="MasterGridviewItem" HeaderStyle-CssClass="MasterGridviewHeader" SortExpression="Product_Name">
+                                                                                <ItemTemplate>
+                                                                                    <asp:Label ID="lblname" runat="server" Text='<%#DynamicparcelGridview.HighlightText(DynamicparcelDisplayFunctions.TruncateDescription(Eval("Product_Name"), "100"), txtsearch)%>' />
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Category" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="PrdCategory_Name">
+                                                                                <ItemTemplate>
+                                                                                    <asp:Label ID="lblCategory" runat="server" Text='<%#DynamicparcelGridview.HighlightText(Eval("PrdCategory_Name"), txtsearch)%>' />
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>
+                                                                        </Columns>
+                                                                        <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="Right" BackColor="White" />
+
+                                                                        <FooterStyle HorizontalAlign="Center" BackColor="White" />
+                                                                        <PagerSettings PageButtonCount="4" />
+
+                                                                        <EmptyDataTemplate>
+                                                                            <asp:Label ID="s" runat="server" Text="No Record Found"></asp:Label><br />
+                                                                            <br />
+                                                                        </EmptyDataTemplate>
+                                                                        <EmptyDataRowStyle HorizontalAlign="Center" />
+                                                                    </asp:GridView>
+                                                                </div>
+                                                            </ContentTemplate>
+                                                            <Triggers>
+                                                                <asp:AsyncPostBackTrigger ControlID="btnsave" />
+                                                                <asp:AsyncPostBackTrigger ControlID="btnopen" />
+                                                                <asp:AsyncPostBackTrigger ControlID="btnshowall" />
+                                                            </Triggers>
+                                                        </asp:UpdatePanel>
+
+                                                    </div>
+                                                    <asp:UpdatePanel ID="UpdatePanel3" runat="server" UpdateMode="Conditional">
+                                                        <ContentTemplate>
+                                                            <div class="modal-footer">
+                                                                <%--<asp:Button ID="btnonlysave" runat="server" OnClientClick="if (!Page_ClientValidate('ProductItemGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                                    UseSubmitBehavior="false" class="btn btn-sm btn-primary" ValidationGroup="ProductItemGroup" Text="Save"></asp:Button>--%>
+                                                                <asp:Button ID="btnsave" Visible="false" runat="server" OnClientClick="if (!Page_ClientValidate('ProductItemGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                                    UseSubmitBehavior="false" class="btn btn-sm btn-primary" ValidationGroup="ProductItemGroup" Text="Save & Close"></asp:Button>
+                                                            </div>
+                                                        </ContentTemplate>
+                                                        <Triggers>
+                                                            <asp:AsyncPostBackTrigger ControlID="btnopen" />
+                                                        </Triggers>
+                                                    </asp:UpdatePanel>
+                                                </div>
+                                            </div>
+                                        </asp:Panel>
+
+                                        <asp:ModalPopupExtender ID="mpe1" runat="server" PopupControlID="pnlPopup1" TargetControlID="btnshow1"
+                                            CancelControlID="btnNo1">
+                                        </asp:ModalPopupExtender>
+                                        <asp:Panel ID="pnlPopup1" runat="server" Style="display: none">
+                                            <div class="modal-dialog modal-lg" style="overflow-y: scroll; position: fixed; top: 0; bottom: 0; left: 0; right: 0; overflow: auto;">
+                                                <div class="modal-content" style="top: 1%; overflow-x: hidden; overflow-y: auto; outline: none; margin-top: 0; overflow: visible;">
+                                                    <div class="modal-header">
+                                                        <asp:LinkButton ID="btnNo1" class="close" ForeColor="Red" runat="server">&times;</asp:LinkButton>
+                                                        <h3 class="modal-title">Add Discount</h3>
+                                                    </div>
+                                                    <div class="modal-body" style="overflow: auto">
+                                                        <div class="table-options clearfix">
+
+
+
+                                                            <div class="col-sm-2 col-xs-12 pull-right ">
+                                                                <asp:Button ID="Button4" runat="server" OnClientClick="if (!Page_ClientValidate('MasterGroupDisc')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                                    UseSubmitBehavior="false" class="btn btn-alt btn-primary" ValidationGroup="MasterGroupDisc" Text="Update" OnClick="btnupdatedisc_Click"></asp:Button>
+                                                            </div>
+                                                        </div>
+                                                        <asp:UpdatePanel ID="UpdatePanel4" runat="server" UpdateMode="Always">
+                                                            <ContentTemplate>
+                                                                <div class="table-responsive">
+                                                                    <asp:GridView ID="grddiscount" runat="server" AutoGenerateColumns="False" DataKeyNames="Product_id"
+                                                                        CssClass="table table-striped table-vcenter table-hover"
+                                                                        AllowPaging="False" AllowSorting="True">
+                                                                        <Columns>
+
+                                                                            <asp:TemplateField HeaderText="ID" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="Product_id" Visible="false">
+                                                                                <ItemTemplate>
+                                                                                    <asp:Literal ID="lblProductid" runat="server" Text='<%#Eval("Product_id")%>' />
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Product Code" ItemStyle-CssClass="MasterGridviewItem" HeaderStyle-CssClass="MasterGridviewHeader" SortExpression="Product_Code">
+                                                                                <ItemTemplate>
+                                                                                    <asp:Literal ID="lblcode" runat="server" Text='<%#Eval("Product_Code")%>' />
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Product Name" ItemStyle-CssClass="MasterGridviewItem" HeaderStyle-CssClass="MasterGridviewHeader" SortExpression="Product_Name">
+                                                                                <ItemTemplate>
+                                                                                    <asp:Literal ID="lblname" runat="server" Text='<%#Eval("Product_Name")%>' />
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Product Rate" ItemStyle-CssClass="MasterGridviewItem" HeaderStyle-CssClass="MasterGridviewHeader">
+                                                                                <ItemTemplate>
+                                                                                    ₹
+                                                                                    <asp:Label ID="lblRate" runat="server" Text='<%#(Eval("Product_Rate"))%>' />
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Discount(%)" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="discount_discount">
+                                                                                <ItemTemplate>
+                                                                                    <asp:TextBox ID="txtdiscount" runat="server" Text='<%#Eval("discount_discount")%>' CssClass="decimal" onChange="DiscountRate(this)"></asp:TextBox>
+                                                                                    <asp:Literal ID="ltCost" runat="server" Text='<%#Eval("Product_Cost")%>' Visible="false" />
+                                                                                    <asp:Literal ID="ltMargin" runat="server" Text='<%#Eval("Product_Margin")%>' Visible="false" />
+                                                                                    <asp:Literal ID="ltRate" runat="server" Text='<%#Eval("Product_Rate")%>' Visible="false" />
+                                                                                    <br />
+                                                                                    <asp:Literal ID="lblERR" runat="server" />
+                                                                                    <asp:CustomValidator ID="CustomValidator1" runat="server" OnServerValidate="valueCheck" ControlToValidate="txtdiscount" ValidationGroup="MasterGroupDisc" CssClass="MasterValidationCSS" Display="Dynamic" SetFocusOnError="true"></asp:CustomValidator>
+                                                                                    <asp:RegularExpressionValidator ID="RegularExpressionValidator1" runat="server" ControlToValidate="txtdiscount" ErrorMessage="Discount should be between 0 to 99" ValidationExpression="^(?:99|\d{1,2})(?:\.\d{1,2})?$" ValidationGroup="MasterGroupDisc" CssClass="MasterValidationCSS" Display="Dynamic"></asp:RegularExpressionValidator>
+                                                                                </ItemTemplate>
+
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Discounted Price ($)" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="discount_discount">
+                                                                                <ItemTemplate>
+                                                                                    <asp:TextBox ID="txtDiscountedRate" runat="server" Text='<%#(Convert.ToDouble(Eval("Product_Rate") - (Eval("Product_Rate") * Eval("discount_discount") / 100)) / txtCurrencyRate.Text).ToString("0.00")%>' onChange="DiscountPercent(this)" CssClass="decimal " Style="text-align: right;"></asp:TextBox>
+                                                                                    <%--<asp:CustomValidator ID="CustomValidator1" runat="server"  OnServerValidate="valueCheck" ControlToValidate="txtdiscount" ValidationGroup="MasterGroupDisc" CssClass="MasterValidationCSS" Display="Dynamic" SetFocusOnError="true"></asp:CustomValidator>--%>
+                                                                                    <%--<asp:RegularExpressionValidator ID="RegularExpressionValidator1" runat="server" ControlToValidate="txtdiscount" ErrorMessage="Discount should be between 0 to 99" ValidationExpression="^(?:99|\d{1,2})(?:\.\d{1,2})?$" ValidationGroup="MasterGroupDisc" CssClass="MasterValidationCSS" Display="Dynamic"></asp:RegularExpressionValidator>--%>
+                                                                                </ItemTemplate>
+
+                                                                            </asp:TemplateField>
+                                                                        </Columns>
+                                                                        <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="Right" BackColor="White" />
+
+                                                                        <FooterStyle HorizontalAlign="Center" BackColor="White" />
+                                                                        <PagerSettings PageButtonCount="4" />
+
+                                                                        <EmptyDataTemplate>
+                                                                            <asp:Label ID="s" runat="server" Text="No Record Found"></asp:Label><br />
+                                                                            <br />
+                                                                        </EmptyDataTemplate>
+                                                                        <EmptyDataRowStyle HorizontalAlign="Center" />
+                                                                    </asp:GridView>
+                                                                </div>
+                                                            </ContentTemplate>
+                                                            <%--<Triggers>
+                                                                <asp:AsyncPostBackTrigger ControlID="btnsave" />
+                                                                <asp:AsyncPostBackTrigger ControlID="btnopen" />
+                                                              
+                                                            </Triggers>--%>
+                                                        </asp:UpdatePanel>
+
+                                                    </div>
+                                                    <%--       <asp:UpdatePanel ID="UpdatePanel5" runat="server" UpdateMode="Always">
+                                                        <ContentTemplate>--%>
+                                                    <div class="modal-footer">
+                                                        <asp:Button Text="Update" runat="server" ID="btnupdatedisc" OnClientClick="if (!Page_ClientValidate('MasterGroupDisc')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                            UseSubmitBehavior="false" class="btn btn-alt btn-primary" ValidationGroup="MasterGroupDisc" />
+                                                    </div>
+                                                    <%--</ContentTemplate>
+                                                        <Triggers>
+                                                            <asp:AsyncPostBackTrigger ControlID="btndiscount" />
+                                                        </Triggers>
+                                                    </asp:UpdatePanel>--%>
+                                                </div>
+                                            </div>
+                                        </asp:Panel>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="divdate" runat="server" visible="false">
+                                <div class="col-md-3">
+                                    <div class="">
+                                        <label for="example-nf-email">Created Date</label>
+                                        <asp:TextBox ID="txtcreatedate" runat="server" ReadOnly="true" placeholder="Created Date" data-toggle="tooltip" title="Created Date"
+                                            CssClass="form-control"></asp:TextBox>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="">
+                                        <label for="example-nf-email">Created Name</label>
+                                        <asp:TextBox ID="txtcreatedname" runat="server" placeholder="Modified Date" ReadOnly="true" data-toggle="tooltip" title="Modified Date"
+                                            CssClass="form-control"></asp:TextBox>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="">
+                                        <label for="example-nf-email">Modified Date</label>
+                                        <asp:TextBox ID="txtmodifieddate" runat="server" placeholder="Modified Date" ReadOnly="true" data-toggle="tooltip" title="Modified Date"
+                                            CssClass="form-control"></asp:TextBox>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="">
+                                        <label for="example-nf-email">Modified Name</label>
+                                        <asp:TextBox ID="txtmodifiedname" runat="server" placeholder="Modified Date" ReadOnly="true" data-toggle="tooltip" title="Modified Date"
+                                            CssClass="form-control"></asp:TextBox>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <div style="clear: both"></div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12" style="margin-bottom: 11px; display: table; margin-top: -8px">
+                <div class="pull-right">
+
+                    <%--<asp:Button Text="Create New Version" runat="server" ID="btnversion" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Creating Version...';"
+                        UseSubmitBehavior="false" class="btn btn-alt btn-sm btn-warning" ValidationGroup="MasterGroup"  />--%>
+                    <asp:Button Text="Save" runat="server" ID="btnadd" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                        UseSubmitBehavior="false" class="btn btn-alt btn-sm btn-primary" ValidationGroup="MasterGroup" />
+                    <asp:LinkButton ID="hfcancel" CausesValidation="false" Text="Cancel" runat="server" NavigateUrl="~/Quotation.aspx" class="btn btn-alt btn-sm btn-danger" TabIndex="15" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <asp:UpdateProgress ID="UpdateProgress1" AssociatedUpdatePanelID="" runat="server" DisplayAfter="0">
+        <ProgressTemplate>
+            <br />
+            <div class="divWaiting">
+                <i class="fa fa-sun-o fa-spin" id="LoadingUpadatePanel"></i>
+            </div>
+        </ProgressTemplate>
+    </asp:UpdateProgress>
+</asp:Content>
+

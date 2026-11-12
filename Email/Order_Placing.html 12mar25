@@ -1,0 +1,84 @@
+<html>
+<head>
+    <title></title>
+    <style>
+        @font-face {
+            font-family:arial;
+            src: url('http://b2b.swissbake.in/css/fonts/Avenir Next.ttc');
+        }
+    </style>
+</head>
+
+<body style="text-align: left;font-family:arial;font-size:medium;">
+    <style type="text/css">
+        .indented {
+            padding-left: 30pt;
+            padding-right: 30pt;
+        }
+    </style>
+<p>To #NAME,</p>
+
+    <p class="">We thank you for your order #ORDERID.</p>
+
+    <p class="">#Table</p>
+    <table>
+        <tr>
+            <td>
+                Bank Name : #BankName
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Account No : #AccountNo
+            </td>
+        </tr>
+        <tr>
+            <td>
+                IFSC Code : #IFSCCode
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Branch : #Branch
+            </td>
+        </tr>
+    </table>
+
+    <p class="">You will receive a confirmation email from us once your order has been approved.</p>
+    <font color="red">
+        <p>
+            <i>
+                <b>
+                    !! DISCLAIMER - TERMS OF SHIPMENT !!<br />
+                    Please note that owing to the complications created in logistics within India as a result of the lockdown, we are not offering any assurance on the condition of delivered goods or the timeline of delivery. Goods will be shipped under sole risk and responsibility of the buyer. No returns, order cancellations, exchanges or refunds shall be entertained against this order.
+                </b>
+            </i>
+        </p>
+    </font>
+    <p class="">For any queries regarding your Order No. #ORDERID you can contact us at <a href="mailto:support@swissbake.in">support@swissbake.in</a> or drop a comment in the SUPPORT section of your account.</p>
+
+    <p>
+            Thank You,<br /><br/>
+			SwissBake&reg; Admin<br/>
+			<font color="red"><b>Swiss Bake Ingredients Pvt. Ltd</b></font>
+			<br/>
+            Customer Support:<a href="http://api.whatsapp.com/send?phone=917447331888" target="_blank"> +91 744 733 1888</a><br/>
+        <a href="mailto:support@swissbake.in"> support@swissbake.in </a> &nbsp;| 
+			<!--<a href="http://b2b.swissbake.ch">b2b.swissbake.ch</a> <br/> <br/>-->
+        <a href="http://www.swissbake.in">www.swissbake.in</a> <br /> <br />
+			<a target="_blank" href="http://www.facebook.com/swissbakemix"> <img alt="follow us on facebook" src="http://crm.swissbake.ch/images/facebook.png" border=0></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a target="_blank" href="https://www.linkedin.com/company/3689822?trk=prof-0-ovw-prev_pos"> <img alt="follow us on linkedin" src="http://crm.swissbake.ch/images/linkedin.png" border=0></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<a target="_blank" href="http://www.twitter.com/swissbakemix"> <img alt="follow us on twitter" src="http://crm.swissbake.ch/images/twitter.png" border=0></a>
+			
+        </p>
+
+
+
+</body>
+</html>
+
+
+
+
+
+

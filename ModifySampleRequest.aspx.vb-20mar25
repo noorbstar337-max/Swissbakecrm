@@ -1,0 +1,1397 @@
+﻿Imports DynamicparcelEnumerations
+Imports System.Net
+Imports System.Web.Script.Serialization
+Imports System.Web.UI.WebControls
+
+Partial Class ModifySampleRequest
+    Inherits _PageBaseClass
+    Dim MainID As Integer
+    Dim returnurl As String
+    Dim Type As String
+    Dim Typeid As Integer
+    Dim Count As Integer = 0
+    Dim TotalAmount As Double = 0.0
+    Dim FooterTotalAmount As Double = 0.0
+    Dim VatAmount As Double = 0.0
+    Public countrate As Double = 0.0
+    Public countrate1 As Double = 0.0
+    Dim Flag As Integer
+    Dim FormDate As String, FromTime As String, FromDateTime As String, billable As Boolean
+    Dim toDate As String, Toime As String, ToDateTime As String
+    Dim ReminderDate As String, Remindertime As String, Reminderdatetime As String, Reminder As Boolean
+    Dim strvat As New List(Of String)
+
+    Protected Sub Page_Init(sender As Object, e As EventArgs) Handles Me.Init
+        If Session("UserId") = Nothing Then
+            TryCast(Me.Master, MainPage).MaintainSession()
+            Try
+                If (Request.QueryString("Id") = Nothing) Then
+                    Response.Redirect("index.aspx")
+                End If
+                'DynamicparcelGridview.CheckPrivilageForModify(Session("UserRoleID"), Button1, btnadd, "Product.aspx")
+                If Request.QueryString("chk") = "v" Then
+					DisableViewMode()
+
+				Else
+                    lbltitle1.Text = "Modify Sample Request"
+                    lbltitle2.Text = "Modify Sample Request"
+                End If
+            Catch ex As Exception
+                Dim error1 As String = ex.Message.Replace(Chr(34), "")
+                error1 = error1.Replace(Chr(39), "")
+                ExecptionBLL.Insert("ModifySampleRequest", "Page_Init", error1, Session("UserId"))
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            End Try
+        Else
+            Try
+                If (Request.QueryString("Id") = Nothing) Then
+                    Response.Redirect("index.aspx")
+                End If
+				'DynamicparcelGridview.CheckPrivilageForModify(Session("UserRoleID"), Button1, btnadd, "Product.aspx")
+				If Request.QueryString("chk") = "v" Then
+					DisableViewMode()
+				Else
+					lbltitle1.Text = "Modify Sample Request"
+                    lbltitle2.Text = "Modify Sample Request"
+                End If
+            Catch ex As Exception
+                Dim error1 As String = ex.Message.Replace(Chr(34), "")
+                error1 = error1.Replace(Chr(39), "")
+                ExecptionBLL.Insert("ModifySampleRequest", "Page_Init", error1, Session("UserId"))
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            End Try
+        End If
+    End Sub
+    
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        If Not IsPostBack Then
+            Try
+
+                If Request.QueryString("Id") <> Nothing And Request.QueryString("type") <> Nothing Then
+                    'FillOwner()
+                    Typeid = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                    Type = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("type")))
+                    ddrelatedtype.SelectedValue = Type
+                    ddrelatedtype_TextChanged(Nothing, Nothing)
+                    ddrelatedtypeid.SelectedValue = Typeid
+                Else
+                    MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                    ''assigncontrol.Uhftype.Value = "Quotation"
+                    ''assigncontrol.Uhftypeid.Value = MainID
+                    'FillOwner()
+                    If MainID = "0" Then
+                        'Session("OrderProduct") = Nothing
+                        ViewState("OrderProduct") = Nothing
+                        divreq.Visible = False
+
+                        lbltitle1.Text = "New Sample Request"
+                        lbltitle2.Text = "New Sample Request"
+                        txtleaddate.Text = Date.Now.Date.ToString("yyyy-MM-dd")
+                        GenerateSamReqNo()
+
+                        TravellingFirstRow()
+
+                        modifyspan.Visible = False
+
+                        txtDate.Text = Date.Now.ToString("yyyy-MM-dd")
+                        ddrelatedtype.SelectedValue = "Lead"
+                        FillCountry()
+                        ddrelatedtype_TextChanged(Nothing, Nothing)
+
+
+                        FillDelCountry()
+                        FillDelState()
+
+
+
+                        DisableGrid()
+                        Disable()
+                        'Convertcurrency()
+                    Else
+                        divreq.Visible = True
+                        txtRequestNo.Enabled = False
+                        ViewState("OrderProduct") = Nothing
+                        ViewState("OrderProduct1") = Nothing
+                        lbltitle1.Text = "Modify Sample Request"
+                        lbltitle2.Text = "Modify Sample Request"
+                        txtleaddate.Text = Date.Now.Date.ToString("yyyy-MM-dd")
+
+                        FillCountry()
+                        FillDelCountry()
+
+                        FillDetail()
+                        'DisableEditMode()
+
+
+
+						ddrelatedtype.Enabled = False
+                        ddrelatedtypeid.Enabled = False
+                        ddQuotationType.Enabled = False
+                        ddrelatedtypeid.CssClass = "form-control"
+                        '================================================
+
+
+                    End If
+                End If
+
+            Catch ex As Exception
+                'Response.Redirect("index.aspx")
+                Dim error1 As String = ex.Message.Replace(Chr(34), "")
+                error1 = error1.Replace(Chr(39), "")
+                ExecptionBLL.Insert("ModifyQuotation", "Page_Load", error1, Session("UserId"))
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            End Try
+        Else
+            Dim target As String = Me.Request.Form("__EVENTTARGET")
+            ''If Not String.IsNullOrEmpty(target) AndAlso target.Equals(Me.UpdatePanel1.ClientID) Then
+            ''    If Not String.IsNullOrEmpty(Me.txtsearch.Text) Then
+            ''        'GridView1.AllowCustomPaging = False
+            ''        FillSearch()
+            ''    Else
+            ''        'GridView1.AllowCustomPaging = True
+            ''        fillUser()
+            ''    End If
+            ''End If
+
+        End If
+
+
+
+    End Sub
+    Public Sub DisableViewMode()
+		Try
+			txtRequestNo.Enabled = False
+			txtDate.Enabled = False
+			ddrelatedtype.Enabled = False
+			ddrelatedtypeid.Enabled = False
+			ddlPrevRequest.Enabled = False
+			txtaddressbill.Enabled = False
+			txtpincodebill.Enabled = False
+			ddlcountrybill.Enabled = False
+			ddlcountrybill.CssClass = "form-control"
+			ddlstatebill.Enabled = False
+			ddlstatebill.CssClass = "form-control"
+			txtcitybill.Enabled = False
+			txtDelAddress.Enabled = False
+			txtDelPin.Enabled = False
+			ddlDelCountry.Enabled = False
+			ddlDelCountry.CssClass = "form-control"
+			ddlDelState.Enabled = False
+			ddlDelState.CssClass = "form-control"
+			txtDelCity.Enabled = False
+			grdGPTravelling.Enabled = False
+			btnadd.Visible = False
+            Button1.Visible = False
+            'btnReject.Visible = False
+
+            grdGPTravelling.Columns(5).Visible = False
+            grdGPTravelling.Columns(6).Visible = False
+            grdGPTravelling.Columns(7).Visible = False
+            grdGPTravelling.Columns(8).Visible = False
+            grdGPTravelling.Columns(9).Visible = False
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ItemDetailControl", "fillUser", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub DisableGrid()
+        Try
+
+            grdGPTravelling.Columns(5).Visible = False
+            grdGPTravelling.Columns(6).Visible = False
+            grdGPTravelling.Columns(7).Visible = False
+            grdGPTravelling.Columns(8).Visible = False
+            If grdGPTravelling.Rows.Count <= 1 Then
+                Dim lnkdelete As LinkButton = DirectCast(grdGPTravelling.Rows(0).FindControl("lnkdelete"), LinkButton)
+                lnkdelete.Visible = False
+            Else
+                For i As Integer = 0 To grdGPTravelling.Rows.Count - 1
+                    Dim lnkdelete As LinkButton = DirectCast(grdGPTravelling.Rows(i).FindControl("lnkdelete"), LinkButton)
+                    lnkdelete.Visible = True
+                Next
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ItemDetailControl", "fillUser", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub EnableGrid()
+        Try
+            If Request.QueryString("chk") = "v" Then
+                grdGPTravelling.Visible = True
+                grdGPTravelling.Enabled = False
+                grdGPTravelling.Columns(5).Visible = True
+                grdGPTravelling.Columns(6).Visible = True
+                grdGPTravelling.Columns(7).Visible = True
+                grdGPTravelling.Columns(8).Visible = True
+                grdGPTravelling.Columns(9).Visible = False
+            Else
+                grdGPTravelling.Columns(5).Visible = True
+                grdGPTravelling.Columns(6).Visible = True
+                grdGPTravelling.Columns(7).Visible = True
+                grdGPTravelling.Columns(8).Visible = True
+                grdGPTravelling.Columns(9).Visible = False
+                btnadd.Visible = True
+                grdGPTravelling.Enabled = True
+                For i As Integer = 0 To grdGPTravelling.Rows.Count - 1
+                    Dim ddlGridProductName As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlGridProductName"), DropDownList)
+                    'Dim ddlQuantity As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlQuantity"), DropDownList)
+                    Dim txtQuantity As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtQuantity"), TextBox)
+                    Dim txtComment As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtComment"), TextBox)
+                    Dim txtFeedback As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtFeedback"), TextBox)
+                    Dim ddlApproved As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlApproved"), DropDownList)
+                    Dim ddlOrdered As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlOrdered"), DropDownList)
+                    ddlGridProductName.Enabled = False
+                    txtQuantity.Enabled = False
+                    txtComment.Enabled = True
+                    txtFeedback.Enabled = True
+                    'ddlQuantity.Enabled = False
+                    ddlApproved.Enabled = True
+                    ddlOrdered.Enabled = True
+                Next
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ItemDetailControl", "fillUser", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub GenerateSamReqNo()
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            txtRequestNo.Text = SampleBLL.GenerateCode("GenerateSamReqNo")
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ItemDetailControl", "fillUser", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub UpdateView()
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            SampleBLL.UpdateView("ViewSamReq", MainID)
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ItemDetailControl", "fillUser", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub Disable()
+        Try
+            divStatus.Visible = False
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ItemDetailControl", "fillUser", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub FillSearch()
+        Try
+            ''GridView1.DataSource = ItemDetailBLL.SearchItemDetail("Quotation", 0, ddrelatedtypeid.SelectedValue, txtsearch.Text.Trim)
+            ''GridView1.DataBind()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ItemDetailControl", "FillSearch", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub addItem()
+        Try
+            Dim count As Integer
+            'If Session("OrderProduct") Is Nothing Then
+            If ViewState("OrderProduct") Is Nothing Then
+
+
+                count = 0
+                Dim dt As New DataTable
+                dt.Columns.Add("ItemDt_ID", GetType(Integer))
+                dt.Columns.Add("ProductId", GetType(Integer))
+                dt.Columns.Add("Product_Name", GetType(String))
+                dt.Columns.Add("Product_Code", GetType(String))
+                dt.Columns.Add("Packing_Packing", GetType(String))
+                dt.Columns.Add("Packing_Weight", GetType(String))
+                dt.Columns.Add("ItemDt_Rate", GetType(String))
+                dt.Columns.Add("ItemDt_Qty", GetType(String))
+                dt.Columns.Add("Product_Vat", GetType(String))
+                dt.Columns.Add("ItemDt_Amount", GetType(String))
+                dt.Columns.Add("Discounted_Rate", GetType(String))
+                dt.Columns.Add("Product_Margin", GetType(String))
+                dt.Columns.Add("Product_Cost", GetType(String))
+                dt.Columns.Add("Product_CostSKU", GetType(String))
+                dt.Columns.Add("Product_Rate", GetType(String))
+                dt.Columns.Add("ItemDt_DesiredMargin", GetType(String))
+
+            End If
+            'If Session("OrderProduct") = Session("OrderProductN") Then
+
+            '    Dim a As String = "aa"
+            'Else
+            '    Dim a As String = "aa"
+            'End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterClientScriptBlock(Page, Me.GetType(), "call", "alert('Error " + error1.ToString + "');", True)
+        End Try
+    End Sub
+
+    Protected Sub btnadd_Click(sender As Object, e As EventArgs) Handles btnadd.Click
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+			If MainID = 0 Then
+				Dim SampleReqID = SampleBLL.InsertSampleRequest(txtRequestNo.Text, txtDate.Text, ddrelatedtype.SelectedValue, ddrelatedtypeid.SelectedValue, Session("UserId"))
+
+				SampleBLL.InsertSampleRequestAddress(SampleReqID, txtDelAddress.Text, txtDelPin.Text, ddlDelCountry.SelectedValue, ddlDelState.SelectedValue, txtDelCity.Text, Session("UserId"))
+
+				For i As Integer = 0 To grdGPTravelling.Rows.Count - 1
+					Dim ddlGridProductName As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlGridProductName"), DropDownList)
+					'Dim ddlQuantity As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlQuantity"), DropDownList)
+					Dim txtQuantity As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtQuantity"), TextBox)
+					Dim txtComment As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtComment"), TextBox)
+					Dim txtFeedback As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtFeedback"), TextBox)
+					Dim ddlApproved As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlApproved"), DropDownList)
+					Dim ddlOrdered As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlOrdered"), DropDownList)
+
+					SampleBLL.InsertSampleRequestDetail(SampleReqID, ddlGridProductName.SelectedValue, txtQuantity.Text, txtComment.Text, txtFeedback.Text, ddlApproved.SelectedValue, ddlOrdered.SelectedValue, Session("UserId"))
+				Next
+			ElseIf MainID > 0 Then
+				SampleBLL.UpdateSampleRequestAddress(MainID, txtDelAddress.Text, txtDelPin.Text, ddlDelCountry.SelectedValue, ddlDelState.SelectedValue, txtDelCity.Text, Session("UserId"))
+
+				SampleBLL.DeleteSampleRequestDetail(MainID)
+				For i As Integer = 0 To grdGPTravelling.Rows.Count - 1
+					Dim ddlGridProductName As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlGridProductName"), DropDownList)
+					'Dim ddlQuantity As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlQuantity"), DropDownList)
+					Dim txtQuantity As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtQuantity"), TextBox)
+					Dim txtComment As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtComment"), TextBox)
+					Dim txtFeedback As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtFeedback"), TextBox)
+					Dim ddlApproved As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlApproved"), DropDownList)
+					Dim ddlOrdered As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlOrdered"), DropDownList)
+
+					SampleBLL.InsertSampleRequestDetail(MainID, ddlGridProductName.SelectedValue, txtQuantity.Text, txtComment.Text, txtFeedback.Text, ddlApproved.SelectedValue, ddlOrdered.SelectedValue, Session("UserId"))
+				Next
+			End If
+			RegistrationMail()
+			Response.Redirect("SampleRequest.aspx")
+
+		Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyQuotation", "btnadd_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+	Public Sub RegistrationMail()
+		Try
+			MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+			Dim sb As New StringBuilder
+			Dim count As Integer = 1
+			Dim s As String = ""
+			Dim body As String = String.Empty
+			Dim reader As StreamReader = New StreamReader(Server.MapPath("~/Email/SampleRequest_Placing.html"))
+			body = reader.ReadToEnd
+			'	Dim ds As DataSet = ViewState("GridRowItems")
+			'	Dim dt As DataTable = ds.Tables(0)
+			sb.Append("<table border='1' cellspacing='0' cellpadding='5' style='border-color: rgb(247, 247, 247);width:100%;text-align:center;'><tr>")
+			sb.Append("<th><center>SR</center></th>")
+			sb.Append("<th><center>PRODUCT NAME</center></th>")
+			sb.Append("<th style='width:15%;'><center>ORDERED QTY</center></th></tr>")
+			For i As Integer = 0 To grdGPTravelling.Rows.Count - 1
+				Dim ddlGridProductName As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlGridProductName"), DropDownList)
+				'Dim ddlQuantity As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlQuantity"), DropDownList)
+				Dim txtQuantity As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtQuantity"), TextBox)
+				sb.Append("<tr><td>" + count.ToString() + "</td>")
+				sb.Append("<td>" + ddlGridProductName.SelectedItem.Text + "</td>")
+                sb.Append("<td>" + txtQuantity.Text + " KG </td></tr>")
+				count = count + 1
+			Next
+			sb.Append("</table>")
+            body = body.Replace("#Table", sb.ToString)
+            Dim dt As DataSet = SampleBLL.InsertCity("Insertcity", ddrelatedtypeid.SelectedValue, ddrelatedtype.SelectedValue)
+            If dt.Tables(0).Rows(0)(0) = "" Then
+                body = body.Replace("#COMPANY", ddrelatedtypeid.SelectedItem.Text + "(" + dt.Tables(0).Rows(0)(1) + "- City is not mention)")
+            Else
+                body = body.Replace("#COMPANY", ddrelatedtypeid.SelectedItem.Text + "(" + dt.Tables(0).Rows(0)(1) + "-" + dt.Tables(0).Rows(0)(0) + ")")
+            End If
+            'body = body.Replace("#COMPANY", ddrelatedtypeid.SelectedItem.Text)
+			If MainID = 0 Then
+				body = body.Replace("#UPDATE", "")
+			Else
+				body = body.Replace("#UPDATE", "(Updated)")
+			End If
+			body = body.Replace("#SALES", Session("UName"))
+			'Dim ds As DataSet = UserBLL.Email(Session("UserId"))
+            Dim email As String = UserBLL.Email(Session("UserId"))
+
+            If email <> "" Then
+                email = email + ",gufran@swissbake.co.in,farhan@swissbake.in"
+                SendMailBLL.SendMail(email, body.ToString, "Sample Request Received")
+            Else
+                SendMailBLL.SendMail("accounts@swissbake.in", body.ToString, "Sample Request Received")
+            End If
+			reader.Dispose()
+		Catch ex As Exception
+			Dim error1 As String = ex.Message.Replace(Chr(34), "")
+			error1 = error1.Replace(Chr(39), "")
+			'ExecptionBLL.Insert("ModifyQuotation", "btnadd_Click", error1, Session("UserId"))
+			ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+		End Try
+	End Sub
+	Protected Sub ddrelatedtype_TextChanged(sender As Object, e As EventArgs) Handles ddrelatedtype.TextChanged
+        Try
+            lbltypeid.Text = ddrelatedtype.SelectedValue
+            If (ddrelatedtype.SelectedValue = "Prospect") Then
+                Dim ds As DataSet
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                'If MainID = 0 Then
+                'ds = SampleBLL.DropdownWithtypeAndID1("AccountDropDowndomestic", "Prospect", Session("UserId"), ddQuotationType.SelectedValue)
+                ds = MainBLL.NewDropdownWithtypeAndID("AccountDropDowndomestic", "Prospect", Session("UserId"), ddQuotationType.SelectedValue)
+                'Else
+                '    ds = MainBLL.DropdownWithtype("EditAccountDropDown", "Prospect")
+                'End If
+                ddrelatedtypeid.DataSource = ds
+                ddrelatedtypeid.DataTextField = "Acc_Name"
+                ddrelatedtypeid.DataValueField = "Acc_Id"
+                ddrelatedtypeid.DataBind()
+                If ddrelatedtypeid.Items.Count >= 1 Then
+                Else
+                    ddrelatedtype.SelectedValue = "None"
+                    ddrelatedtypeid.DataSource = ""
+                    ddrelatedtypeid.DataBind()
+                    ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + ("No prospect found").ToString + "')", True)
+                End If
+
+            ElseIf (ddrelatedtype.SelectedValue = "Account") Then
+                Dim ds As DataSet
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                'If MainID = 0 Then
+                '                ds = SampleBLL.DropdownWithtypeAndID1("AccountDropDowndomestic", "Account", Session("UserId"), ddQuotationType.SelectedValue)
+                ds = MainBLL.NewDropdownWithtypeAndID("AccountDropDowndomestic", "Account", Session("UserId"), ddQuotationType.SelectedValue)
+                'Else
+                '    ds = MainBLL.DropdownWithtype("EditAccountDropDown", "Account")
+                'End If
+                ddrelatedtypeid.DataSource = ds
+                ddrelatedtypeid.DataTextField = "Acc_Name"
+                ddrelatedtypeid.DataValueField = "Acc_Id"
+                ddrelatedtypeid.DataBind()
+                If ddrelatedtypeid.Items.Count >= 1 Then
+                Else
+                    ddrelatedtype.SelectedValue = "None"
+                    ddrelatedtypeid.DataSource = ""
+                    ddrelatedtypeid.DataBind()
+                    ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + ("No account found").ToString + "')", True)
+                End If
+
+            ElseIf (ddrelatedtype.SelectedValue = "Lead") Then
+                Dim ds As DataSet
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                'If MainID = 0 Then
+                ds = SampleBLL.DropdownWithtypeAndID1("LeadDropDowndomestic", "Lead", Session("UserId"), ddQuotationType.SelectedValue)
+                'Else
+                '    ds = MainBLL.DropdownWithtype("EditAccountDropDown", "Lead")
+                'End If
+                ddrelatedtypeid.DataSource = ds
+                ddrelatedtypeid.DataTextField = "Lead_Name"
+                ddrelatedtypeid.DataValueField = "Lead_Id"
+                ddrelatedtypeid.DataBind()
+                If ddrelatedtypeid.Items.Count >= 1 Then
+                Else
+                    ddrelatedtype.SelectedValue = "None"
+                    ddrelatedtypeid.DataSource = ""
+                    ddrelatedtypeid.DataBind()
+                    ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + ("No account found").ToString + "')", True)
+                End If
+
+            ElseIf (ddrelatedtype.SelectedValue = "None") Then
+                ddrelatedtypeid.DataSource = ""
+                ddrelatedtypeid.DataBind()
+            End If
+            FillAddressInfo()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyQuotation", "ddrelatedtype_TextChanged", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub FillAddressInfo()
+        Dim ds As DataSet
+
+        If (ddrelatedtype.SelectedValue = "Lead") Then
+
+            ds = SampleBLL.FillBillingAddr("FillLeadBillingAddr", ddrelatedtypeid.SelectedValue)
+            txtaddressbill.Text = ds.Tables(0).Rows(0)("LeadAddress_Address")
+            txtpincodebill.Text = ds.Tables(0).Rows(0)("LeadAddress_Pincode")
+            ddlcountrybill.SelectedValue = ds.Tables(0).Rows(0)("LeadAddress_Country")
+            ddlcountrybill_SelectedIndexChanged(Nothing, Nothing)
+            ddlstatebill.SelectedValue = ds.Tables(0).Rows(0)("LeadAddress_State")
+            txtcitybill.Text = ds.Tables(0).Rows(0)("LeadAddress_City")
+        Else
+
+            ds = SampleBLL.FillBillingAddr("FillAccountBillingAddr", ddrelatedtypeid.SelectedValue)
+            txtaddressbill.Text = ds.Tables(0).Rows(0)("AccAddr_Address")
+            txtpincodebill.Text = ds.Tables(0).Rows(0)("AccAddr_Pincode")
+            ddlcountrybill.SelectedValue = ds.Tables(0).Rows(0)("AccAddr_Country")
+            ddlcountrybill_SelectedIndexChanged(Nothing, Nothing)
+            ddlstatebill.SelectedValue = ds.Tables(0).Rows(0)("AccAddr_State")
+            txtcitybill.Text = ds.Tables(0).Rows(0)("AccAddr_City")
+
+        End If
+
+
+    End Sub
+    Public Sub FillCountry()
+        Try
+            Dim ds As DataSet = MainBLL.Dropdown("CountryDropDown")
+            ddlcountrybill.DataSource = ds.Tables(0)
+            ddlcountrybill.DataTextField = "CountryName"
+            ddlcountrybill.DataValueField = "Id"
+            ddlcountrybill.DataBind()
+            ddlcountrybill.Items.Insert(0, New ListItem("Select Country", "0"))
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyLead", "FillCountry", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+    Public Sub FillStatebill()
+        Try
+            ddlstatebill.Items.Clear()
+            Dim ds As DataSet = MainBLL.DropdownWithname("StateDropDownbyname", ddlcountrybill.SelectedItem.Text)
+            ddlstatebill.DataSource = ds.Tables(0)
+            ddlstatebill.DataTextField = "StateName"
+            ddlstatebill.DataValueField = "Id"
+            ddlstatebill.DataBind()
+            ddlstatebill.Items.Insert(0, New ListItem("Select State", "0"))
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyLead", "FillStatebill", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+    Protected Sub ddlcountrybill_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddlcountrybill.SelectedIndexChanged
+        Try
+            FillStatebill()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyLead", "ddlcountrybill_SelectedIndexChanged", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub ddlcountrybill_TextChanged(sender As Object, e As EventArgs) Handles ddlcountrybill.TextChanged
+        Try
+            FillStatebill()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyLead", "ddlcountrybill_SelectedIndexChanged", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub FillDelCountry()
+        Try
+            Dim ds As DataSet = MainBLL.Dropdown("CountryDropDown")
+            ddlDelCountry.DataSource = ds.Tables(0)
+            ddlDelCountry.DataTextField = "CountryName"
+            ddlDelCountry.DataValueField = "Id"
+            ddlDelCountry.DataBind()
+            ddlDelCountry.Items.Insert(0, New ListItem("Select Country", "0"))
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyLead", "FillCountry", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+    Public Sub FillDelState()
+        Try
+            ddlDelState.Items.Clear()
+            Dim ds As DataSet = MainBLL.DropdownWithname("StateDropDownbyname", ddlDelCountry.SelectedItem.Text)
+            ddlDelState.DataSource = ds.Tables(0)
+            ddlDelState.DataTextField = "StateName"
+            ddlDelState.DataValueField = "Id"
+            ddlDelState.DataBind()
+            ddlDelState.Items.Insert(0, New ListItem("Select State", "0"))
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyLead", "FillStatebill", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+    Protected Sub ddlDelCountry_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddlDelCountry.SelectedIndexChanged
+        Try
+            FillDelState()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            'ExecptionBLL.Insert("ModifyLead", "ddlcountrybill_SelectedIndexChanged", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub ddrelatedtypeid_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddrelatedtypeid.SelectedIndexChanged
+        Try
+            FillAddressInfo()
+            Dim Chk As String = SampleBLL.CheckPageNameWithID(ddrelatedtype.SelectedValue, ddrelatedtypeid.SelectedValue, "ChkSampleReq")
+            If Chk = "Already Exist" Then
+                ddlPrevRequest.SelectedValue = "Yes"
+                ddlPrevRequest.Enabled = False
+            Else
+                ddlPrevRequest.SelectedValue = "No"
+                ddlPrevRequest.Enabled = True
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            'ExecptionBLL.Insert("ModifyLead", "ddlcountrybill_SelectedIndexChanged", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub FillDetail()
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            'Dim dt As DataSet = SampleBLL.ViewByID(MainID, "DispSampleRequest") 'due to emp id n user id MUBYN
+            Dim dt As DataSet = SampleBLL.ViewByID(MainID, "DispSampleRequestNew")
+            Dim dtUser As New DataTable
+            dtUser = dt.Tables(0)
+            Dim drLogin As DataRow
+            drLogin = dtUser.Rows(0)
+            lblmodifiedname.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("U_FirstName"))
+            lblmodifieddate.Text = DynamicparcelDataManipulation.DateFormat(drLogin("SampleRequest_ModifiedDate"))
+            txtRequestNo.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("SampleRequest_No"))
+            txtDate.Text = DynamicparcelDataManipulation.DateFormat(drLogin("SampleRequest_Date"))
+            ddrelatedtype.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("SampleRequest_Type"))
+            ddrelatedtype_TextChanged(Nothing, Nothing)
+            ddrelatedtypeid.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("SampleRequest_TypeId"))
+
+            FillAddressInfo()
+            '' opened by faisal above was comented
+            ddQuotationType.SelectedValue = "Domestic"
+            '  ddQuotationType.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin(""))
+            txtDelAddress.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("SamReqAddr_Address"))
+            txtDelPin.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("SamReqAddr_Pincode"))
+            ddlDelCountry.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("SamReqAddr_Country"))
+            ddlDelCountry_SelectedIndexChanged(Nothing, Nothing)
+            ddlDelState.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("SamReqAddr_State"))
+            txtDelCity.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("SamReqAddr_City"))
+            lblStatus.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("SampleRequest_SampleStatus"))
+
+            grdGPTravelling.DataSource = dt.Tables(1)
+            Session("ViewMode") = dt.Tables(1)
+            ViewState("GridRowItems") = dt.Tables(1)
+            grdGPTravelling.DataBind()
+
+            If lblStatus.Text = "Requested" Then
+                DisableEditMode()
+                DisableGrid()
+            ElseIf lblStatus.Text = "Approved" Then
+                DisableEdit()
+                DisableGrid()
+            ElseIf lblStatus.Text = "Authorized" Then
+                DisableEdit()
+                DisableGrid()
+            ElseIf lblStatus.Text = "Dispatched" Then
+                DisableEdit()
+                EnableGrid()
+            End If
+
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyQuotation", "FillDetail", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+    Public Sub DisableEditMode()
+        Try
+
+            txtRequestNo.Enabled = False
+            txtDate.Enabled = False
+            ddrelatedtype.Enabled = False
+            ddrelatedtypeid.Enabled = False
+            ddlPrevRequest.Enabled = False
+            txtaddressbill.Enabled = False
+            txtpincodebill.Enabled = False
+            ddlcountrybill.Enabled = False
+            ddlcountrybill.CssClass = "form-control"
+            ddlstatebill.Enabled = False
+            ddlstatebill.CssClass = "form-control"
+            txtcitybill.Enabled = False
+
+            'e.Row.RowType = DataControlRowType.DataRow Then
+            '   Try
+            'For i As Integer = 0 To grdGPTravelling.Rows.Count - 1
+            ''For Each Row As GridViewRow In Me.grdGPTravelling.Rows
+            ''    Dim ddlGridProductName As DropDownList = DirectCast(Row.FindControl("ddlGridProductName"), DropDownList)
+            ''    'Dim ddlGridProductName As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlGridProductName"), DropDownList)
+            ''    'Dim ddlQuantity As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlQuantity"), DropDownList)
+            ''    'Dim txtComment As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtComment"), TextBox)
+
+            ''    ddlGridProductName.Enabled = False
+            ''    'ddlQuantity.Enabled = False
+            ''    'txtComment.Enabled = False
+
+            ''Next
+            ' ''            Dim txtDesc As DropDownList
+            ' ''ddlGridProductName = (DropDownList)e.Item.FindControl("ddlGridProductName")
+            ' ''string val = txtDesc.Text
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ItemDetailControl", "fillUser", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub DisableEdit()
+        Try
+            txtRequestNo.Enabled = False
+            txtDate.Enabled = False
+            ddrelatedtype.Enabled = False
+            ddrelatedtypeid.Enabled = False
+            ddlPrevRequest.Enabled = False
+            txtaddressbill.Enabled = False
+            txtpincodebill.Enabled = False
+            ddlcountrybill.Enabled = False
+            ddlcountrybill.CssClass = "form-control"
+            ddlstatebill.Enabled = False
+            ddlstatebill.CssClass = "form-control"
+            txtcitybill.Enabled = False
+            txtDelAddress.Enabled = False
+            txtDelPin.Enabled = False
+            ddlDelCountry.Enabled = False
+            ddlDelCountry.CssClass = "form-control"
+            ddlDelState.Enabled = False
+            ddlDelState.CssClass = "form-control"
+            txtDelCity.Enabled = False
+            grdGPTravelling.Enabled = False
+            btnadd.Visible = False
+            Button1.Visible = False
+            'e.Row.RowType = DataControlRowType.DataRow Then
+            '   Try
+            'For i As Integer = 0 To grdGPTravelling.Rows.Count - 1
+            ''For Each Row As GridViewRow In Me.grdGPTravelling.Rows
+            ''    Dim ddlGridProductName As DropDownList = DirectCast(Row.FindControl("ddlGridProductName"), DropDownList)
+            ''    'Dim ddlGridProductName As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlGridProductName"), DropDownList)
+            ''    'Dim ddlQuantity As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlQuantity"), DropDownList)
+            ''    'Dim txtComment As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtComment"), TextBox)
+
+            ''    ddlGridProductName.Enabled = False
+            ''    'ddlQuantity.Enabled = False
+            ''    'txtComment.Enabled = False
+
+            ''Next
+            ' ''            Dim txtDesc As DropDownList
+            ' ''ddlGridProductName = (DropDownList)e.Item.FindControl("ddlGridProductName")
+            ' ''string val = txtDesc.Text
+            For i As Integer = 0 To grdGPTravelling.Rows.Count - 1
+                Dim ddlGridProductName As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlGridProductName"), DropDownList)
+                'Dim ddlQuantity As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlQuantity"), DropDownList)
+                Dim txtQuantity As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtQuantity"), TextBox)
+                Dim txtComment As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtComment"), TextBox)
+                Dim txtFeedback As TextBox = DirectCast(grdGPTravelling.Rows(i).FindControl("txtFeedback"), TextBox)
+                Dim ddlApproved As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlApproved"), DropDownList)
+                Dim ddlOrdered As DropDownList = DirectCast(grdGPTravelling.Rows(i).FindControl("ddlOrdered"), DropDownList)
+
+                ddlGridProductName.Enabled = False
+                'ddlQuantity.Enabled = False
+                txtQuantity.Enabled = False
+                txtComment.Enabled = True
+                txtFeedback.Enabled = True
+                'ddlQuantity.Enabled = False
+                ddlApproved.Enabled = True
+                ddlOrdered.Enabled = True
+            Next
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ItemDetailControl", "fillUser", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub hfcancel_Click(sender As Object, e As EventArgs) Handles hfcancel.Click
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            If Request.QueryString("returnurl") = "y" Then
+                ''    Response.Redirect("ViewQuotation.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID.ToString())) & "&Qtyp=" + HttpUtility.UrlEncode(Security.Encrypt((ddCurrency.SelectedValue).ToString())))
+            Else
+                Response.Redirect("SampleRequest.aspx")
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyLead", "hfcancel_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub ddQuotationType_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddQuotationType.SelectedIndexChanged
+        Try
+            If (ddQuotationType.SelectedValue = "Domestic") Then
+                Dim ds As DataSet
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                If MainID = 0 Then
+                    'ds = MainBLL.DropdownWithtypeAndID1("AccountDropDowndomestic", ddrelatedtype.SelectedValue, Session("UserId"), ddQuotationType.SelectedValue)
+                    ds = MainBLL.NewDropdownWithtypeAndID("AccountDropDowndomestic", ddrelatedtype.SelectedValue, Session("UserId"), ddQuotationType.SelectedValue)
+                Else
+                    ds = MainBLL.DropdownWithtype("EditAccountDropDown", ddQuotationType.SelectedValue)
+                End If
+                ddrelatedtypeid.DataSource = ds
+                ddrelatedtypeid.DataTextField = "Acc_Name"
+                ddrelatedtypeid.DataValueField = "Acc_Id"
+                ddrelatedtypeid.DataBind()
+                If ddrelatedtypeid.Items.Count >= 1 Then
+                Else
+                    ddrelatedtype.SelectedValue = "None"
+                    ddrelatedtypeid.DataSource = ""
+                    ddrelatedtypeid.DataBind()
+                    ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + ("No prospect found").ToString + "')", True)
+                End If
+
+                ViewState("OrderProduct") = Nothing
+                ''grditemproduct.DataSource = ""
+                ''grditemproduct.DataBind()
+
+                '' txtdispath.Text = ""
+            ElseIf (ddQuotationType.SelectedValue = "Export") Then
+                Dim ds As DataSet
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                If MainID = 0 Then
+                    'ds = MainBLL.DropdownWithtypeAndID1("AccountDropDowndomestic", ddrelatedtype.SelectedValue, Session("UserId"), ddQuotationType.SelectedValue)
+                    ds = MainBLL.NewDropdownWithtypeAndID("AccountDropDowndomestic", ddrelatedtype.SelectedValue, Session("UserId"), ddQuotationType.SelectedValue)
+                Else
+                    ds = MainBLL.DropdownWithtype("EditAccountDropDown", ddQuotationType.SelectedValue)
+                End If
+                ddrelatedtypeid.DataSource = ds
+                ddrelatedtypeid.DataTextField = "Acc_Name"
+                ddrelatedtypeid.DataValueField = "Acc_Id"
+                ddrelatedtypeid.DataBind()
+                If ddrelatedtypeid.Items.Count >= 1 Then
+                Else
+                    ddrelatedtype.SelectedValue = "None"
+                    ddrelatedtypeid.DataSource = ""
+                    ddrelatedtypeid.DataBind()
+                    ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + ("No account found").ToString + "')", True)
+                End If
+
+                ViewState("OrderProduct") = Nothing
+                ''grditemproduct.DataSource = ""
+                ''grditemproduct.DataBind()
+
+                '' txtdispath.Text = "Transport Agent"
+                '' ddModeOfTransport_SelectedIndexChanged(ddModeOfTransport, New EventArgs())
+
+
+            ElseIf (ddrelatedtype.SelectedValue = "None") Then
+                ddrelatedtypeid.DataSource = ""
+                ddrelatedtypeid.DataBind()
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyQuotation", "ddrelatedtype_TextChanged", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub GridView1_Sorting(sender As Object, e As GridViewSortEventArgs)
+        SetSortDirection(SortDireaction)
+        Try
+            Dim dt As DataSet = QuotationBLL.SortingQuotationByAssignmq(Session("UserId"))
+            Dim DataTable As DataTable = dt.Tables(0)
+            If DataTable IsNot Nothing Then
+                DataTable.DefaultView.Sort = Convert.ToString(e.SortExpression) & " " & _sortDirection
+                ''GridView1.DataSource = DataTable
+                ''GridView1.DataBind()
+                SortDireaction = _sortDirection
+                Dim columnIndex As Integer = 0
+                ''For Each headerCell As DataControlFieldHeaderCell In GridView1.HeaderRow.Cells
+                ''    If headerCell.ContainingField.SortExpression = e.SortExpression Then
+                ''        columnIndex = GridView1.HeaderRow.Cells.GetCellIndex(headerCell)
+                ''    End If
+                ''Next
+                ''  GridView1.HeaderRow.Cells(columnIndex).Controls.Add(sortImage)
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("Quotation", "GridView1_Sorting", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub grdGPTravelling_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles grdGPTravelling.RowCommand
+        Try
+            Flag = 0
+            If e.CommandName = "AddNewRowTravel" Then
+                TravellAddNewRow()
+                If grdGPTravelling.Rows.Count > 3 Then
+                    Dim lnkadd As LinkButton = DirectCast(grdGPTravelling.FooterRow.FindControl("lnkadd"), LinkButton)
+                    lnkadd.Visible = False
+                Else
+                    Dim lnkadd As LinkButton = DirectCast(grdGPTravelling.FooterRow.FindControl("lnkadd"), LinkButton)
+                    lnkadd.Visible = True
+                End If
+
+            ElseIf e.CommandName = "deletelinkTravel" Then
+                'Dim dt As DataTable = Session("ViewMode")
+                SetPreviousData()
+                If ViewState("GridRowItems") IsNot Nothing Then
+                    'If ViewState("CurrentTable4") IsNot Nothing Then
+                    'Dim dt As DataTable = DirectCast(ViewState("CurrentTable4"), DataTable)
+
+                    'Dim index As Integer = Convert.ToInt32(e.RowIndex)
+                    'Dim dt As DataTable = TryCast(ViewState("dt"), DataTable)
+                    'dt.Rows(index).Delete()
+                    'ViewState("dt") = dt
+                    'BindGrid()
+
+                    Dim dt As DataTable = DirectCast(ViewState("GridRowItems"), DataTable)
+                    Dim drCurrentRow As DataRow = Nothing
+                    Dim rowIndex As Integer = Convert.ToInt32(e.CommandArgument)
+                    If dt.Rows.Count > 0 Then
+                        dt.Rows.Remove(dt.Rows(rowIndex))
+                        drCurrentRow = dt.NewRow()
+                        'ViewState("CurrentTable4") = dt
+                        ViewState("GridRowItems") = dt
+                        Flag = rowIndex
+                        ' TravellDeleteRow()
+
+                        grdGPTravelling.DataSource = dt
+                        grdGPTravelling.DataBind()
+
+                        If grdGPTravelling.Rows.Count <= 1 Then
+                            Dim lnkdelete As LinkButton = DirectCast(grdGPTravelling.Rows(0).FindControl("lnkdelete"), LinkButton)
+                            lnkdelete.Visible = False
+                        Else
+                            For i As Integer = 0 To grdGPTravelling.Rows.Count - 1
+                                Dim lnkdelete As LinkButton = DirectCast(grdGPTravelling.Rows(i).FindControl("lnkdelete"), LinkButton)
+                                lnkdelete.Visible = True
+                            Next
+                        End If
+                        For i As Integer = 0 To grdGPTravelling.Rows.Count - 2
+                            grdGPTravelling.Rows(i).Cells(0).Text = Convert.ToString(i + 1)
+                        Next
+
+
+                    End If
+                End If
+                SetPreviousData()
+            End If
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+
+        End Try
+    End Sub
+    Private Sub TravellAddNewRow()
+
+        Try
+
+            Dim rowIndex As Integer = 0
+
+            If ViewState("GridRowItems") IsNot Nothing Then
+                'If ViewState("CurrentTable4") IsNot Nothing Then
+                '    Dim dtCurrentTable As DataTable = DirectCast(ViewState("CurrentTable4"), DataTable)
+                Dim dtCurrentTable As DataTable = DirectCast(ViewState("GridRowItems"), DataTable)
+                Dim drCurrentRow As DataRow = Nothing
+                If dtCurrentTable.Rows.Count > 0 Then
+                    For i As Integer = 1 To dtCurrentTable.Rows.Count
+                        Dim ddlGridProductName As DropDownList = DirectCast(grdGPTravelling.Rows(rowIndex).FindControl("ddlGridProductName"), DropDownList)
+                        'Dim txtProductCode As TextBox = DirectCast(grdGPTravelling.Rows(rowIndex).FindControl("txtProductCode"), TextBox)
+                        'Dim ddlQuantity As DropDownList = DirectCast(grdGPTravelling.Rows(rowIndex).FindControl("ddlQuantity"), DropDownList)
+                        Dim txtQuantity As TextBox = DirectCast(grdGPTravelling.Rows(rowIndex).FindControl("txtQuantity"), TextBox)
+                        Dim txtComment As TextBox = DirectCast(grdGPTravelling.Rows(rowIndex).FindControl("txtComment"), TextBox)
+                        Dim txtFeedback As TextBox = DirectCast(grdGPTravelling.Rows(rowIndex).FindControl("txtFeedback"), TextBox)
+                        Dim ddlApproved As DropDownList = DirectCast(grdGPTravelling.Rows(rowIndex).FindControl("ddlApproved"), DropDownList)
+                        Dim ddlOrdered As DropDownList = DirectCast(grdGPTravelling.Rows(rowIndex).FindControl("ddlOrdered"), DropDownList)
+                        Dim btnComplaint As Button = DirectCast(grdGPTravelling.Rows(rowIndex).FindControl("btnComplaint"), Button)
+                        Dim approved, Ordered As Boolean
+
+                        If ddlApproved.SelectedValue = 0 Then
+                            approved = False
+                        Else
+                            approved = True
+                        End If
+
+                        If ddlApproved.SelectedValue = 0 Then
+                            Ordered = False
+                        Else
+                            Ordered = True
+                        End If
+
+                        drCurrentRow = dtCurrentTable.NewRow()
+                        ' ''drCurrentRow("RowNumber") = i + 1
+                        drCurrentRow("RowNumber") = grdGPTravelling.Rows.Count + 1
+                        dtCurrentTable.Rows(i - 1)("SampleRequestDetail_ProductId") = ddlGridProductName.SelectedValue
+                        'dtCurrentTable.Rows(i - 1)("Product_Code") = txtProductCode.Text
+                        'dtCurrentTable.Rows(i - 1)("SampleRequestDetail_ProductQnty") = ddlQuantity.SelectedValue
+                        dtCurrentTable.Rows(i - 1)("SampleRequestDetail_ProductQnty") = txtQuantity.Text
+                        dtCurrentTable.Rows(i - 1)("SampleRequestDetail_Remark") = txtComment.Text
+                        dtCurrentTable.Rows(i - 1)("SampleRequestDetail_Feedback") = txtFeedback.Text
+                        dtCurrentTable.Rows(i - 1)("SampleRequestDetail_Approved") = approved
+                        dtCurrentTable.Rows(i - 1)("SampleRequestDetail_Ordered") = Ordered
+
+                        ''If txtArrival.Text <> Nothing Then  'And txtDeparture.Text <> Nothing 
+
+                        ''    dtCurrentTable.Rows(i - 1)("GroupTravelling_StartDate") = txtArrival.Text
+                        ''    'dtCurrentTable.Rows(i - 1)("GroupTravelling_EndDate") = txtDeparture.Text
+                        ''    '' dtCurrentTable.Rows(i - 1)("GroupTravelling_EndDate") = CommonFunctionDataManipulation.DateFormat1(Date.Now.ToString("yyyy/MM/dd"))
+                        ''Else
+                        ''    ''  dtCurrentTable.Rows(i - 1)("GroupTravelling_StartDate") = CommonFunctionDataManipulation.DateFormat1(Date.Now.ToString("yyyy/MM/dd"))
+                        ''    ''  dtCurrentTable.Rows(i - 1)("GroupTravelling_EndDate") = CommonFunctionDataManipulation.DateFormat1(Date.Now.ToString("yyyy/MM/dd"))
+                        ''End If
+
+                        rowIndex += 1
+                    Next
+                    dtCurrentTable.Rows.Add(drCurrentRow)
+                    ViewState("GridRowItems") = dtCurrentTable
+                    'ViewState("CurrentTable4") = dtCurrentTable
+
+                    grdGPTravelling.DataSource = dtCurrentTable
+                    grdGPTravelling.DataBind()
+                End If
+
+            End If
+            ' TravelSetPreviousData()
+            SetPreviousData()
+        Catch ex As Exception
+
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("UserId"))
+            Throw ex
+
+        End Try
+    End Sub
+
+    Private Sub TravellingFirstRow()
+
+        Try
+            'hfFirst.Value = 1
+            Dim dt As New DataTable()
+            Dim dr As DataRow = Nothing
+            dt.Columns.Add(New DataColumn("RowNumber", GetType(String)))
+            dt.Columns.Add(New DataColumn("SampleRequestDetail_ProductId", GetType(String)))
+            'dt.Columns.Add(New DataColumn("Product_Code", GetType(String)))
+            dt.Columns.Add(New DataColumn("SampleRequestDetail_ProductQnty", GetType(String)))
+            dt.Columns.Add(New DataColumn("SampleRequestDetail_Remark", GetType(String)))
+            dt.Columns.Add(New DataColumn("SampleRequestDetail_Feedback", GetType(String)))
+            dt.Columns.Add(New DataColumn("SampleRequestDetail_Approved", GetType(String)))
+            dt.Columns.Add(New DataColumn("SampleRequestDetail_Ordered", GetType(String)))
+
+            dr = dt.NewRow()
+            dr("RowNumber") = 1
+            dr("SampleRequestDetail_ProductId") = String.Empty
+            'dr("Product_Code") = String.Empty
+            dr("SampleRequestDetail_ProductQnty") = String.Empty
+            dr("SampleRequestDetail_Remark") = String.Empty
+            dr("SampleRequestDetail_Feedback") = String.Empty
+            dr("SampleRequestDetail_Approved") = String.Empty
+            dr("SampleRequestDetail_Ordered") = String.Empty
+
+            dt.Rows.Add(dr)
+            ViewState("GridRowItems") = dt
+            'ViewState("CurrentTable4") = dt
+
+
+            grdGPTravelling.DataSource = dt
+            grdGPTravelling.DataBind()
+            Dim lnkdelete As LinkButton = DirectCast(grdGPTravelling.Rows(0).FindControl("lnkdelete"), LinkButton)
+            lnkdelete.Visible = False
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("UserId"))
+        End Try
+    End Sub
+
+    Private Sub SetPreviousData()
+        Try
+            Dim rowIndex As Integer = 0
+            If ViewState("GridRowItems") IsNot Nothing Then
+                Dim dt As DataTable = DirectCast(ViewState("GridRowItems"), DataTable)
+                Dim dtCurrentTable As DataTable = DirectCast(ViewState("GridRowItems"), DataTable)
+                Dim drCurrentRow As DataRow = Nothing
+                If dt.Rows.Count > 0 Then
+                    For i As Integer = 0 To dt.Rows.Count - 1
+
+                        Dim ddlGridProductName As DropDownList = DirectCast(grdGPTravelling.Rows(rowIndex).Cells(0).FindControl("ddlGridProductName"), DropDownList)
+                        Dim txtQuantity As TextBox = DirectCast(grdGPTravelling.Rows(rowIndex).Cells(0).FindControl("txtQuantity"), TextBox)
+                        Dim ddlApproved As DropDownList = DirectCast(grdGPTravelling.Rows(rowIndex).Cells(0).FindControl("ddlApproved"), DropDownList)
+                        Dim ddlOrdered As DropDownList = DirectCast(grdGPTravelling.Rows(rowIndex).Cells(0).FindControl("ddlOrdered"), DropDownList)
+                        Dim ltSampleRequestDetail_ProductId As Literal = DirectCast(grdGPTravelling.Rows(rowIndex).Cells(0).FindControl("ltSampleRequestDetail_ProductId"), Literal)
+                        Dim ltQuantity As Literal = DirectCast(grdGPTravelling.Rows(rowIndex).Cells(0).FindControl("ltQuantity"), Literal)
+                        Dim ltApproved As Literal = DirectCast(grdGPTravelling.Rows(rowIndex).Cells(0).FindControl("ltApproved"), Literal)
+                        Dim ltOrdered As Literal = DirectCast(grdGPTravelling.Rows(rowIndex).Cells(0).FindControl("ltOrdered"), Literal)
+                        Dim txtComment As TextBox = DirectCast(grdGPTravelling.Rows(rowIndex).Cells(0).FindControl("txtComment"), TextBox)
+                        Dim txtFeedback As TextBox = DirectCast(grdGPTravelling.Rows(rowIndex).Cells(0).FindControl("txtFeedback"), TextBox)
+                        grdGPTravelling.Rows(i).Cells(0).Text = Convert.ToString(i + 1)
+                        Dim approved, Ordered As String
+                        If ddlApproved.SelectedValue = 0 Then
+                            approved = False
+                        Else
+                            approved = True
+                        End If
+
+                        If ddlApproved.SelectedValue = 0 Then
+                            Ordered = False
+                        Else
+                            Ordered = True
+                        End If
+
+                     
+                        'drCurrentRow = dt.NewRow()
+                        'drCurrentRow("RowNumber") = i + 1
+                        dt.Rows(i)("RowNumber") = i + 1
+                        dt.Rows(i)("SampleRequestDetail_ProductId") = ddlGridProductName.SelectedValue
+                        dt.Rows(i)("SampleRequestDetail_ProductQnty") = txtQuantity.Text
+                        dt.Rows(i)("SampleRequestDetail_Remark") = txtComment.Text
+                        dt.Rows(i)("SampleRequestDetail_Feedback") = txtFeedback.Text
+                        dt.Rows(i)("SampleRequestDetail_Approved") = approved
+                        dt.Rows(i)("SampleRequestDetail_Ordered") = Ordered
+
+                        ddlGridProductName.SelectedValue = dt.Rows(i)("SampleRequestDetail_ProductId").ToString
+                        txtQuantity.Text = dt.Rows(i)("SampleRequestDetail_ProductQnty").ToString
+                        txtComment.Text = dt.Rows(i)("SampleRequestDetail_Remark").ToString
+                        txtFeedback.Text = dt.Rows(i)("SampleRequestDetail_Feedback").ToString
+                        Ordered = dt.Rows(i)("SampleRequestDetail_Ordered").ToString
+                        approved = dt.Rows(i)("SampleRequestDetail_Approved").ToString
+                        rowIndex += 1
+
+                        grdGPTravelling.Rows(i).Cells(0).Text = Convert.ToString(i + 1)
+
+                        If i < dt.Rows.Count - 1 Then
+                            ddlGridProductName.Enabled = False
+                        End If
+                    Next
+
+                End If
+                'If dt.Rows.Count = 1 Then
+                '    Dim btn1 As LinkButton = DirectCast(GridView1.Rows(0).FindControl("lnkdelete"), LinkButton)
+                '    btn1.Visible = False
+                'End If
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("UserId"))
+
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub grdGPTravelling_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles grdGPTravelling.RowDataBound
+
+        Try
+            If e.Row.RowType = DataControlRowType.DataRow Then
+                Dim ddlGridProductName As DropDownList = DirectCast(e.Row.FindControl("ddlGridProductName"), DropDownList)
+                'Dim ddlQuantity As DropDownList = DirectCast(e.Row.FindControl("ddlQuantity"), DropDownList)
+                Dim txtQuantity As TextBox = DirectCast(e.Row.FindControl("txtQuantity"), TextBox)
+                Dim ddlApproved As DropDownList = DirectCast(e.Row.FindControl("ddlApproved"), DropDownList)
+                Dim ddlOrdered As DropDownList = DirectCast(e.Row.FindControl("ddlOrdered"), DropDownList)
+                Dim ltSampleRequestDetail_ProductId As Literal = DirectCast(e.Row.FindControl("ltSampleRequestDetail_ProductId"), Literal)
+                Dim ltQuantity As Literal = DirectCast(e.Row.FindControl("ltQuantity"), Literal)
+                Dim ltApproved As Literal = DirectCast(e.Row.FindControl("ltApproved"), Literal)
+                Dim ltOrdered As Literal = DirectCast(e.Row.FindControl("ltOrdered"), Literal)
+
+                '//////////////////
+
+                Dim DTProd As DataTable = SampleBLL.Dropdown("ProductDropDown").Tables(0)
+                ddlGridProductName.DataSource = DTProd
+                ''ddlGridProductName.DataSource = SampleBLL.Dropdown("ProductDropDown")
+                ddlGridProductName.DataTextField = "Product_Name"
+                ddlGridProductName.DataValueField = "Product_Id"
+                ddlGridProductName.DataBind()
+
+                For x As Integer = 0 To grdGPTravelling.Rows.Count - 1 'MUBYN
+                    Dim ddRM1 As Literal = TryCast(grdGPTravelling.Rows(x).FindControl("ltSampleRequestDetail_ProductId"), Literal)
+                    ddlGridProductName.Items.Remove(ddlGridProductName.Items.FindByValue(ddRM1.Text))
+                    Dim ddlGridProductNamePrev As DropDownList = TryCast(grdGPTravelling.Rows(x).FindControl("ddlGridProductName"), DropDownList)
+                    ddlGridProductNamePrev.Enabled = False
+                Next
+                '//////////////////
+
+                ''''ddlGridProductName.SelectedValue = ltSampleRequestDetail_ProductId.Text
+                ddlGridProductName.Items.Insert(0, New ListItem("Select Product", "0"))
+                ddlGridProductName.SelectedValue = ltSampleRequestDetail_ProductId.Text
+                'ddlQuantity.SelectedValue = ltQuantity.Text
+                txtQuantity.Text = ltQuantity.Text
+                If ltApproved.Text = "True" Then
+                    ddlApproved.SelectedValue = 1
+                Else
+                    ddlApproved.SelectedValue = 0
+                End If
+                If ltOrdered.Text = "True" Then
+                    ddlOrdered.SelectedValue = 1
+                Else
+                    ddlOrdered.SelectedValue = 0
+                End If
+            End If
+
+        Catch ex As Exception
+            Dim errorMsg As String = ex.Message.Replace(Chr(34), "")
+            errorMsg = errorMsg.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, errorMsg, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (errorMsg.ToString).ToString + "')", True)
+        End Try
+
+        'dtCurrentTable.Rows.Add(drCurrentRow)
+        'ViewState("CurrentTable4") = dtCurrentTable
+        'grdGPTravelling.DataSource = dtCurrentTable
+        'grdGPTravelling.DataBind()
+        'grdGPTravelling.DataBind()
+        ' dt.Rows.Add(dr)
+    End Sub
+    Sub AtLeastOneContact_ServerValidate(ByVal source As Object, ByVal args As System.Web.UI.WebControls.ServerValidateEventArgs)
+        If txtemail.Text & txtofficeno.Text & txtmob.Text <> "" Then
+            args.IsValid = True
+        Else
+            args.IsValid = False
+        End If
+    End Sub
+    Protected Sub btnsavePop_Click(sender As Object, e As EventArgs) Handles btnsavePop.Click
+        Try
+            SaveProduct()
+            'Response.Redirect(Request.RawUrl)
+            'ddrelatedtype.SelectedValue = "Lead"
+            'ddrelatedtypeid.SelectedValue=
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("Lead", "btnsavePop_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Private Sub SaveProduct()
+        Try
+            MainID = LeadBLL.QuickLeadInsert(txtleaddate.Text.Trim, txtleadname.Text.Trim, 1, Session("UserId"), Session("UserId"), Session("Audlog_Id"), ddlLeadCategory.SelectedValue, "")
+            Session("relatedtypeid") = MainID
+            LeadContactBLL.QuickInsert(txtname.Text.Trim, txtemail.Text.Trim, txtmob.Text.Trim, txtofficeno.Text.Trim, txtextention.Text.Trim, Session("UserId"), MainID, Session("Audlog_Id"), True, 1)
+            LeadAddressBLL.Insert("", "", 0, 105, "", Session("UserId"), MainID, "Billing", Session("Audlog_Id"))
+            Dim count As Integer = 0
+            count = AssignToBLL.MaxAssignTo
+            Dim sb As New StringBuilder
+            sb.Append("<root>")
+            sb.Append("<row Assignto_ID='" & count.ToString & "' Assignto_UserID='" & Session("UserId") &
+                     "' Assignto_Type='" & "Lead" & "' Assignto_TypeID='" & MainId & "' Assignto_CreatedID='" & Session("UserId") &
+                     "' Assignto_CreatedDate='" & DateAndTime.DateString & "' Assignto_ModifiedID='" & Session("UserId") & "' Assignto_ModifiedDate='" & DateAndTime.DateString &
+                      "' Assignto_Del='0' Assignto_Status='Active' />")
+            count = count + 1
+            sb.Append("</root>")
+            AssignToBLL.XMLInsert(sb.ToString, Session("Audlog_Id"), "Lead")
+            'GridView1.PageIndex = GridView1.PageIndex
+            'dLead()
+            mpe.Hide()
+            ddrelatedtype.SelectedValue = "Lead"
+            ddrelatedtype_TextChanged(Nothing, Nothing)
+
+            ddrelatedtypeid.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(Session("relatedtypeid"))
+            FillAddressInfo()
+            'ddrelatedtypeid.SelectedIndex = (MainID)
+            'Response.Redirect("ViewLead.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainId.ToString())))
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("Lead", "SaveProduct", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+    'Protected Sub Activity()
+    '	Try
+
+
+
+    '		'Dim txtduedate As TextBox
+    '		'Dim txtreminderdate As TextBox
+    '		'Dim txtstarttime As TextBox
+    '		'Dim txtremindertime As TextBox
+    '		'Dim txtendtime As TextBox
+    '		'txtduedate.Text = Date.Now.Date.ToString("yyyy-MM-dd")
+
+
+    '		'If String.IsNullOrEmpty(txtDate.Text) Then
+    '		'    txtDate.Text = Date.Now.Date.ToString("yyyy-MM-dd")
+    '		'End If
+
+
+    '		'txtreminderdate.Text = Date.Now.Date.ToString("yyyy-MM-dd")
+
+
+    '		'txtstarttime.Text = Date.Now.ToString("H:mm:ss")
+
+
+    '		'txtremindertime.Text = Date.Now.ToString("H:mm:ss")
+
+
+    '		'txtendtime.Text = Date.Now.Add(New TimeSpan(0, 1, 0)).ToString("H:mm:ss")
+
+    '		'FormDate = txtDate.Text.Trim
+    '		'FromTime = txtstarttime.Text.Trim
+    '		'FromDateTime = Convert.ToDateTime(FormDate + " " + FromTime)
+    '		'ReminderDate = txtreminderdate.Text.Trim
+    '		'Remindertime = txtremindertime.Text.Trim
+    '		'Reminderdatetime = Convert.ToDateTime(ReminderDate + " " + Remindertime)
+    '		'toDate = txtDate.Text.Trim
+    '		'Toime = txtendtime.Text
+    '		'ToDateTime = Convert.ToDateTime(toDate + " " + Toime)
+
+    '		'Reminder = 1
+
+    '		'MainID = ActivityBLL.InsertFullTask("Admin", "Order Follow Up", "Not Started", txtduedate.Text.Trim,
+    '		'"Task", ddrelatedtype.SelectedValue, ddrelatedtypeid.SelectedValue, "None", 0,
+    '		'"High", Session("Audlog_Id"), "Sample Reaquest", "", Session("UserId"), FromDateTime, ToDateTime, Reminder, Reminderdatetime)
+    '		'assigncontrol.AddAssignTo(MainID)
+    '		'If ddrelatedtype.SelectedValue = "Lead" Then
+    '		'    LeadBLL.UpdateLeadStage(drelatedtypeid.SelectedValue, 12)
+    '		'End If
+    '	Catch ex As Exception
+    '		Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '		error1 = error1.Replace(Chr(39), "")
+    '		ExecptionBLL.Insert("Lead", "SaveProduct", error1, Session("UserId"))
+    '		'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '		Throw ex
+    '	End Try
+    'End Sub
+    Protected Sub Page_PreInit(sender As Object, e As EventArgs) Handles Me.PreInit
+        'Default Private Property Item(ByVal Optional  As MasterPageFile = "~/MasterPage2.master") 
+        Dim host As String = HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) ' HttpContext.Current.Request.Url.Host
+        ' Dim url As String
+
+        If host = "http://mcrm.swissbake.ch" Then
+            Me.MasterPageFile = "MCRMMaster.master"
+
+        End If
+
+    End Sub
+End Class

@@ -1,0 +1,578 @@
+﻿Imports System.Drawing
+
+Partial Class Lead
+    Inherits _PageBaseClass
+    Private MainId As Integer
+    Private Type As String
+    Dim Query As String
+    Dim ModuleName As String
+    Dim strNames As New List(Of String)
+    Dim sb As New StringBuilder
+    Dim Count As Integer = 0
+
+    Protected Sub Page_Init(sender As Object, e As EventArgs) Handles Me.Init
+        If Session("UserId") = Nothing Then
+            TryCast(Me.Master, MainPage).MaintainSession()
+        End If
+    End Sub
+
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        Try
+            ''SearchControl.ULkadd.Visible = True
+            'SearchControl.ULkadd.Text = "Quick Add"
+            'SearchControl.Uhfadd.NavigateUrl = Page.ResolveUrl("ModifyLead.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0)) + "&returnurl=y")
+            If Not IsPostBack Then
+                'fillGlobalSearch()
+                GridView1.AllowCustomPaging = True
+                'Hfgridview.Value = "LeadGridviewByAssign"
+                'hfsearch.Value = "SearchLeadByAssign"
+                'hftotalrecord.Value = "LeadTotalNumberOfRecord"
+                fillLead()
+                CheckPrivilage()
+                'Above Line For Passing Mode In Search Lead Control
+                '    SearchControl.Uhfgridviewmode.Value = "LeadGridviewByAssign"
+                '    SearchControl.Uhfsearchmode.Value = "SearchLeadByAssign"
+                'SearchControl.Uhftotalcount.Value = "LeadTotalNumberOfRecord"
+            End If
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("Lead", "Page_Load", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    ''------------Global Search------------
+
+    'Protected Sub btnadd_Click(sender As Object, e As EventArgs) Handles btnadd.Click
+    '    Try
+    '        GridView1.AllowCustomPaging = False
+    '        If txttop.Text = "" Then
+    '            sb.Append(hfquery.Value + " Where ")
+    '        Else
+    '            txttop.Text = txttop.Text.Replace(".", "")
+    '            hftopquery.Value = hfquery.Value
+    '            hftopquery.Value = hftopquery.Value.Replace("SELECT distinct ", "Select Top " + txttop.Text + " ")
+    '            sb.Append(hftopquery.Value + " Where ")
+    '        End If
+    '        Count = 1
+    '        For i As Integer = 0 To rpsearch.Items.Count - 1
+    '            Dim hfcoloumname As HiddenField = CType(rpsearch.Items(i).FindControl("hfcoloumname"), HiddenField)
+    '            Dim hflogoperator As HiddenField = CType(rpsearch.Items(i).FindControl("hflogoperator"), HiddenField)
+    '            Dim hfoperator As HiddenField = CType(rpsearch.Items(i).FindControl("hfoperator"), HiddenField)
+    '            Dim hfdatatype As HiddenField = CType(rpsearch.Items(i).FindControl("hfdatatype"), HiddenField)
+    '            Dim txtsearch As TextBox = CType(rpsearch.Items(i).FindControl("txtsearch"), TextBox)
+    '            Dim txtstart As TextBox = CType(rpsearch.Items(i).FindControl("txtstart"), TextBox)
+    '            Dim txtend As TextBox = CType(rpsearch.Items(i).FindControl("txtend"), TextBox)
+    '            If (txtsearch.Text = "") Then
+    '                If (txtend.Text = "" And txtstart.Text = "") Then
+    '                Else
+    '                    If i = 0 Then
+    '                        If (hfoperator.Value = "like") Then
+    '                            sb.Append(hfcoloumname.Value + " LIKE '%" & txtsearch.Text & "%' ")
+    '                            Count = Count + 1
+    '                        ElseIf (hfoperator.Value = "BETWEEN") Then
+    '                            sb.Append(hfcoloumname.Value + " " + hfoperator.Value + " '" + txtstart.Text + "' " + " And " + " '" + txtend.Text + "' ")
+    '                            Count = Count + 1
+    '                        ElseIf (hfoperator.Value = "<") Then
+    '                            sb.Append(hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        ElseIf (hfoperator.Value = ">") Then
+    '                            sb.Append(hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        ElseIf (hfoperator.Value = "<>") Then
+    '                            sb.Append(hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        ElseIf (hfoperator.Value = "=") Then
+    '                            sb.Append(hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        End If
+    '                    Else
+    '                        If (hfoperator.Value = "like") Then
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " LIKE '%" & txtsearch.Text & "%' ")
+    '                            Count = Count + 1
+    '                        ElseIf (hfoperator.Value = "BETWEEN") Then
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " " + hfoperator.Value + " '" + txtstart.Text + "' " + " And " + " '" + txtend.Text + "' ")
+    '                            Count = Count + 1
+    '                        ElseIf (hfoperator.Value = "<") Then
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        ElseIf (hfoperator.Value = ">") Then
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        ElseIf (hfoperator.Value = "<>") Then
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        ElseIf (hfoperator.Value = "=") Then
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        End If
+    '                    End If
+    '                End If
+    '            Else
+    '                If i = 0 Then
+    '                    If (hfoperator.Value = "like") Then
+    '                        sb.Append(hfcoloumname.Value + " LIKE '%" & txtsearch.Text & "%' ")
+    '                        Count = Count + 1
+    '                    ElseIf (hfoperator.Value = "BETWEEN") Then
+    '                        sb.Append(hfcoloumname.Value + " " + hfoperator.Value + " '" + txtstart.Text + "' " + " And " + " '" + txtend.Text + "' ")
+    '                        Count = Count + 1
+    '                    ElseIf (hfoperator.Value = "<") Then
+    '                        sb.Append(hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                        Count = Count + 1
+    '                    ElseIf (hfoperator.Value = ">") Then
+    '                        sb.Append(hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                        Count = Count + 1
+    '                    ElseIf (hfoperator.Value = "<>") Then
+    '                        sb.Append(hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                        Count = Count + 1
+    '                    ElseIf (hfoperator.Value = "=") Then
+    '                        sb.Append(hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                        Count = Count + 1
+    '                    End If
+    '                Else
+    '                    If (hfoperator.Value = "like") Then
+    '                        If hfdatatype.Value = "datetime" Then
+    '                            sb.Append(hflogoperator.Value + " " + "CONVERT(VARCHAR(10), " + hfcoloumname.Value + ", 105)" + " LIKE '%" & CDate(txtsearch.Text).ToString("dd-MM-yyyy") & "%' ")
+    '                            Count = Count + 1
+    '                        Else
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " LIKE '%" & txtsearch.Text & "%' ")
+    '                            Count = Count + 1
+    '                        End If
+
+    '                    ElseIf (hfoperator.Value = "BETWEEN") Then
+    '                        If hfdatatype.Value = "datetime" Then
+    '                            sb.Append(hflogoperator.Value + " " + "CONVERT(VARCHAR(10), " + hfcoloumname.Value + ", 105)" + " LIKE '%" & CDate(txtsearch.Text).ToString("dd-MM-yyyy") & "%' ")
+    '                            Count = Count + 1
+    '                        Else
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " " + hfoperator.Value + " '" + txtstart.Text + "' " + " And " + " '" + txtend.Text + "' ")
+    '                            Count = Count + 1
+    '                        End If
+    '                    ElseIf (hfoperator.Value = "<") Then
+    '                        If hfdatatype.Value = "datetime" Then
+    '                            sb.Append(hflogoperator.Value + " " + "CONVERT(VARCHAR(10), " + hfcoloumname.Value + ", 105)" + " LIKE '%" & CDate(txtsearch.Text).ToString("dd-MM-yyyy") & "%' ")
+    '                            Count = Count + 1
+    '                        Else
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        End If
+    '                    ElseIf (hfoperator.Value = ">") Then
+    '                        If hfdatatype.Value = "datetime" Then
+    '                            sb.Append(hflogoperator.Value + " " + "CONVERT(VARCHAR(10), " + hfcoloumname.Value + ", 105)" + " LIKE '%" & CDate(txtsearch.Text).ToString("dd-MM-yyyy") & "%' ")
+    '                            Count = Count + 1
+    '                        Else
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        End If
+    '                    ElseIf (hfoperator.Value = "<>") Then
+    '                        If hfdatatype.Value = "datetime" Then
+    '                            sb.Append(hflogoperator.Value + " " + "CONVERT(VARCHAR(10), " + hfcoloumname.Value + ", 105)" + " LIKE '%" & CDate(txtsearch.Text).ToString("dd-MM-yyyy") & "%' ")
+    '                            Count = Count + 1
+    '                        Else
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        End If
+    '                    ElseIf (hfoperator.Value = "=") Then
+    '                        If hfdatatype.Value = "datetime" Then
+    '                            sb.Append(hflogoperator.Value + " " + "CONVERT(VARCHAR(10), " + hfcoloumname.Value + ", 105)" + " LIKE '%" & CDate(txtsearch.Text).ToString("dd-MM-yyyy") & "%' ")
+    '                            Count = Count + 1
+    '                        Else
+    '                            sb.Append(hflogoperator.Value + " " + hfcoloumname.Value + " " + hfoperator.Value + " '" + txtsearch.Text + "' ")
+    '                            Count = Count + 1
+    '                        End If
+    '                    End If
+    '                End If
+    '            End If
+    '        Next
+    '        If Count > 1 Then
+    '            sb = sb.Replace("Where AND", "Where ")
+    '            sb = sb.Replace("Where OR", "Where ")
+    '            'sb.Append("and [Lead_OwnerID] in (SELECT U_ID FROM [dbo].[UserOwnerChain](" & Session("UserId") & "))")
+    '            Dim test As String = sb.ToString
+    '            Dim phrase As String = test.Substring(test.IndexOf("Where") + 5)
+    '            Dim temp As String = sb.ToString
+    '            temp = temp.Remove(temp.IndexOf("Where") + 0)
+    '            Dim NewQuery As String = temp + " Where (" + phrase + "and [Lead_OwnerID] in (SELECT U_ID FROM [dbo].[UserOwnerChain](" & Session("UserId") & ")))" +
+    '                " OR (" + phrase + "and [Assignto_UserID] in (SELECT U_ID FROM [dbo].[UserOwnerChain](" & Session("UserId") & ")))"
+    '            GridView1.DataSource = CustomsReport.SearchCustomReport(NewQuery.ToString)
+    '            GridView1.DataBind()
+    '            Hfsearchcheck.Value = "True"
+    '            hfsearchquery.Value = NewQuery.ToString
+    '        Else
+    '            'sb = sb.Replace("Where", "")
+    '            'sb = sb.Replace("Where", "")
+    '            Dim test As String = sb.ToString
+    '            Dim phrase As String = test.Substring(test.IndexOf("Where") + 5)
+    '            Dim temp As String = sb.ToString
+    '            temp = temp.Remove(temp.IndexOf("Where") + 0)
+    '            Dim NewQuery As String = temp + " Where ([Lead_OwnerID] in (SELECT U_ID FROM [dbo].[UserOwnerChain](" & Session("UserId") & ")))" +
+    '               " OR ([Assignto_UserID] in (SELECT U_ID FROM [dbo].[UserOwnerChain](" & Session("UserId") & ")))"
+    '            GridView1.DataSource = CustomsReport.FillCustomReport(NewQuery.ToString)
+    '            GridView1.DataBind()
+    '            Hfsearchcheck.Value = "True"
+    '            'hftopquery.Value = hfquery.Value
+    '            hfsearchquery.Value = NewQuery.ToString
+    '        End If
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert("CustomMis", "btnadd_Click", error1, Session("UserId"))
+    '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '        'Throw ex
+    '    End Try
+    'End Sub
+
+    'Protected Sub rpsearch_ItemDataBound(sender As Object, e As RepeaterItemEventArgs) Handles rpsearch.ItemDataBound
+    '    Try
+    '        If e.Item.ItemType = DataControlRowType.DataRow Or e.Item.ItemType = ListItemType.AlternatingItem Then
+    '            Dim ltid As Literal = CType(e.Item.FindControl("ltid"), Literal)
+    '            Dim hfcoloumname As HiddenField = CType(e.Item.FindControl("hfcoloumname"), HiddenField)
+    '            Dim hflogoperator As HiddenField = CType(e.Item.FindControl("hflogoperator"), HiddenField)
+    '            Dim hfoperator As HiddenField = CType(e.Item.FindControl("hfoperator"), HiddenField)
+    '            Dim hfdatatype As HiddenField = CType(e.Item.FindControl("hfdatatype"), HiddenField)
+    '            Dim txtsearch As TextBox = CType(e.Item.FindControl("txtsearch"), TextBox)
+    '            Dim txtstart As TextBox = CType(e.Item.FindControl("txtstart"), TextBox)
+    '            Dim txtend As TextBox = CType(e.Item.FindControl("txtend"), TextBox)
+    '            Dim divTextbox As HtmlGenericControl = CType(e.Item.FindControl("divTextbox"), HtmlGenericControl)
+    '            Dim divbetwwen As HtmlGenericControl = CType(e.Item.FindControl("divbetwwen"), HtmlGenericControl)
+    '            Dim lblopertor As Label = CType(e.Item.FindControl("lbloperator"), Label)
+    '            Dim lbloperator1 As Label = CType(e.Item.FindControl("lbloperator1"), Label)
+    '            Dim cValidation As CustomValidator = TryCast(e.Item.FindControl("cValidation"), CustomValidator)
+    '            If hfoperator.Value = "BETWEEN" Then
+    '                If hfdatatype.Value = "datetime" Then
+    '                    divTextbox.Visible = False
+    '                    divbetwwen.Visible = True
+    '                    'txtstart.TextMode = TextBoxMode.Date
+    '                    'txtend.TextMode = TextBoxMode.Date
+
+    '                Else
+    '                    divTextbox.Visible = False
+    '                    divbetwwen.Visible = True
+    '                End If
+    '            ElseIf hfdatatype.Value = "bigint" Then
+    '                divTextbox.Visible = True
+    '                divbetwwen.Visible = False
+    '            ElseIf (hfdatatype.Value = "datetime" And hfoperator.Value <> "BETWEEN") Then
+    '                divTextbox.Visible = True
+    '                divbetwwen.Visible = False
+    '                txtsearch.TextMode = TextBoxMode.Date
+    '            End If
+    '            If hfReport_Type.Value = "Custom Report" Then
+    '                lbloperator1.Visible = True
+    '                lblopertor.Visible = True
+    '            End If
+
+    '        End If
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert("CustomMis", "rpsearch_ItemDataBound", error1, Session("UserId"))
+    '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '        'Throw ex
+    '    End Try
+    'End Sub
+
+    'Public Sub fillGlobalSearch()
+    '    Try
+    '        MainId = 24
+    '        Dim dt As DataSet = MainBLL.ViewByID(MainId, "ViewCustomReport")
+    '        Dim dtUser As New DataTable
+    '        dtUser = dt.Tables(0)
+    '        If dtUser.Rows.Count > 0 Then
+    '            Dim drLogin As DataRow
+    '            drLogin = dtUser.Rows(0)
+    '            Query = DynamicparcelDataManipulation.FixNullFromDB(drLogin("CustomReport_Query"))
+    '            hfReport_Type.Value = DynamicparcelDataManipulation.FixNullFromDB(drLogin("CustomReport_Type").ToString)
+    '            hfquery.Value = Query
+    '            hfmodule.Value = DynamicparcelDataManipulation.FixNullFromDB(drLogin("CustomReport_TableName"))
+    '            Dim str As String = DynamicparcelDataManipulation.FixNullFromDB(drLogin("CustomReport_SelectedFields").ToString())
+    '            Dim strArr() As String
+    '            strArr = str.Split(",")
+    '        End If
+    '        'GridView1.PageIndex = 0
+    '        'GridView1.DataSource = CustomsReport.FillCustomReport(Query)
+    '        'GridView1.DataBind()
+    '        rpsearch.DataSource = MainBLL.ViewByID(MainId, "ViewCustomreportDT")
+    '        rpsearch.DataBind()
+    '        If rpsearch.Items.Count > 0 Then
+    '            btnadd.Visible = True
+    '            btnshowall.Visible = True
+    '        Else
+    '            btnadd.Visible = False
+    '            btnshowall.Visible = False
+    '        End If
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert("CustomMis", "fillLead", error1, Session("UserId"))
+    '        'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '        Throw ex
+    '    End Try
+    'End Sub
+
+    'Protected Sub btnshowall_Click(sender As Object, e As EventArgs) Handles btnshowall.Click
+    '    Try
+    '        GridView1.AllowCustomPaging = True
+    '        fillLead()
+    '        txttop.Text = ""
+    '        Hfsearchcheck.Value = ""
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert("CustomMis", "btnshowall_Click", error1, Session("UserId"))
+    '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '        Throw ex
+    '    End Try
+    'End Sub
+
+    Protected Sub btnExportExcel_Click(sender As Object, e As EventArgs) Handles btnExportExcel.Click
+        Try
+            Response.Clear()
+            Response.Buffer = True
+            Response.AddHeader("content-disposition", "attachment;filename=GridViewExport.xls")
+            Response.Charset = ""
+            Response.ContentType = "application/vnd.ms-excel"
+            Dim sw As New StringWriter()
+            Dim hw As New HtmlTextWriter(sw)
+
+            If String.IsNullOrEmpty(txtsearch.Text.Trim) And String.IsNullOrEmpty(DynamicparcelDataManipulation.DateFormat(txtstartdate.Text)) Then
+                GridView1.DataSource = reportBLL.topaccount()
+                GridView1.DataBind()
+            ElseIf String.IsNullOrEmpty(txtsearch.Text) And Not String.IsNullOrEmpty(DynamicparcelDataManipulation.DateFormat(txtstartdate.Text)) Then
+                GridView1.DataSource = reportBLL.TopAccountInPeriod(DynamicparcelDataManipulation.DateFormat(txtstartdate.Text), DynamicparcelDataManipulation.DateFormat(txtEndDate.Text))
+                GridView1.DataBind()
+            ElseIf Not String.IsNullOrEmpty(txtsearch.Text) And String.IsNullOrEmpty(DynamicparcelDataManipulation.DateFormat(txtstartdate.Text)) Then
+                GridView1.DataSource = reportBLL.TopAccountInPeriodSearchnoDate(txtsearch.Text)
+                GridView1.DataBind()
+            Else
+                GridView1.DataSource = reportBLL.TopAccountInPeriodSearch(DynamicparcelDataManipulation.DateFormat(txtstartdate.Text), DynamicparcelDataManipulation.DateFormat(txtEndDate.Text), txtsearch.Text.Trim)
+                GridView1.DataBind()
+            End If
+
+            GridView1.RenderControl(hw)
+
+            'style to format numbers to string 
+            Dim style As String = "<style> .textmode { mso-number-format:\@; } </style>"
+            Response.Write(style)
+            Response.Output.Write(sw.ToString())
+            Response.Flush()
+            Response.End()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("CustomMis", "btnExportExcel_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            ' Throw ex
+        End Try
+    End Sub
+
+    ''------------Global Search------------
+
+    Public Sub fillLead()
+        Try
+            GridView1.DataSource = reportBLL.OutstandingReport()
+            GridView1.DataBind()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("Lead", "fillLead", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+
+    Public Sub IndexfillLead()
+        Try
+            GridView1.DataSource = reportBLL.OutstandingReport()
+            GridView1.DataBind()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("Lead", "IndexfillLead", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+
+    'Protected Sub GridView1_PageIndexChanging(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewPageEventArgs) Handles GridView1.PageIndexChanging
+    '    Try
+    '        'If Hfsearchcheck.Value = "True" Then
+    '        '    GridView1.PageIndex = e.NewPageIndex
+    '        '    GridView1.DataSource = CustomsReport.SearchCustomReport(hfsearchquery.Value)
+    '        '    GridView1.DataBind()
+    '        'Else
+    '        '    If SearchControl.UtxtSearch.Text = "" Then
+    '        '        GridView1.PageIndex = e.NewPageIndex
+    '        '        GridView1.DataSource = MainBLL.FillGridViewById(GridView1.PageIndex, SearchControl.Uddpagesize.SelectedValue, Session("UserId"), Hfgridview.Value)
+    '        '        GridView1.DataBind()
+    '        '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "ScrollPage", "ResetScrollPosition();", True)
+    '        '    Else
+    '        '        GridView1.PageIndex = e.NewPageIndex
+    '        '        SearchFillLead()
+    '        '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "ScrollPage", "ResetScrollPosition();", True)
+    '        '    End If
+    '        'End If
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert("Lead", "GridView1_PageIndexChanging", error1, Session("UserId"))
+    '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '    End Try
+    'End Sub
+
+    'Protected Sub ddpagesize_SelectedIndexChanged(ByVal sender As Object, ByVal e As System.EventArgs) Handles SearchControl.SelectedIndexChanged
+    '    Try
+    '        If SearchControl.Uddpagesize.SelectedItem.Text <> "0" Then
+    '            GridView1.PageSize = SearchControl.Uddpagesize.SelectedValue.ToString()
+    '            IndexfillLead()
+    '            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "ScrollPage", "ResetScrollPosition();", True)
+    '        End If
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert("Lead", "ddpagesize_SelectedIndexChanged", error1, Session("UserId"))
+    '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '    End Try
+    'End Sub
+
+    Protected Sub GridView1_Sorting(sender As Object, e As GridViewSortEventArgs)
+        SetSortDirection(SortDireaction)
+        Try
+            Dim dt As DataSet
+            Dim DataTable As DataTable
+            'If Hfsearchcheck.Value = "True" Then
+            '    DataTable = CustomsReport.SearchCustomReport(hfsearchquery.Value)
+            'Else
+            dt = reportBLL.OutstandingReport()
+            DataTable = dt.Tables(0)
+            ' End If
+            If DataTable IsNot Nothing Then
+                DataTable.DefaultView.Sort = Convert.ToString(e.SortExpression) & " " & _sortDirection
+                GridView1.DataSource = DataTable
+                GridView1.DataBind()
+                SortDireaction = _sortDirection
+                Dim columnIndex As Integer = 0
+                For Each headerCell As DataControlFieldHeaderCell In GridView1.HeaderRow.Cells
+                    If headerCell.ContainingField.SortExpression = e.SortExpression Then
+                        columnIndex = GridView1.HeaderRow.Cells.GetCellIndex(headerCell)
+                    End If
+                Next
+                GridView1.HeaderRow.Cells(columnIndex).Controls.Add(sortImage)
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("Lead", "GridView1_Sorting", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub GridView1_RowCommand(ByVal sender As Object, ByVal e As System.Web.UI.WebControls.GridViewCommandEventArgs) Handles GridView1.RowCommand
+        'If e.CommandName = "deletelink" Then
+        '    If deletestatus.Value = "yes" Then
+        '        Dim index As Integer = Convert.ToInt32(e.CommandArgument)
+        '        MainId = GridView1.DataKeys(index).Value
+        '        Try
+        '            MainBLL.DeleteSI(MainId, Session("LeadId"), "LeadDeleteSi", Session("Audlog_Id"))
+        '            IndexfillLead()
+        '        Catch ex As Exception
+        '            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+        '            error1 = error1.Replace(Chr(39), "")
+        '            ExecptionBLL.Insert("Lead", "deletelink", error1, Session("UserId"))
+        '            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        '        End Try
+        '    Else
+        '        If SearchControl.UtxtSearch.Text.Trim = "" Then
+        '            IndexfillLead()
+        '        Else
+        '            SearchFillLead()
+        '        End If
+        '    End If
+        'ElseIf e.CommandName = "statuslink" Then
+        '    Dim index As Integer = Convert.ToInt32(e.CommandArgument)
+        '    MainId = GridView1.DataKeys(index).Value
+        '    Try
+        '        MainBLL.UpdateStatus(MainId, Session("LeadId"), "LeadStatus", Session("Audlog_Id"))
+        '        If SearchControl.UtxtSearch.Text.Trim = "" Then
+        '            IndexfillLead()
+        '        Else
+        '            SearchFillLead()
+        '        End If
+        '    Catch ex As Exception
+        '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+        '        error1 = error1.Replace(Chr(39), "")
+        '        ExecptionBLL.Insert("Lead", "statuslink", error1, Session("UserId"))
+        '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        '    End Try
+        'End If
+    End Sub
+
+    'Public Sub SearchFillLead()
+    '    Try
+    '        GridView1.DataSource = MainBLL.SearchGridViewByID(SearchControl.UtxtSearch.Text.Trim, Session("UserId"), hfsearch.Value)
+    '        GridView1.DataBind()
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert("Lead", "SearchFillLead", error1, Session("UserId"))
+    '        'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '        Throw ex
+    '    End Try
+    'End Sub
+
+    Public Sub CheckPrivilage()
+        Try
+            'Dim dt As DataSet = PrivilageBLL.CheckPrivilige(Session("UserRoleID"), "Lead.aspx")
+            'Dim dtprivilage As New DataTable
+            'dtprivilage = dt.Tables(0)
+            'Dim drprivilage As DataRow
+            'If dtprivilage.Rows.Count = 0 Then
+            '    'SearchControl.Uhfadd.Visible = False
+            '    GridView1.Columns(0).Visible = False
+            '    'SearchControl.ULkadd.Visible = False
+            'Else
+            '    drprivilage = dtprivilage.Rows(0)
+            '    If (drprivilage("Prvg_RAdd").ToString()) = True Then
+            '        'SearchControl.Uhfadd.Visible = True
+            '        'SearchControl.ULkadd.Visible = True
+            '    Else
+            '        'SearchControl.Uhfadd.Visible = False
+            '        'SearchControl.ULkadd.Visible = False
+            '    End If
+            '    If (drprivilage("Prvg_RUpdate").ToString()) = True Then
+            '        GridView1.Columns(0).Visible = True
+            '    Else
+            '        GridView1.Columns(0).Visible = False
+            '    End If
+            'End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("Lead", "CheckPrivilage", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+
+
+
+    Protected Sub btnshowall_Click(sender As Object, e As EventArgs) Handles btnshowall.Click
+        fillLead()
+    End Sub
+
+    Protected Sub btnadd_Click(sender As Object, e As EventArgs) Handles btnadd.Click
+        If String.IsNullOrEmpty(txtsearch.Text.Trim) And String.IsNullOrEmpty(DynamicparcelDataManipulation.DateFormat(txtstartdate.Text)) Then
+            fillLead()
+        ElseIf String.IsNullOrEmpty(txtsearch.Text) And Not String.IsNullOrEmpty(DynamicparcelDataManipulation.DateFormat(txtstartdate.Text)) Then
+            GridView1.DataSource = reportBLL.TopAccountInPeriod(DynamicparcelDataManipulation.DateFormat(txtstartdate.Text), DynamicparcelDataManipulation.DateFormat(txtEndDate.Text))
+            GridView1.DataBind()
+        ElseIf Not String.IsNullOrEmpty(txtsearch.Text) And String.IsNullOrEmpty(DynamicparcelDataManipulation.DateFormat(txtstartdate.Text)) Then
+            GridView1.DataSource = reportBLL.TopAccountInPeriodSearchnoDate(txtsearch.Text)
+            GridView1.DataBind()
+        Else
+            GridView1.DataSource = reportBLL.TopAccountInPeriodSearch(DynamicparcelDataManipulation.DateFormat(txtstartdate.Text), DynamicparcelDataManipulation.DateFormat(txtEndDate.Text), txtsearch.Text.Trim)
+            GridView1.DataBind()
+        End If
+    End Sub
+End Class

@@ -1,0 +1,105 @@
+﻿Imports System.IO
+Imports System.Net
+Imports System.Data
+Imports System.Web
+
+Public Class SendUsingSMPP
+
+    Public Shared Function SendSMS(ByVal message1 As String, ByVal number As String) As String
+        If Not number = 0 Then
+            Dim WebRequest As Net.WebRequest 'object for WebRequest 
+            Dim WebResonse As Net.WebResponse 'object for WebResponse 
+            ' DEFINE PARAMETERS USED IN URL 
+            ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''' '''''''' 
+            'To what server you need to connect to for submission 
+            'i.e. Dim Server As String = "xxxxx.xxxxx.xxxxx" 
+            Dim Server As String = "103.16.101.52"
+            'Port that is to be used like 8080 or 8000 
+            Dim Port As String = "8080"
+            'Username that is to be used for submission 
+            'i.e. Dim UserName As String = "tester" 
+            Dim UserName As String = "atec-swissb"
+            ' password that is to be used along with username 
+            'i.e. Dim Password As String = "password" 
+            Dim Password As String = "123456"
+            'What type of the message that is to be sent. 
+            '0:means plain text 
+            '1:means flash 
+            '2:means Unicode (Message content should be in Hex)
+            '6:means Unicode Flash(Message content should be in Hex) 
+            Dim type As Integer = 0
+            'Message content that is to be transmitted 
+            Dim Message As String = message1.ToString
+            'Url Encode message 
+            Message = HttpUtility.UrlEncode(Message)
+            If (type = 2) Or (type = 6) Then
+                Message = SendUsingSMPP.ConvertToUnicode(Message)
+            End If
+            'Require DLR or not 
+            '0:means DLR is not Required 
+            '1:means DLR is Required 
+            Dim DLR As Integer = 1
+            'Sender Id to be used for submitting the message 
+            'i.e. Dim SenderName As String = "test" 
+            Dim Source As String = "SWBAKE"
+            'Destinations to which message is to be sent For submitting more 
+            'than(one)
+            'destination at once destinations should be comma separated Like 
+            '91999000123,91999000124
+
+            Dim Destination As String '= number
+            Dim host As String = HttpContext.Current.Request.Url.Host
+            If host = "localhost" Then
+                Destination = "9773438089"
+                'Destination = "9029258816"
+            Else
+                Destination = number
+
+            End If
+            '''''''CODE COMPLETE TO DEFINE PARAMETER'''''''''''''''' 
+            Dim WebResponseString As String = ""
+            Dim URL As String = "http://" & Server & ":" & Port & "/bulksms/bulksms?username=" & UserName & "&password=" & Password & "&type=" & type & "&dlr=" & DLR & "&destination=" & Destination & "&source=" & Source & "&message=" & Message & ""
+            WebRequest = Net.HttpWebRequest.Create(URL) 'Hit URL Link 
+            WebRequest.Timeout = 25000
+
+            Try
+                WebResonse = WebRequest.GetResponse 'Get Response 
+                Dim reader As IO.StreamReader = New IO.StreamReader(WebResonse.GetResponseStream)
+                'Read Response and store in variable 
+                WebResponseString = reader.ReadToEnd()
+                WebResonse.Close()
+                ' MessageBox.Show(WebResponseString) 'Display Response. 
+            Catch ex As Exception
+                WebResponseString = "Request Timeout" 'If any exception 
+                'occur.
+                '  MessageBox.Show(WebResponseString, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End Try
+            Return WebResponseString
+        Else
+            Return 0
+        End If
+    End Function
+    'Function To Convert String to Unicode if MessageType=2 and 6. 
+
+    Public Shared Function ConvertToUnicode(ByVal str As String) As String
+        Dim ArrayOFBytes() As Byte =
+        System.Text.Encoding.Unicode.GetBytes(str)
+        Dim UnicodeString As String = ""
+        Dim v As Integer
+        For v = 0 To ArrayOFBytes.Length - 1
+            If v Mod 2 = 0 Then
+                Dim t As Integer = ArrayOFBytes(v)
+                ArrayOFBytes(v) = ArrayOFBytes(v + 1)
+                ArrayOFBytes(v + 1) = t
+            End If
+        Next
+        For v = 0 To ArrayOFBytes.Length - 1
+            Dim c As String = Hex$(ArrayOFBytes(v))
+            If c.Length = 1 Then
+                c = "0" & c
+            End If
+            UnicodeString = UnicodeString & c
+        Next
+        Return UnicodeString
+    End Function
+End Class

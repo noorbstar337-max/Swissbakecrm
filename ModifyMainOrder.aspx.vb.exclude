@@ -1,0 +1,292 @@
+﻿Imports DynamicparcelEnumerations
+Partial Class ModifyMainOrder
+    Inherits System.Web.UI.Page
+    Dim MainID As Integer
+    Dim ContactID As Integer
+    Dim RelatedID As Integer
+    Dim ConatctType As String
+    Dim RelatedType As String
+    Dim returnurl As String
+    Public count As Integer
+    Dim total As Integer = 0
+    Private result As Integer = 0
+    Public countrate As Double = 0.0
+    Public countrate1 As Double = 0.0
+    Dim arrList As New ArrayList()
+    Dim dt As New DataTable()
+    Dim dr As DataRow = Nothing
+    Dim catId As Integer = 0
+    Dim totalvat As Integer = 0
+    Dim InvoiceID As Integer
+    Dim totalgrandvat As Double = 0
+    Dim totalgrand As Double = 0
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        If Not IsPostBack Then
+
+            FillProductGrid()
+        End If
+    End Sub
+
+    Public Sub FillProductGrid()
+        Try
+
+            GridView1.DataSource = ProductBLL.MainProductViewAll(Session("UserId"))
+            GridView1.DataBind()
+            btnsubmit.Visible = True
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+    Protected Sub ddrelatedtype_TextChanged(sender As Object, e As EventArgs) Handles ddrelatedtype.TextChanged
+        Try
+            If ddrelatedtype.SelectedValue = "Lead" Then
+                Dim ds As DataSet = MainBLL.Dropdown("LeadContactDropDown")
+                ddrelatedtypeid.DataSource = ds
+                ddrelatedtypeid.DataTextField = "Lead_Name"
+                ddrelatedtypeid.DataValueField = "Lead_Id"
+                ddrelatedtypeid.DataBind()
+            ElseIf (ddrelatedtype.SelectedValue = "Prospect") Then
+                Dim ds As DataSet = MainBLL.DropdownWithtype("AccountDropDown", "Prospect")
+                ddrelatedtypeid.DataSource = ds
+                ddrelatedtypeid.DataTextField = "Acc_Name"
+                ddrelatedtypeid.DataValueField = "Acc_Id"
+                ddrelatedtypeid.DataBind()
+            ElseIf (ddrelatedtype.SelectedValue = "Account") Then
+                Dim ds As DataSet = MainBLL.DropdownWithtype("AccountDropDown", "Account")
+                ddrelatedtypeid.DataSource = ds
+                ddrelatedtypeid.DataTextField = "Acc_Name"
+                ddrelatedtypeid.DataValueField = "Acc_Id"
+                ddrelatedtypeid.DataBind()
+            ElseIf (ddrelatedtype.SelectedValue = "Opportunity") Then
+                Dim ds As DataSet = MainBLL.Dropdown("OpportunityDropDown")
+                ddrelatedtypeid.DataSource = ds
+                ddrelatedtypeid.DataTextField = "Opportunity_Name"
+                ddrelatedtypeid.DataValueField = "Opportunity_Id"
+                ddrelatedtypeid.DataBind()
+            ElseIf (ddrelatedtype.SelectedValue = "None") Then
+                ddrelatedtypeid.DataSource = ""
+                ddrelatedtypeid.DataBind()
+               
+            End If
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ActivitTask", "ddrelatedtype_TextChanged", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub txtOrderQty_TextChanged(sender As Object, e As EventArgs)
+        Try
+
+            For Each row As GridViewRow In GridView1.Rows
+                Dim a As Integer
+                Dim lbltotalamount2 As Literal = DirectCast(row.FindControl("lbltotalamount2"), Literal)
+                Dim lbltotalamount As Label = DirectCast(row.FindControl("lbltotalamount"), Label)
+                Dim lbltotalamount1 As Label = DirectCast(row.FindControl("lbltotalamount1"), Label)
+                Dim lbl As Label = DirectCast(row.FindControl("lblunit"), Label)
+                Dim txtOrderQty As TextBox = DirectCast(row.FindControl("txtOrderQty"), TextBox)
+                Dim lblrate As Label = DirectCast(row.FindControl("lblrate"), Label)
+                Dim lblkgs As Label = DirectCast(row.FindControl("lblkgs"), Label)
+                ' Dim txtkgs As TextBox = DirectCast(row.FindControl("txtkgs"), TextBox)
+                If txtOrderQty.Text.Contains(".") Then
+                    txtOrderQty.Text = Math.Floor(CDbl(txtOrderQty.Text))
+                End If
+
+                If txtOrderQty.Text = "" Then
+                Else
+                    Dim numbers As String() = Regex.Split(lbl.Text, "\D+")
+                    For Each value As String In numbers
+                        If Not String.IsNullOrEmpty(value) Then
+                            Dim i As Integer = Integer.Parse(value)
+                            'txtkgs.Text = txtOrderQty.Text * i
+                            lblkgs.Text = txtOrderQty.Text * i & "kg"
+                            a = txtOrderQty.Text * i
+
+                        End If
+                    Next
+                    lbltotalamount1.Text = "₹  " & (lbltotalamount.Text * a)
+                    lbltotalamount2.Text = lbltotalamount.Text * a
+                End If
+
+
+            Next
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
+    Public Sub Insert()
+        Try
+           
+
+            'Session("OrderProduct") = Nothing
+            'ViewOrder()
+            'Session("OrderID&Amount") = InvoiceID.ToString + "," + ltgrandtotal.Text + "," + ddpayment.SelectedItem.Text.Trim
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub placeorder()
+        Try
+            Dim count As Integer
+            If Session("OrderProduct") Is Nothing Then
+                count = 0
+                Dim dt As New DataTable
+                dt.Columns.Add("Srno", GetType(Integer))
+                dt.Columns.Add("ProductId", GetType(Integer))
+                dt.Columns.Add("SwissBake Products", GetType(String))
+                dt.Columns.Add("Code", GetType(String))
+
+                dt.Columns.Add("Unit", GetType(String))
+                dt.Columns.Add("Rate", GetType(String))
+                dt.Columns.Add("Quantity", GetType(String))
+                dt.Columns.Add("Amount", GetType(String))
+                dt.Columns.Add("Vat", GetType(String))
+                dt.Columns.Add("Weight", GetType(String))
+                dt.Columns.Add("Vat1", GetType(String))
+                For Each row As GridViewRow In GridView1.Rows
+                    Dim txtOrderQty = DirectCast(row.FindControl("txtOrderQty"), TextBox)
+                    Dim lblproductId = DirectCast(row.FindControl("lblproductId"), Label)
+                    Dim lblname = DirectCast(row.FindControl("lblname"), Label)
+                    Dim lblcode = DirectCast(row.FindControl("lblcode"), Label)
+                    'Dim lbldosage = DirectCast(row.FindControl("lbldosage"), Label)
+                    ' Dim lblusage = DirectCast(row.FindControl("lblusage"), Label)
+                    Dim lblunit = DirectCast(row.FindControl("lblunit"), Label)
+                    Dim Literal1 = DirectCast(row.FindControl("Literal1"), Literal)
+                    Dim lblamount = DirectCast(row.FindControl("lblamount"), Label)
+                    Dim lbltotalamount2 = DirectCast(row.FindControl("lbltotalamount2"), Literal)
+                    Dim lblvat = DirectCast(row.FindControl("lblvat"), Label)
+                    Dim lblkgs = DirectCast(row.FindControl("lblkgs"), Label)
+
+                    If txtOrderQty.Text = "" Then
+                    Else
+                        If txtOrderQty.Text = 0 Then
+
+                        Else
+                            lblamount.Text = lbltotalamount2.Text
+                            totalvat = Convert.ToDouble((lblvat.Text * lblamount.Text) / 100)
+                            dt.Rows.Add(count, lblproductId.Text, lblname.Text, lblcode.Text, lblunit.Text, Literal1.Text, txtOrderQty.Text, lblamount.Text, totalvat, lblkgs.Text, lblvat.Text)
+                            count = count + 1
+                        End If
+
+                    End If
+
+                Next
+                Session("OrderProduct") = dt
+            Else
+                Dim dt As DataTable = DirectCast(Session("OrderProduct"), DataTable)
+                count = dt.Rows.Count
+                For Each row As GridViewRow In GridView1.Rows
+                    Dim txtOrderQty = DirectCast(row.FindControl("txtOrderQty"), TextBox)
+                    Dim lblproductId = DirectCast(row.FindControl("lblproductId"), Label)
+                    Dim lblname = DirectCast(row.FindControl("lblname"), Label)
+                    Dim lblcode = DirectCast(row.FindControl("lblcode"), Label)
+                    'Dim lbldosage = DirectCast(row.FindControl("lbldosage"), Label)
+                    ' Dim lblusage = DirectCast(row.FindControl("lblusage"), Label)
+                    Dim lblunit = DirectCast(row.FindControl("lblunit"), Label)
+                    Dim Literal1 = DirectCast(row.FindControl("Literal1"), Literal)
+                    Dim lblamount = DirectCast(row.FindControl("lblamount"), Label)
+                    Dim lbltotalamount2 = DirectCast(row.FindControl("lbltotalamount2"), Literal)
+                    Dim lblvat = DirectCast(row.FindControl("lblvat"), Label)
+                    Dim lblkgs = DirectCast(row.FindControl("lblkgs"), Label)
+                    If txtOrderQty.Text = "" Then
+                    Else
+                        If txtOrderQty.Text = 0 Then
+
+                        Else
+
+                            lblamount.Text = lbltotalamount2.Text
+                            totalvat = Convert.ToDouble((lblvat.Text * lblamount.Text) / 100)
+                            dt.Rows.Add(count, lblproductId.Text, lblname.Text, lblcode.Text, lblunit.Text, Literal1.Text, txtOrderQty.Text, lblamount.Text, totalvat, lblkgs.Text, lblvat.Text)
+                            count = count + 1
+                        End If
+                    End If
+                Next
+            End If
+
+            Dim dt1 As DataTable = DirectCast(Session("OrderProduct"), DataTable)
+            If dt1.Rows.Count > 0 Then
+                For Each row As DataRow In dt1.Rows
+
+                Next
+            End If
+            Dim ProductId As Integer = 0
+            Dim amount As Double = 0
+            Dim rnd As New Random()
+            Dim verfirycode As Integer = rnd.[Next](10000, 999999)
+            Dim dice As String = "OD" + rnd.[Next](10000, 999999).ToString() + " "
+
+            InvoiceID = OrderBLL.InsertCRM(dice, ddrelatedtypeid.SelectedValue, totalgrand, "Pending", ddpayment.SelectedItem.Text.Trim, totalgrandvat, 0, Session("UserId"), "", "")
+
+            For Each row As DataRow In dt.Rows
+                OrderBLL.Main_Order_Details(InvoiceID, row("ProductId").ToString, row("Quantity").ToString, row("Rate").ToString, row("Amount").ToString, row("Vat"))
+            Next
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterClientScriptBlock(Page, Me.GetType(), "call", "alert('Error " + error1.ToString + "');", True)
+        End Try
+    End Sub
+
+    Protected Sub btnsubmit_Click(sender As Object, e As EventArgs) Handles btnsubmit.Click
+        Try
+            placeorder()
+            'Response.Redirect("Cart.aspx")
+            ' ScriptManager.RegisterClientScriptBlock(Page, Me.GetType(), "call", "alert('Product has been added to your cart ');", True)
+            Page.Response.Redirect(HttpContext.Current.Request.Url.ToString(), True)
+
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+    Protected Sub GridView1_RowDataBound1(sender As Object, e As GridViewRowEventArgs)
+        If e.Row.RowType = DataControlRowType.DataRow Then
+
+            Dim lblstock As Label = DirectCast(e.Row.FindControl("lblstock"), Label)
+            Dim lblout As Label = DirectCast(e.Row.FindControl("lblout"), Label)
+
+            Dim Literal1 As Literal = DirectCast(e.Row.FindControl("Literal1"), Literal)
+            Dim lbl As Label = DirectCast(e.Row.FindControl("lblunit"), Label)
+            Dim lblrate As Label = DirectCast(e.Row.FindControl("lblrate"), Label)
+            Dim lbldiscount As Label = DirectCast(e.Row.FindControl("lbldiscount"), Label)
+            Dim lbltotalamount As Label = DirectCast(e.Row.FindControl("lbltotalamount"), Label)
+            Dim DropDownList1 As DropDownList = DirectCast(e.Row.FindControl("DropDownList1"), DropDownList)
+            Dim txtOrderQty As TextBox = DirectCast(e.Row.FindControl("txtOrderQty"), TextBox)
+
+
+            If lblstock.Text = "In Stock" Then
+                lblout.Visible = False
+                Dim numbers As String() = Regex.Split(lbl.Text, "\D+")
+                For Each value As String In numbers
+                    If Not String.IsNullOrEmpty(value) Then
+                        Dim i As Integer = Integer.Parse(value)
+                        txtOrderQty.Attributes.Add("step", i)
+                    End If
+                Next
+            Else
+                txtOrderQty.Visible = False
+                lblout.Visible = True
+            End If
+
+            If lbldiscount.Text = "" Then
+                lblrate.Visible = False
+                Literal1.Text = lblrate.Text
+                lbltotalamount.Text = Literal1.Text
+            Else
+                countrate = lbldiscount.Text / 100
+                countrate1 = lblrate.Text * countrate
+                Literal1.Text = lblrate.Text - countrate1
+                lbltotalamount.Text = Literal1.Text
+            End If
+        End If
+    End Sub
+
+    
+
+
+End Class

@@ -1,0 +1,944 @@
+﻿Imports System.Diagnostics
+'Imports NReco.PdfGenerator
+Imports System.IO
+Imports iTextSharp
+'Imports iTextSharp.text.api
+Imports iTextSharp.text
+Imports iTextSharp.text.pdf
+Imports iTextSharp.text.html.simpleparser
+Imports iTextSharp.tool.xml
+Imports System.Net
+
+Partial Class ViewQuotation
+    Inherits System.Web.UI.Page
+    Dim MainID As Integer
+    Dim Qtyp As String
+    Dim FooterTotalAmount As Double = 0.0
+    Dim VatAmount As Double = 0.0
+    Dim Temp As Double = 0.0
+    Dim count As Double = 0.0
+    Dim version As Double = 0.0
+    Dim countrydt As DataTable
+    Dim statedt As DataTable
+    Dim AccId As Integer
+    Dim ltitemtypeid As Label
+    Protected Sub Page_Init(sender As Object, e As EventArgs) Handles Me.Init
+        If Session("UserId") = Nothing Then
+            TryCast(Me.Master, MainPage).MaintainSession()
+            Try
+                If (Request.QueryString("Id") = Nothing) Then
+                    Response.Redirect("index.aspx")
+                End If
+            Catch ex As Exception
+                Dim error1 As String = ex.Message.Replace(Chr(34), "")
+                error1 = error1.Replace(Chr(39), "")
+                ExecptionBLL.Insert("ViewQuotation", "Page_Init", error1, Session("UserId"))
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            End Try
+        Else
+            Try
+                If (Request.QueryString("Id") = Nothing) Then
+                    Response.Redirect("index.aspx")
+                End If
+            Catch ex As Exception
+                Dim error1 As String = ex.Message.Replace(Chr(34), "")
+                error1 = error1.Replace(Chr(39), "")
+                ExecptionBLL.Insert("ViewQuotation", "Page_Init", error1, Session("UserId"))
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            End Try
+        End If
+    End Sub
+
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        Try
+            If Not IsPostBack Then
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                Qtyp = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Qtyp")))
+                privilage()
+                'aedit.HRef = Page.ResolveUrl("ModifyQuotation.aspx?chk=e&Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID.ToString())) + "&returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)))
+                aedit.HRef = Page.ResolveUrl("ModifyQuotation.aspx?chk=e&Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID.ToString())) + "&returnurl=y")
+                ' aedit.HRef = Page.ResolveUrl("ModifyQuotation.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID.ToString())) + "&returnurl=y")
+                aprint.HRef = Page.ResolveUrl("PrintDocs.aspx?tpy=Quotation&type=" + HttpUtility.UrlEncode(Security.Encrypt((Qtyp).ToString())) + "&Id=" + HttpUtility.UrlEncode(Security.Encrypt((MainID).ToString())))
+                FillDetail()
+                FillQuotation()
+                FillProforma()
+                activitycontrol.Uhftype.Value = "Quotation"
+                activitycontrol.Uhftypeid.Value = MainID
+                documentcontrol.Uhftype.Value = "Quotation"
+                documentcontrol.Uhftypeid.Value = MainID
+                notecontrol.Uhftype.Value = "Quotation"
+                notecontrol.Uhftypeid.Value = MainID
+                itemdtcontrol.Uhftype.Value = hfcontacttype.Value
+                itemdtcontrol.Uhftypeid.Value = hfcontacttypeid.Value
+                itemdtcontrol.Uhfopptype.Value = "Quotation"
+                itemdtcontrol.Uhfopptypeid.Value = MainID
+                emailcontrol.Uhftype.Value = "Quotation"
+                emailcontrol.Uhftypeid.Value = MainID
+            End If
+            Me.RegisterPostBackControl()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ViewQuotation", "Page_Load", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+        'FillDetail()
+        'upquickaction.Update()
+    End Sub
+    'gayatri created this for quotation history on 23-08-2017
+    Public Sub FillQuotation()
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            Dim ChildId As Integer = QuotationBLL.getChildIdByQId("getChildIdByQId", MainID)
+            If ChildId <> 0 Then
+                '   rpgridhistory.DataSource = QuotationBLL.FillQDetailbyID("GetQuotHistory", ChildId)
+
+                ' rpgridhistory.DataBind()
+
+                'rptmaidq.DataSource = QuotationBLL.FillQDetailbyID("GetQuotHistory", ChildId)
+                rptmaidq.DataSource = QuotationBLL.FillQDetailbyID("GetQuotHistory", MainID)
+                rptmaidq.DataBind()
+            Else
+                rptmaidq.DataSource = QuotationBLL.FillQDetailbyID("GetQuotHistory", MainID)
+                rptmaidq.DataBind()
+            End If
+            version = rptmaidq.Items.Count
+            For i As Integer = 0 To rptmaidq.Items.Count - 1
+                Dim lblversion As Label = TryCast(rptmaidq.Items(i).FindControl("lblversion"), Label)
+                ' For j As Integer = rptmaidq.Items.Count To 0 Step -rptmaidq.Items.Count
+                '  Dim lblversion As Label = DirectCast(grditemproduct.Parent.FindControl("lblversion"), Label)
+                lblversion.Text = (CDbl(1) + CDbl(version / 100)).ToString("")
+                version = version - 1
+                'Exit For
+                ' Next
+            Next
+            Dim totalcount As Integer = rptmaidq.Items.Count
+            If totalcount > 0 Then
+                lblitemdt.Text = "Quotation History (" + totalcount.ToString + ")"
+            Else
+                lblitemdt.Text = "No Quotation History"
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ViewPrinciple", "FillPrinciple", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Function checkurledit(ByVal QuotId As Integer)
+        Dim result As String = ""
+        result = "ModifyQuotation.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&Id=" + HttpUtility.UrlEncode(Security.Encrypt(Eval("Quotation_Id").ToString()))
+        Return result
+    End Function
+    Public Function checkurlView(ByVal QuotId As Integer)
+        Dim result As String = ""
+        result = "ModifyQuotation.aspx?chk=v&returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&Id=" + HttpUtility.UrlEncode(Security.Encrypt(Eval("Quotation_Id").ToString()))
+        Return result
+    End Function
+    '================================================================================================
+    Public Sub FillProforma()
+        Try
+            grdproforma.DataSource = ProformaBLL.ProfromaByType("Quotation", MainID, Session("UserId"))
+            grdproforma.DataBind()
+            Dim ds As DataSet
+            ds = DirectCast(grdproforma.DataSource, DataSet)
+            lblcontact.Text = ds.Tables(0).Rows.Count
+            If lblcontact.Text > 0 Then
+                lblcontact.Text = "Proforma (" + lblcontact.Text.ToString + ")"
+                aedit.Visible = False
+               
+                btnopneprofroma.Visible = False
+            Else
+                lblcontact.Text = "No Proforma"
+            End If
+   
+
+            Dim dtcheck As DataSet = QuotationBLL.Checkorderexist(MainID)
+            Dim checkcname As String = dtcheck.Tables(0).Rows(0)("checkname").ToString()
+            If checkcname = "Already Exist" Then
+
+                aedit.Visible = False
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ViewQuotation", "lkquicktask_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub lkquicktask_Click(sender As Object, e As EventArgs) Handles lkquicktask.Click
+        Try
+            activitycontrol.dateTimeFuntion()
+            activitycontrol.Utask.Show()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ViewQuotation", "lkquicktask_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub lkquickevent_Click(sender As Object, e As EventArgs) Handles lkquickevent.Click
+        Try
+            activitycontrol.dateTimeFuntion()
+            activitycontrol.UtaskEvent.Show()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ViewQuotation", "lkquickevent_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub lkquickcall_Click(sender As Object, e As EventArgs) Handles lkquickcall.Click
+        Try
+            activitycontrol.dateTimeFuntion()
+            activitycontrol.UtaskCall.Show()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ViewQuotation", "lkquickcall_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub FillDetail()
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            Dim dt As DataSet = MainBLL.ViewByID(MainID, "ViewQuotation")
+            Dim dtUser As New DataTable
+            dtUser = dt.Tables(0)
+            Dim drLogin As DataRow
+            drLogin = dtUser.Rows(0)
+            'ltrevenue.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Revenue").ToString())
+            ltcontactname.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_No").ToString())
+            ltcompanyname.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Acc_Name").ToString())
+            ltStage.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_Validity").ToString())
+			Lblbank.Text = DynamicparcelDataManipulation.FixNullFromDB(dt.Tables(1).Rows(0)("BankName").ToString())
+            ''ltvalidy.Text = ltStage.Text
+            'ltprobability.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("OppStage_Probability").ToString())
+            ltprobability.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_ModeOFPayment").ToString())
+            'ltowner.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("U_FirstName").ToString())
+            rpowner.DataSource = AssignToBLL.FillAssignTo("Quotation", MainID)
+            rpowner.DataBind()
+            hfcontacttype.Value = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_Type").ToString())
+            hfcontacttypeid.Value = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_TypeId").ToString())
+            ltdate.Text = DynamicparcelDataManipulation.AlphaDateFormat(drLogin("Quotation_Date").ToString())
+            ''ltbuyerref.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_AuthSign").ToString())
+            ''ltotherref.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_AuthSign").ToString())
+            '' ltaccname.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Acc_Name").ToString())
+            AccId = DynamicparcelDataManipulation.FixNullFromDB(drLogin("acc_id").ToString())
+            ''FillBillingAddressDetail()
+            If drLogin("Acc_Category").ToString() = "Export" Then
+                divExport.Visible = True
+                ltModeOfTransport.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_ModeOfTransport").ToString())
+                'ltCountryOfOrigin.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_CountryOfOrigin").ToString())
+
+                ' ltPortLoading.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_PortOfLoading").ToString())
+                ' ltPortDischarge.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_PortOfDischarge").ToString())
+
+
+
+                '   Dim country As Array = countrydt.Select("ID = '" + drLogin("Quotation_CountryOfFinalDestination").ToString() + "'")
+                '   If country.Length <> 0 Then
+                ltCountryFinalDestination.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_CountryOfFinalDestination").ToString())
+                '  ltCountryFinalDestination.Text = country(0)(1).ToString + " "
+                ' End If
+                ' Dim state As Array = statedt.Select("ID = '" + drLogin("Quotation_FinalDestination").ToString() + "'")
+
+                ' If state.Length <> 0 Then
+                ltFinalDestination.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Quotation_FinalDestination").ToString())
+                'ltFinalDestination.Text += state(0)(1).ToString + "- "
+                'End If
+
+
+            End If
+            dt = Nothing
+            dt = ActivityBLL.FillTaskType("Quotation", MainID, "CountActivity")
+            dtUser = dt.Tables(0)
+            drLogin = dtUser.Rows(0)
+            ltcounttask.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Task").ToString())
+            ltcountevent.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Evented").ToString())
+            ltcountcall.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Calls").ToString())
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ViewQuotation", "FillDetail", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+
+    ''Public Sub FillBillingAddressDetail()
+    ''    Try
+    ''        countrydt = MainBLL.Dropdown("CountryDropDown").Tables(0)
+    ''        statedt = MainBLL.Dropdown("ALLStateDropDown").Tables(0)
+    ''        Dim dt As DataSet = MainBLL.ViewByID(AccId, "ProspectBillingAddressViewByID")
+    ''        Dim dtUser As New DataTable
+    ''        dtUser = dt.Tables(0)
+    ''        If dtUser.Rows.Count > 0 Then
+    ''            Dim drLogin As DataRow
+    ''            drLogin = dtUser.Rows(0)
+    ''            If String.IsNullOrEmpty(drLogin("AccAddr_Name").ToString()) Then
+    ''            Else
+    ''                ltaccCont.Text += DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Name").ToString())
+    ''                'lblbuyerref.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Name").ToString())
+    ''            End If
+    ''            If String.IsNullOrEmpty(drLogin("AccAddr_Telephone").ToString()) Then
+    ''                ' lblcontacbill.Visible = False
+    ''            Else
+
+    ''                ltaccCont.Text += " " + "Phone: " + DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Telephone").ToString())
+    ''            End If
+    ''            If String.IsNullOrEmpty(drLogin("AccAddr_Email").ToString()) Then
+    ''                ' lblcontacbill.Visible = False
+    ''            Else
+    ''                ltaccCont.Text += " " + " Email: " + DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Email").ToString())
+    ''            End If
+
+    ''            If String.IsNullOrEmpty(drLogin("AccAddr_Address").ToString()) Then
+    ''            Else
+    ''                ltAccaddr.Text += " " + DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Address").ToString())
+    ''            End If
+    ''            If String.IsNullOrEmpty(drLogin("AccAddr_Pincode").ToString()) Then
+    ''            Else
+    ''                ltpincity.Text += " " + DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Pincode").ToString())
+    ''            End If
+    ''            If String.IsNullOrEmpty(drLogin("AccAddr_City").ToString()) Then
+    ''            Else
+    ''                ltpincity.Text += " " + DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_City").ToString())
+    ''            End If
+    ''            'Dim country As Array = countrydt.Select("ID = '" + drLogin("AccAddr_Country").ToString() + "'")
+    ''            'If country.Length <> 0 Then
+    ''            '    lblcontrybill.Text = country(0)(1).ToString + " "
+    ''            'End If
+    ''            Dim state As Array = statedt.Select("ID = '" + drLogin("AccAddr_State").ToString() + "'")
+    ''            If state.Length <> 0 Then
+    ''                ltstate.Text += " " + state(0)(1).ToString
+    ''            End If
+    ''        End If
+    ''    Catch ex As Exception
+    ''        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    ''        error1 = error1.Replace(Chr(39), "")
+    ''        ExecptionBLL.Insert("PrintSalesOrder", "FillBillingAddressDetail", error1, Session("UserId"))
+    ''        'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    ''        Throw ex
+    ''    End Try
+    ''End Sub
+
+    Public Sub privilage()
+        Try
+            Dim dt As DataSet = PrivilageBLL.CheckPrivilige(Session("UserRoleID"), "Quotation.aspx")
+            Dim dtprivilage As New DataTable
+            dtprivilage = dt.Tables(0)
+            Dim drprivilage As DataRow
+            If dtprivilage.Rows.Count = 0 Then
+                aedit.Visible = False
+                lkdelete.Visible = False
+            Else
+                drprivilage = dtprivilage.Rows(0)
+                If (drprivilage("Prvg_RUpdate").ToString()) = True Then
+                    aedit.Visible = True
+                Else
+                    aedit.Visible = False
+                End If
+                'If (drprivilage("Prvg_RDelete").ToString()) = True Then
+                '    lkdelete.Visible = True
+                'Else
+                '    lkdelete.Visible = False
+                'End If
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ViewQuotation", "privilage", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+
+    Protected Sub lkdelete_Click(sender As Object, e As EventArgs) Handles lkdelete.Click
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            If deletestatus.Value = "yes" Then
+                'MainBLL.DeleteSI(MainID, Session("UserId"), "LeadDeleteSi", Session("Audlog_Id"))
+                Response.Redirect("MainQuotation.aspx")
+            Else
+
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ViewQuotation", "lkdelete_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    'Protected Sub lkprint_Click(sender As Object, e As EventArgs) Handles lkprint.Click
+    '    Using sw As New StringWriter()
+    '        Using hw As New HtmlTextWriter(sw)
+    '            pnl.RenderControl(hw)
+    '            Dim sr As New StringReader(sw.ToString())
+    '            Dim htmlContent = [String].Format(sw.ToString())
+    '            Dim pdfBytes = (New NReco.PdfGenerator.HtmlToPdfConverter()).GeneratePdf(htmlContent)
+    '            Response.AddHeader("Content-Type", "application/pdf")
+    '            Response.AddHeader("Content-Disposition", String.Format("attachment; filename=Convert_Current_Page.pdf; size={0}", pdfBytes.Length.ToString()))
+    '            Response.BinaryWrite(pdfBytes)
+    '            Response.End()
+    '        End Using
+    '    End Using
+    'End Sub
+
+    ''Protected Sub rpproforma_ItemDataBound(sender As Object, e As RepeaterItemEventArgs) Handles rpproforma.ItemDataBound
+    ''    If e.Item.ItemType = ListItemType.Item Or e.Item.ItemType = ListItemType.AlternatingItem Then
+    ''        Dim ltquantity As Literal = TryCast(e.Item.FindControl("ltquantity"), Literal)
+    ''        Dim ltrate As Literal = TryCast(e.Item.FindControl("ltrate"), Literal)
+    ''        Dim ltproductWeight As Literal = TryCast(e.Item.FindControl("ltproductWeight"), Literal)
+    ''        Dim ltkg As Literal = TryCast(e.Item.FindControl("ltproductWeight"), Literal)
+    ''        Dim ltamount As Literal = TryCast(e.Item.FindControl("ltamount"), Literal)
+    ''        Dim lblvat As Literal = TryCast(e.Item.FindControl("lblvat"), Literal)
+    ''        Dim lblvatinrs As Literal = TryCast(e.Item.FindControl("lblvatinrs"), Literal)
+    ''        ltkg.Text = ltproductWeight.Text * ltquantity.Text
+    ''        ltamount.Text = ltkg.Text * Math.Round(Convert.ToDouble(ltrate.Text))
+    ''        Dim VAT As Double = Math.Round(Convert.ToDouble((lblvat.Text * ltamount.Text) / 100))
+    ''        lblvatinrs.Text = Math.Round(VAT).ToString("N2")
+    ''        VatAmount = VatAmount + VAT
+    ''        ltamount.Text = (Math.Round(Convert.ToDouble(ltamount.Text)) + VAT).ToString("N2")
+    ''        FooterTotalAmount = FooterTotalAmount + (Math.Round(Convert.ToDouble(ltamount.Text)))
+    ''    End If
+    ''End Sub
+
+    Protected Sub btnopneprofroma_Click(sender As Object, e As EventArgs) Handles btnopneprofroma.Click
+        MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+        lblquoamount.Text = ItemDetailBLL.TotalAmount("Quotation", MainID)
+        If lblquoamount.Text = "0" Then
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + ("Please enter item detail before creating proforma").ToString + "')", True)
+        Else
+            mpe.Show()
+        End If
+    End Sub
+
+
+
+    Protected Sub btnsave_Click(sender As Object, e As EventArgs) Handles btnsave.Click
+        Try
+            If txtpayablenow.Text = "" Then
+                txtpayablenow.Text = 0
+            End If
+            If String.IsNullOrEmpty(txtduedate.Text) Then
+                txtduedate.Text = Date.Now.Date.ToString("yyyy-MM-dd")
+            End If
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            ProformaBLL.Insert("Quotation", MainID, Convert.ToDateTime(txtduedate.Text.Trim).ToString("yyyy-MM-dd"), "True", "", Session("UserId"), lblquoamount.Text, txtpayablenow.Text, Session("UserId"), Session("UserId"))
+            Response.Redirect(Request.RawUrl)
+            'FillProforma()
+            'mpe.Hide()
+            'Me.RegisterPostBackControl()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ViewQuotation", "btnSaveClick", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    'Private Function ConvertHtmlToPDF() As Byte()
+    '    Dim nRecohtmltoPdfObj As New HtmlToPdfConverter()
+    '    nRecohtmltoPdfObj.Orientation = PageOrientation.Portrait
+    '    Dim htmlContent As String = Nothing
+    '    Using sw As New StringWriter()
+    '        Using hw As New HtmlTextWriter(sw)
+    '            ''pnl.RenderControl(hw)
+    '            Dim sr As New StringReader(sw.ToString())
+    '            htmlContent = [String].Format(sw.ToString())
+    '        End Using
+    '    End Using
+    '    Return nRecohtmltoPdfObj.GeneratePdf(htmlContent)
+    'End Function
+
+    Private Sub WriteDocument(fileName As String, contentType As String, content As Byte())
+        HttpContext.Current.Response.Clear()
+        Response.ContentType = contentType
+        Response.AddHeader("content-disposition", Convert.ToString("attachment; filename=") & fileName)
+        Response.CacheControl = "No-cache"
+        Response.BinaryWrite(content)
+        Response.Flush()
+        Response.SuppressContent = True
+        HttpContext.Current.ApplicationInstance.CompleteRequest()
+    End Sub
+
+
+    Protected Sub grdproforma_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles grdproforma.RowCommand
+        If e.CommandName = "updatelink" Then
+            Try
+                Dim index As Integer = Convert.ToInt32(e.CommandArgument)
+                Dim proformaID As Integer = grdproforma.DataKeys(index).Value
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                Dim name As String = ProformaBLL.Proformatype(MainID)
+                Qtyp = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Qtyp")))
+                ' If name = "Export" Then
+                Response.Redirect("PrintDocs.aspx?tpy=Proforma&type=" + HttpUtility.UrlEncode(Security.Encrypt((Qtyp).ToString())) + "&Id=" + HttpUtility.UrlEncode(Security.Encrypt((MainID).ToString())))
+                ' Else
+
+                ' End If
+                'Dim url As String = "PrintProforma.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(proformaID.ToString())) + "&qid=" + HttpUtility.UrlEncode(Security.Encrypt(MainID.ToString()))
+                'Response.Redirect(url)
+
+                ''Dim index As Integer = Convert.ToInt32(e.CommandArgument)
+                ''MainID = grdproforma.DataKeys(index).Value
+                ''Dim dt As DataSet
+                ''dt = MainBLL.ViewByID(MainID, "ProfromabyID")
+                ''Dim dtUser As New DataTable
+                ''dtUser = dt.Tables(0)
+                ''Dim drLogin As DataRow
+                ''drLogin = dtUser.Rows(0)
+                ''ltloginname.Text = Session("UName")
+                ''ltquono.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Proforma_No").ToString())
+                ''ltprodate.Text = DynamicparcelDataManipulation.AlphaDateFormat(drLogin("Proforma_Date").ToString())
+                ''ltprodate.Text = DynamicparcelDataManipulation.AlphaDateFormat(drLogin("Proforma_Date").ToString())
+                ''Temp = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Proforma_PayableNow").ToString())
+                ''MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+
+                ''rpproforma.DataSource = ItemDetailBLL.FillItemDT("Quotation", MainID)
+                ''rpproforma.DataBind()
+                ''Dim lblControl As Literal, Advance As Literal, VAT As Literal
+                ''lblControl = rpproforma.Controls(rpproforma.Controls.Count - 1).Controls(0).FindControl("lttotalamount")
+                ''lblControl.Text = FooterTotalAmount.ToString("N2")
+                ''Advance = rpproforma.Controls(rpproforma.Controls.Count - 1).Controls(0).FindControl("ltadvance")
+                ''Advance.Text = Temp.ToString("N2")
+                ''VAT = rpproforma.Controls(rpproforma.Controls.Count - 1).Controls(0).FindControl("ltvat")
+                ''VAT.Text = VatAmount.ToString("N2")
+                ''WriteDocument(ltquono.Text + ".pdf", "application/pdf", ConvertHtmlToPDF())
+
+                ' Dim process As New Process()
+                'process.StartInfo.FileName = Server.MapPath("~/bin/wkhtmltopdf.exe")
+                '-------Print Code--------
+                'Using sw As New StringWriter()
+                '    Using hw As New HtmlTextWriter(sw)
+                '        pnl.RenderControl(hw)
+                '        Dim sr As New StringReader(sw.ToString())
+                '        Dim htmlContent = [String].Format(sw.ToString())
+                '        Session("print") = htmlContent
+                '        Response.Redirect("Demo1.aspx")
+                '        'Dim pdfBytes = (New NReco.PdfGenerator.HtmlToPdfConverter()).GeneratePdf(htmlContent)
+                '        'Response.AddHeader("Content-Type", "application/pdf")
+                '        'Response.AddHeader("Content-Disposition", String.Format("attachment; filename=Convert_Current_Page.pdf; size={0}", pdfBytes.Length.ToString()))
+                '        'Response.BinaryWrite(pdfBytes)
+                '        'Dim MyDate As DateTime = DateTime.Now
+                '        'Dim filename As String = MyDate.ToString("ddMMyyhhmmss") + ".Pdf"
+                '        'Dim path As String = Server.MapPath("~/img/Pdf/" + filename)
+                '        'MainID = grdproforma.DataKeys(index).Value
+                '        'File.WriteAllBytes(path, pdfBytes)
+                '        'ProformaBLL.UpdatePdf("img/Pdf/" + filename, MainID)
+                '        'Response.End()
+                '    End Using
+                'End Using
+                '-------Print Code--------
+                'WriteDocument("htmlToPDF.pdf", "application/pdf", ConvertHtmlToPDF())
+                'Dim MyDate As DateTime = DateTime.Now
+                'Dim filename As String = MyDate.ToString("ddMMyyhhmmss") + ".Pdf"
+                'Dim path As String = Server.MapPath("~/img/Pdf/" + filename)
+                'MainID = grdproforma.DataKeys(index).Value
+                'File.WriteAllBytes(path, pdfBytes)
+                'ProformaBLL.UpdatePdf("img/Pdf/" + filename, MainID)
+            Catch ex As Exception
+                Dim error1 As String = ex.Message.Replace(Chr(34), "")
+                error1 = error1.Replace(Chr(39), "")
+                ExecptionBLL.Insert("ViewQuotation", "updatelink", error1, Session("UserId"))
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            End Try
+        ElseIf e.CommandName = "EmailLink" Then
+            Try
+                Dim index As Integer = Convert.ToInt32(e.CommandArgument)
+                MainID = grdproforma.DataKeys(index).Value
+                'Dim dt As DataSet
+                'dt = MainBLL.ViewByID(MainID, "ProfromabyID")
+                'Dim dtUser As New DataTable
+                'dtUser = dt.Tables(0)
+                'Dim drLogin As DataRow
+                'drLogin = dtUser.Rows(0)
+
+                ''ltloginname.Text = Session("UName")
+                ''ltquono.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Proforma_No").ToString())
+                ''ltprodate.Text = DynamicparcelDataManipulation.AlphaDateFormat(drLogin("Proforma_Date").ToString())
+                ''ltprodate.Text = DynamicparcelDataManipulation.AlphaDateFormat(drLogin("Proforma_Date").ToString())
+                ''Temp = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Proforma_PayableNow").ToString())
+                ''MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                ''rpproforma.DataSource = ItemDetailBLL.FillItemDT("Quotation", MainID)
+                ''rpproforma.DataBind()
+                ''Dim lblControl As Literal, Advance As Literal, VAT As Literal
+                ''lblControl = rpproforma.Controls(rpproforma.Controls.Count - 1).Controls(0).FindControl("lttotalamount")
+                ''lblControl.Text = FooterTotalAmount.ToString("N2")
+                ''Advance = rpproforma.Controls(rpproforma.Controls.Count - 1).Controls(0).FindControl("ltadvance")
+                ''Advance.Text = Temp.ToString("N2")
+                ''VAT = rpproforma.Controls(rpproforma.Controls.Count - 1).Controls(0).FindControl("ltvat")
+                ''VAT.Text = VatAmount.ToString("N2")
+
+                'Using sw As New StringWriter()
+                '    Using hw As New HtmlTextWriter(sw)
+                '        ''pnl.RenderControl(hw)
+                '        Dim sr As New StringReader(sw.ToString())
+                '        Dim htmlContent = [String].Format(sw.ToString())
+                '        Dim pdfBytes = (New NReco.PdfGenerator.HtmlToPdfConverter()).GeneratePdf(htmlContent)
+                '        Response.AddHeader("Content-Type", "application/pdf")
+                '        Response.AddHeader("Content-Disposition", String.Format("attachment; filename=Convert_Current_Page.pdf; size={0}", pdfBytes.Length.ToString()))
+                '        Response.BinaryWrite(pdfBytes)
+                '        Dim MyDate As DateTime = DateTime.Now
+                '        Dim filename As String = MyDate.ToString("ddMMyyyyhhmmss") + ".Pdf"
+                '        Dim path As String = Server.MapPath("~/img/Pdf/" + filename)
+                '        MainID = grdproforma.DataKeys(index).Value
+                '        File.WriteAllBytes(path, pdfBytes)
+                '        ProformaBLL.UpdatePdf("img/Pdf/" + filename, MainID)
+                '        Dim QuoId As Integer = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                '        Response.Redirect(("~/composemessage.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&ID=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&QID=" + HttpUtility.UrlEncode(Security.Encrypt(QuoId))))
+                '        Response.End()
+                '    End Using
+                'End Using
+                Dim QuoId As Integer = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                Response.Redirect(("~/composemessage.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&ID=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&QID=" + HttpUtility.UrlEncode(Security.Encrypt(QuoId))))
+            Catch ex As Exception
+                Dim error1 As String = ex.Message.Replace(Chr(34), "")
+                error1 = error1.Replace(Chr(39), "")
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            End Try
+        ElseIf e.CommandName = "Editlink" Then
+            Dim index As Integer = Convert.ToInt32(e.CommandArgument)
+            Dim row As GridViewRow = grdproforma.Rows(index)
+            Dim lnkedit As LinkButton = TryCast(row.FindControl("lnkedit"), LinkButton)
+            Dim lkupdate As LinkButton = TryCast(row.FindControl("lkupdate"), LinkButton)
+            Dim lnkdelete As LinkButton = TryCast(row.FindControl("lnkdelete"), LinkButton)
+            Dim txtduedate As TextBox = TryCast(row.FindControl("txtduedate"), TextBox)
+            Dim txtpayablenow As TextBox = TryCast(row.FindControl("txtpayablenow"), TextBox)
+            Dim ltproformadate As Literal = TryCast(row.FindControl("ltproformadate"), Literal)
+            Dim ltpayablenow As Label = TryCast(row.FindControl("ltpayablenow"), Label)
+            ltproformadate.Visible = False
+            ltpayablenow.Visible = False
+            txtduedate.Visible = True
+            txtpayablenow.Visible = True
+            lkupdate.Visible = True
+            lnkdelete.Visible = False
+            lnkedit.Text = "Cancel"
+            lnkedit.CommandName = "Cancellink"
+            lnkedit.CssClass = "btn btn-xs btn-warning"
+        ElseIf e.CommandName = "Cancellink" Then
+            Dim index As Integer = Convert.ToInt32(e.CommandArgument)
+            Dim row As GridViewRow = grdproforma.Rows(index)
+            Dim lnkedit As LinkButton = TryCast(row.FindControl("lnkedit"), LinkButton)
+            Dim lkupdate As LinkButton = TryCast(row.FindControl("lkupdate"), LinkButton)
+            Dim lnkdelete As LinkButton = TryCast(row.FindControl("lnkdelete"), LinkButton)
+            Dim txtduedate As TextBox = TryCast(row.FindControl("txtduedate"), TextBox)
+            Dim txtpayablenow As TextBox = TryCast(row.FindControl("txtpayablenow"), TextBox)
+            Dim ltproformadate As Literal = TryCast(row.FindControl("ltproformadate"), Literal)
+            Dim ltpayablenow As Label = TryCast(row.FindControl("ltpayablenow"), Label)
+            ltpayablenow.Visible = True
+            ltproformadate.Visible = True
+            txtduedate.Visible = False
+            txtpayablenow.Visible = False
+            lkupdate.Visible = False
+            lnkdelete.Visible = True
+            lnkedit.Text = "Edit"
+            lnkedit.CommandName = "Editlink"
+            lnkedit.CssClass = "btn btn-primary"
+        ElseIf e.CommandName = "updatelinksdd" Then
+            Dim index As Integer = Convert.ToInt32(e.CommandArgument)
+            Dim row As GridViewRow = grdproforma.Rows(index)
+            MainID = grdproforma.DataKeys(index).Value
+            Dim txtduedate As TextBox = TryCast(row.FindControl("txtduedate"), TextBox)
+            Dim txtpayablenow As TextBox = TryCast(row.FindControl("txtpayablenow"), TextBox)
+            Dim ltproformadate As Literal = TryCast(row.FindControl("ltproformadate"), Literal)
+            Dim ltpayablenow As Label = TryCast(row.FindControl("ltpayablenow"), Label)
+            Dim lnkedit As LinkButton = TryCast(row.FindControl("lnkedit"), LinkButton)
+            Dim lkupdate As LinkButton = TryCast(row.FindControl("lkupdate"), LinkButton)
+            Dim lnkdelete As LinkButton = TryCast(row.FindControl("lnkdelete"), LinkButton)
+            If txtpayablenow.Text = "" Then
+                txtpayablenow.Text = 0
+            End If
+            If String.IsNullOrEmpty(txtduedate.Text) Then
+                txtduedate.Text = Date.Now.Date.ToString("yyyy-MM-dd")
+            End If
+            ltproformadate.Visible = True
+            ltpayablenow.Visible = True
+            txtduedate.Visible = False
+            txtpayablenow.Visible = False
+            lkupdate.Visible = False
+            lnkdelete.Visible = True
+            lnkedit.Text = "Edit"
+            lnkedit.CommandName = "Editlink"
+            lnkedit.CssClass = "btn btn-primary"
+            ProformaBLL.Update(txtduedate.Text.Trim, txtpayablenow.Text.Trim, Session("UserId"), Session("UserId"), MainID)
+            ltpayablenow.Text = txtpayablenow.Text
+            ltproformadate.Text = txtduedate.Text.Trim
+        ElseIf e.CommandName = "deletelink" Then
+            If deletestatus.Value = "yes" Then
+                Dim index As Integer = Convert.ToInt32(e.CommandArgument)
+                Dim row As GridViewRow = grdproforma.Rows(index)
+                MainID = grdproforma.DataKeys(index).Value
+                ProformaBLL.DeleteProforma(MainID)
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                Response.Redirect(Request.RawUrl)
+                '' FillProforma()
+            Else
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                FillProforma()
+            End If
+
+        End If
+    End Sub
+
+    Private Sub RegisterPostBackControl()
+        For Each row As GridViewRow In grdproforma.Rows
+            Dim lkprintpdf As LinkButton = TryCast(row.FindControl("lkprintpdf"), LinkButton)
+            ScriptManager.GetCurrent(Me).RegisterPostBackControl(lkprintpdf)
+            Dim lkemail As LinkButton = TryCast(row.FindControl("lkemail"), LinkButton)
+            ScriptManager.GetCurrent(Me).RegisterPostBackControl(lkemail)
+            'Dim lnkedit As LinkButton = TryCast(row.FindControl("lnkedit"), LinkButton)
+            'ScriptManager.GetCurrent(Me).RegisterAsyncPostBackControl(lnkedit)
+            'Dim lnkdelete As LinkButton = TryCast(row.FindControl("lnkdelete"), LinkButton)
+            'ScriptManager.GetCurrent(Me).RegisterAsyncPostBackControl(lnkdelete)
+        Next
+    End Sub
+
+    Public Shared Function HtmlToPdf(outputFilenamePrefix As String, urls As String) As String
+        Dim urlsSeparatedBySpaces As String = String.Empty
+        Try
+
+            If (urls Is Nothing) OrElse (urls.Length = 0) Then
+                Throw New Exception("No input URLs provided for HtmlToPdf")
+            Else
+                urlsSeparatedBySpaces = [String].Join(" ", urls)
+            End If
+            'Concatenate URLs
+            Dim outputFolder As String = HttpContext.Current.Server.MapPath("~/img/Pdf")
+            Dim outputFilename As String = (outputFilenamePrefix & Convert.ToString("_")) + DateTime.Now.ToString("yyyy-MM-dd-hh-mm-ss-fff") + ".PDF"
+            ' assemble destination PDF file name
+            ' needs to be false in order to redirect output
+            ' redirect all 3, as it should be all 3 or none
+            Dim p As New Process
+            p.StartInfo.FileName = HttpContext.Current.Server.MapPath("~/bin/wkhtmltopdf.exe")
+            p.StartInfo.Arguments = urlsSeparatedBySpaces + " " + outputFilename
+            p.StartInfo.UseShellExecute = False
+            p.StartInfo.RedirectStandardError = True
+            p.StartInfo.RedirectStandardInput = True
+            p.StartInfo.RedirectStandardOutput = True
+            p.StartInfo.WorkingDirectory = HttpContext.Current.Server.MapPath(outputFolder)
+            p.Start()
+            ' read the output here...
+            Dim output = p.StandardOutput.ReadToEnd
+            Dim errorOutput = p.StandardError.ReadToEnd()
+
+            ' ...then wait n milliseconds for exit (as after exit, it can't read the output)
+            p.WaitForExit(60000)
+
+            ' read the exit code, close process
+            Dim returnCode As Integer = p.ExitCode
+            p.Close()
+
+            ' if 0 or 2, it worked so return path of pdf
+            If (returnCode = 0) OrElse (returnCode = 2) Then
+                Return outputFolder & outputFilename
+            Else
+                Throw New Exception(errorOutput)
+                ExecptionBLL.Insert("ViewQuotation", "updatelink", errorOutput, 1)
+            End If
+        Catch exc As Exception
+            ExecptionBLL.Insert("ViewQuotation", "updatelink", exc.Message, 1)
+            Throw New Exception(Convert.ToString((Convert.ToString("Problem generating PDF from HTML, URLs: ") & urlsSeparatedBySpaces) + ", outputFilename: ") & outputFilenamePrefix, exc)
+        End Try
+    End Function
+
+
+    'Private Function ConvertHtmlToPDF() As Byte()
+    '    Dim nRecohtmltoPdfObj As New HtmlToPdfConverter()
+    '    nRecohtmltoPdfObj.Orientation = PageOrientation.Portrait
+    '    Dim htmlContent As String = Nothing
+    '    Using sw As New StringWriter()
+    '        Using hw As New HtmlTextWriter(sw)
+    '            pnl.RenderControl(hw)
+    '            Dim sr As New StringReader(sw.ToString())
+    '            htmlContent = [String].Format(sw.ToString())
+    '        End Using
+    '    End Using
+    '    Return nRecohtmltoPdfObj.GeneratePdf(htmlContent)
+    'End Function
+
+    'Private Sub WriteDocument(fileName As String, contentType As String, content As Byte())
+    '    HttpContext.Current.Response.Clear()
+    '    Response.ContentType = contentType
+    '    Response.AddHeader("content-disposition", Convert.ToString("attachment; filename=") & fileName)
+    '    Response.CacheControl = "No-cache"
+    '    Response.BinaryWrite(content)
+    '    Response.Flush()
+    '    Response.SuppressContent = True
+    '    HttpContext.Current.ApplicationInstance.CompleteRequest()
+    'End Sub
+
+    'Protected Sub rpgridhistory_ItemDataBound(sender As Object, e As RepeaterItemEventArgs) Handles rpgridhistory.ItemDataBound
+    '    Try
+    '        If (e.Item.ItemType = ListItemType.Item Or e.Item.ItemType = ListItemType.AlternatingItem) Then
+    '            Dim lblId As Label = DirectCast(e.Item.FindControl("lblId"), Label)
+    '            Dim rptQuotationdetails As Repeater = TryCast(e.Item.FindControl("rptQuotationdetails"), Repeater)
+    '            rptQuotationdetails.DataSource = QuotationBLL.FillQDetailbyID("getQuotationDetailsById", Convert.ToInt32(lblId.Text))
+    '            rptQuotationdetails.DataBind()
+    '        End If
+
+
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("UserId")) 'ViewSponsor", "fillVisa", error1, Session("UserId"))
+    '        Throw ex
+    '        'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '    End Try
+    'End Sub
+    Protected Sub grditemproduct_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles grditemproduct.RowDataBound
+        Dim type As String = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Qtyp")))
+        'Dim lblAmount As Literal = DirectCast(grditemproduct.Rows(0).FindControl("lblAmount1"), Literal)
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            ltitemtypeid = DirectCast(e.Row.FindControl("ltitemtypeid"), Label)
+
+            Dim ltproductid As Literal = DirectCast(e.Row.FindControl("ltproductid"), Literal)
+            Dim txtquantity As Label = TryCast(e.Row.FindControl("txtquantity"), Label)
+            Dim ltrate As Literal = TryCast(e.Row.FindControl("ltrate"), Literal)
+            Dim ltitemid As Literal = TryCast(e.Row.FindControl("ltitemid"), Literal)
+            Dim ltproductWeight As Literal = TryCast(e.Row.FindControl("ltproductWeight"), Literal)
+            Dim ltkg As Literal = TryCast(e.Row.FindControl("ltkg"), Literal)
+            Dim ltamount As Literal = TryCast(e.Row.FindControl("ltamount"), Literal)
+            Dim lblvat As Literal = TryCast(e.Row.FindControl("lblvat"), Literal)
+            Dim lblvatinrs As Literal = TryCast(e.Row.FindControl("lblvatinrs"), Literal)
+            If txtquantity.Text = "" Then
+                txtquantity.Text = 1
+            End If
+            If txtquantity.Text.Contains(".") Then
+                txtquantity.Text = Math.Floor(CDbl(txtquantity.Text))
+            End If
+            ltkg.Text = ltproductWeight.Text * txtquantity.Text
+            ltamount.Text = ltkg.Text * Math.Round(Convert.ToDouble(ltrate.Text))
+            Dim VAT As Double
+            If type = "USD" Then
+                VAT = 0.0
+                lblvat.Text = "0.0"
+                grditemproduct.Columns(5).Visible = False
+            Else
+
+                ' ''VAT = Math.Round(Convert.ToDouble((lblvat.Text * ltamount.Text) / 100))*********MUBYN
+                VAT = (Convert.ToDouble((lblvat.Text * ltamount.Text) / 100))
+            End If
+            ' ''lblvatinrs.Text = Math.Round(VAT).ToString("N2")***********MUBYN
+            lblvatinrs.Text = (VAT).ToString("N2")
+            ltamount.Text = Math.Round(Convert.ToDouble(ltamount.Text)).ToString("N2")
+
+
+        End If
+        If e.Row.RowType = DataControlRowType.Footer Then
+            Dim lblfreight As Label = DirectCast(e.Row.FindControl("lblfreight"), Label)
+            '   Dim ltitemtypeid As Literal = DirectCast(e.Row.FindControl("ltitemtypeid"), Literal)
+
+            If Not lblfreight Is Nothing Then
+                lblfreight.Text = ItemDetailBLL.GetFright("Quotation", ltitemtypeid.Text).ToString
+                lblfreight.Text = (CDbl(lblfreight.Text)).ToString("N2")
+            End If
+        End If
+
+
+        '    Dim gvr As GridViewRow = DirectCast(sender, Repeater).NamingContainer
+
+        'now you can find control like this,
+        '   Dim lbl_name As Label = DirectCast(gvr.FindControl("lblversion"), Label)
+
+
+    End Sub
+    Protected Sub rptmaidq_ItemDataBound(sender As Object, e As RepeaterItemEventArgs) Handles rptmaidq.ItemDataBound
+        Try
+
+            Dim lblqtn As Label = DirectCast(e.Item.FindControl("lblqtn"), Label)
+
+            '  Dim lblversion As Label = DirectCast(e.Item.FindControl("lblversion"), Label)
+            '   Dim lblamt As Label = DirectCast(e.Item.FindControl("lblamt"), Label)
+
+          
+            ' Dim rep1 As Repeater = TryCast(e.Item.FindControl("rptqtndetails"), Repeater)
+
+            Dim grditemproduct As GridView = TryCast(e.Item.FindControl("grditemproduct"), GridView)
+
+            grditemproduct.DataSource = ItemDetailBLL.FillItemDT("Quotation", Convert.ToInt32(lblqtn.Text), AccId)
+            grditemproduct.DataBind()
+
+           
+            If grditemproduct.Rows.Count > 0 Then
+                Dim lttotalamount As Literal = DirectCast(grditemproduct.FooterRow.FindControl("lttotalamount"), Literal)
+                Dim lttotalvat As Literal = DirectCast(grditemproduct.FooterRow.FindControl("lttotalvat"), Literal)
+                Dim lblfreight As Label = DirectCast(grditemproduct.FooterRow.FindControl("lblfreight"), Label)
+
+                Dim ltamount As Literal = TryCast(grditemproduct.FindControl("ltamount"), Literal)
+                Dim lblvat As Literal = TryCast(grditemproduct.FindControl("lblvat"), Literal)
+                Dim lblvatinrs As Literal = TryCast(grditemproduct.FindControl("lblvatinrs"), Literal)
+                '  lblvatinrs.Text = VAT.ToString("N2")
+                '  ltamount.Text = Math.Round(Convert.ToDouble(ltamount.Text)).ToString("N2")
+
+                If String.IsNullOrEmpty(lblfreight.Text) Then
+                    lblfreight.Text = "0.00"
+                End If
+                FooterTotalAmount = 0.0
+                VatAmount = 0.0
+                For i As Integer = 0 To grditemproduct.Rows.Count - 1
+                    ltamount = DirectCast(grditemproduct.Rows(i).FindControl("ltamount"), Literal)
+                    lblvatinrs = DirectCast(grditemproduct.Rows(i).FindControl("lblvatinrs"), Literal)
+                    VatAmount = VatAmount + lblvatinrs.Text
+                    FooterTotalAmount = FooterTotalAmount + ltamount.Text
+                Next
+                Dim FreightTax As Double = ConfigurationManager.AppSettings("freightvalue")
+                Dim freightamt As Double = (Convert.ToDouble(lblfreight.Text) * CDbl(FreightTax) / 100).ToString("N2")
+                VatAmount = VatAmount + freightamt
+                lttotalamount.Text = Math.Round(FooterTotalAmount + VatAmount + Convert.ToDouble(lblfreight.Text), 0, MidpointRounding.AwayFromZero).ToString("N2")
+                ' ''lttotalvat.Text = Math.Round(VatAmount).ToString("N2")***********MUBYN
+                lttotalvat.Text = (VatAmount).ToString("N2")
+
+                Dim lblamt As Label = DirectCast(grditemproduct.Parent.FindControl("lblamt"), Label)
+                lblamt.Text = "₹ " + lttotalamount.Text
+            End If
+
+            ' rep1.DataSource = QuotationBLL.FillQDetailbyID("getQuotationDetailsById", Convert.ToInt32(lblqtn.Text))
+            ' rep1.DataBind()
+
+            '  Next
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            '   ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("UserId")) 'ViewSponsor", "fillVisa", error1, Session("UserId"))
+            Throw ex
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+
+    End Sub
+    Public Sub CheckPrivi()
+        Try
+            Dim ds As DataSet = UserBLL.CheckPrivi(Session("UserRoleID"), "Quotation.aspx")
+            Dim strArr() As String
+            Dim TemStr As String = ""
+            Dim dtPrivi As New DataTable
+            dtPrivi = Session("dtPrivilege")
+            Dim rows() As DataRow = dtPrivi.Select("Menu_URL = 'Quotation.aspx'")
+
+            TemStr = rows(0).Item("Val").ToString()
+            strArr = TemStr.Split(",")
+            If (strArr.Length > 3) Then
+                If MainID = 0 Then
+                    If strArr(2) = "1" Then
+                    Else
+                        Response.Redirect("index.aspx")
+                    End If
+                Else
+                    'If strArr(1) = "1" Or strArr(2) = "1" Or strArr(3) = "1" Then
+                    If strArr(2) = "1" Then
+                    Else
+                        Response.Redirect("index.aspx")
+                    End If
+                End If
+            End If
+        Catch ex As Exception
+
+        End Try
+    End Sub
+End Class

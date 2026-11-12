@@ -1,0 +1,415 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/LMSMasterPage.master" AutoEventWireup="false" MaintainScrollPositionOnPostback="true" CodeFile="ModifyFormulation.aspx.vb" Inherits="ModifyFormulation" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" runat="Server">
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+
+    <%--    <div class="content-header header-section">
+                <h1>Formulation
+                </h1>
+            </div>--%>
+    <ul class="breadcrumb breadcrumb-top">
+        <li><a href="LMSDashboard.aspx">Home</a></li>
+        <li>Formulation</li>
+        <asp:HiddenField ID="strrowcount" runat="server" />
+        <asp:HiddenField ID="hfFormVersion" runat="server" />
+
+    </ul>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="block full ">
+                <div class="block-title ">
+                    <h2><strong>Lab Management</strong></h2>
+                </div>
+              
+                <ul class="nav nav-pills nav-justified clickable-steps">
+                    <li runat="server" id="liFormulation">
+                        <asp:HyperLink runat="server" ID="lnkFormulation" style="background-color: #1bbae1;">
+                        <span class="badge pull-right"></span>
+                        <b><i class="gi gi-group themed-color-dark"></i></b><strong>&nbsp;&nbsp;Formulation</strong>
+                        </asp:HyperLink>
+                    </li>
+                    <li runat="server" id="liRecipe" class="col-md-4">
+                        <asp:HyperLink runat="server" ID="lnkRecipe">
+                        <b><i class="fa fa-newspaper-o   themed-color-dark"></i></b>
+                        <strong>&nbsp;&nbsp;Recipe</strong>
+                        </asp:HyperLink>
+                    </li>
+                    <li runat="server" id="liTrial" class="col-md-4">
+                        <asp:HyperLink runat="server" ID="lnkTrial">
+                        <span class="badge pull-right"></span>
+                        <b><i class="fa fa-gear themed-color-dark"></i></b><strong>&nbsp;&nbsp;Trial</strong>
+                        </asp:HyperLink>
+                    </li>
+                </ul>
+                <br />
+                <%--<div class="row">--%>
+                <asp:HiddenField ID="hfBtnPrint" runat="server"/>
+                <%-- Fromulation Starts --%>
+                <div class="widget">
+                    <div class="widget-extra themed-background-dark">
+                        <h5 class="widget-content-light abc">
+                            <strong>Formulation (<asp:Label ID="lblFormulationNo" runat="server" data-toggle="tooltip" ></asp:Label>) 
+                                <a runat="server" ID="btnprint" class="btn btn-alt btn-xs btn-primary" target="_blank" style="margin-left:10px;">Print</a>                                
+                                <a runat="server" ID="btnprintblank" class="btn btn-alt btn-xs btn-primary" target="_blank">Print Blank</a> </strong>
+                             <strong><asp:Label  runat="server" ID="lblapproved" style="float:right;"></asp:Label></strong>
+                             <span class="pull-right" id="modifyspan" runat="server">By&nbsp;<a style="text-decoration: none;"><asp:Label ID="lblmodifiedname" runat="server" Font-Bold="true"></asp:Label></a>&nbsp;on&nbsp;<a style="text-decoration: none;"><asp:Label ID="lblmodifieddate" Font-Bold="true" runat="server" Font-Italic="true"></asp:Label></a>
+                                  </span>
+                        </h5>
+                        
+                    </div>
+
+                    <div class="block full ">
+
+                        <div class="widget-extra-full">
+                            <div class="form-horizontal form-bordered  ">
+                                <div class="col-md-12">
+                                    <asp:UpdatePanel ID="UpdatePanel6" runat="server">
+                                        <ContentTemplate>
+                                            <script type="text/javascript" >
+                                                Sys.Application.add_load(custom);
+                                            </script>
+
+                                            <asp:HiddenField ID="HiddenField1" runat="server" />
+                                            <%-- Fromulation Starts --%>
+                                            <%--<div class="col-md-12">--%>
+                                            <%--<div class="widget">--%>
+                                            <%--<div class="block" style="display: table; width: 100%;">--%>
+                                            <asp:UpdatePanel ID="UpdatePanel2" runat="server">
+                                                <ContentTemplate>
+                                                    <%--          <div class="col-lg-3">
+                                                            <label for="example-nf-email" class="col-md-6">Formulation No.</label>
+                                                            <div class="col-md-6">
+                                                                <asp:Label ID="lblFormulationNo" runat="server" data-toggle="tooltip" title="Enter Formulation No."></asp:Label>
+                                                            </div>
+                                                        </div>--%>
+                                                    <div style="clear: both"></div>
+                                                    <div class="col-xs-11">
+                                                        <div class="col-md-3">
+                                                            <label for="example-nf-email" class="col-md-6">Formulation Type</label>
+                                                            <div class="col-md-6">
+                                                                <asp:DropDownList ID="ddlFormulationType" runat="server" data-toggle="tooltip" title="Select Product Type" CssClass="form-control select-chosen" TabIndex="1" AutoPostBack="true">
+                                                                    <asp:ListItem Value="0">Existing Product</asp:ListItem>
+                                                                    <asp:ListItem Value="1">New Product</asp:ListItem>
+                                                                    <asp:ListItem Value="2">Competitor Product</asp:ListItem>
+                                                                </asp:DropDownList>
+                                                                <asp:RequiredFieldValidator ID="rfddlFormulationType" runat="server" ControlToValidate="ddlFormulationType" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                                    ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                                <br />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3" id="divDDLProduct" runat="server">
+                                                            <label for="example-nf-email" class="col-md-3">Product </label>
+                                                            <div class="col-md-9">
+                                                                <asp:DropDownList ID="ddlProduct" runat="server" AutoPostBack="true" data-toggle="tooltip" title="Select Product" CssClass="form-control select-chosen" TabIndex="2">
+                                                                </asp:DropDownList>
+                                                                <asp:RequiredFieldValidator ID="rfddlProduct" runat="server" ControlToValidate="ddlProduct" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                                    ErrorMessage="This is Required" InitialValue="Select Product" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3" id="divTxtProduct" runat="server" visible="false">
+                                                            <label for="example-nf-email" class="col-md-3">Product </label>
+                                                            <div class="col-md-9">
+                                                                <asp:TextBox ID="txtProduct" runat="server" AutoPostBack="true" data-toggle="tooltip" placeholder="Enter Product" title="Enter Product" CssClass="form-control" TabIndex="2">
+                                                                </asp:TextBox>
+                                                                <asp:Label Visible="false" ID="lblProdExist" runat="server" Text="Product already Exist" ForeColor="Red"></asp:Label>
+                                                                <asp:RequiredFieldValidator ID="rftxtProduct" runat="server" ControlToValidate="txtProduct" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                                    ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3" id="div1" runat="server">
+                                                            <label for="example-nf-email" class="col-md-6">Mix Type</label>
+                                                            <div class="col-md-6">
+                                                                <asp:DropDownList ID="ddlMixTypeForm" runat="server" data-toggle="tooltip" title="Select Product" CssClass="form-control select-chosen" TabIndex="2">
+                                                                    <asp:ListItem Value="Bread">Bread</asp:ListItem>
+                                                                    <asp:ListItem Value="Cake">Cake</asp:ListItem>
+                                                                </asp:DropDownList>
+                                                                <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" ControlToValidate="ddlProduct" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                                    ErrorMessage="This is Required"  Display="Dynamic"></asp:RequiredFieldValidator>
+                                                            </div>
+                                                            <asp:Label ID="lblMixError" runat="server" Style="color: red;" Visible="false">Please update Mix Type of selected Product</asp:Label>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label for="example-nf-email" class="col-md-5">Quantity(KG) </label>
+                                                            <div class="col-md-7">
+                                                                <asp:TextBox ID="txtQuantityForm" runat="server" data-toggle="tooltip" placeholder="Enter Quantity" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');" title="Enter Quantity" CssClass="form-control decimal" TabIndex="3"></asp:TextBox>
+                                                                <asp:Label ID="lblKG" runat="server" Style="color: red;" Visible="false">This is required</asp:Label>
+                                                                <asp:RequiredFieldValidator ID="RftxtQuantityForm" runat="server" ControlToValidate="txtQuantityForm" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                                    ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                                <asp:RegularExpressionValidator ID="RegExptxtQuantityForm" runat="server" Display="Dynamic" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS" ControlToValidate="txtQuantityForm" ErrorMessage="0 is not valid."
+                                                                    ValidationExpression="^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$"></asp:RegularExpressionValidator>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <%--<asp:Button ID="ntntest" ValidationGroup="1"  runat="server"  Text="test" />--%>
+                                                    <div class="col-md-1 pull-right">
+                                                        <asp:Button Text="Submit" runat="server" ID="btnSubmit" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Exploring...';"
+                                                            UseSubmitBehavior="false" class="btn btn-xs btn-success" ValidationGroup="MasterGroup" OnClick="btnSubmit_Click" />
+                                                        <%--<asp:Button Text="Submit Quotation" runat="server" ID="btnadd" OnClientClick="if (!Page_ClientValidate('MasterGroup1')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                            UseSubmitBehavior="false" class="btn btn-alt btn-sm btn-primary" ValidationGroup="MasterGroup1" Style="width: 183px; border: 1px solid #A39A9A; padding: 7px; background-color: #B31616; color: white; margin-right: 15px;" />--%>
+                                                    </div>
+                                                    <div style="clear: both"></div>
+
+
+                                                    <br />
+                                                    <br />
+                                                </ContentTemplate>
+                                                <Triggers>
+                                                    <%--  <asp:PostBackTrigger ControlID="gvLMS" />--%>
+                                                </Triggers>
+                                            </asp:UpdatePanel>
+
+                                            <div class="table-responsive">
+                                                <div class="widget-extra-full">
+                                                    <div class="form-horizontal">
+                                                        <%-- <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Conditional">--%>
+                                                        <asp:UpdatePanel ID="UpdatePanel4" runat="server">
+                                                            <ContentTemplate>
+
+                                                                <div class="table-responsive">
+                                                                    <asp:GridView ID="gvLMS" Visible="false" runat="server" AutoGenerateColumns="False" DataKeyNames="" AllowCustomPaging="true"
+                                                                        CssClass="table table-striped table-vcenter table-condensed" ShowFooter="true" GridLines="None">
+                                                                        <Columns>
+                                                                            <asp:BoundField DataField="RowNumber" Visible="true" />
+
+                                                                            <asp:TemplateField HeaderText="Sr No." Visible="False" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="">
+                                                                                <ItemTemplate>
+                                                                                    <div class="input-group  col-md-12">
+                                                                                        <div class="text-center">
+                                                                                            <asp:Literal ID="ltRowNumber" runat="server" Text='<%#Eval("RowNumber")%>' Visible="False"></asp:Literal>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </ItemTemplate>
+                                                                            </asp:TemplateField>
+
+                                                                            <asp:TemplateField HeaderText="Raw Material" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader " ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">
+                                                                                <ItemTemplate>
+                                                                                    <div class="col-md-12">
+                                                                                        <asp:DropDownList ID="ddlRM" runat="server" CssClass="form-control select-chosen " AutoPostBack="true" OnSelectedIndexChanged="ddlRM_SelectedIndexChanged"></asp:DropDownList>
+                                                                                        <asp:Literal ID="ltRMat" runat="server" Text='<%#Eval("FRawM_RawMID")%>' Visible="false"></asp:Literal>
+                                                                                        <asp:RequiredFieldValidator ID="rfvddlRM" runat="server" InitialValue="0" ControlToValidate="ddlRM" Display="Dynamic" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                                                            ErrorMessage="This is required" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                                                    </div>
+                                                                                </ItemTemplate>
+                                                                                <%--<FooterTemplate>
+                                                           <div class="col-md-12">
+                                                                <strong><asp:Label ID="lblGvTotal" runat="server" Text="Total"  Visible="false" CssClass=" MasterGridviewItem"  ></asp:Label></strong>
+                                                            </div>
+                                                        </FooterTemplate>--%>
+                                                                            </asp:TemplateField>
+
+                                                                            <asp:TemplateField HeaderText="Quantity(%)" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader col-md-2" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">
+                                                                                <ItemTemplate>
+                                                                                    <div class="col-md-12">
+                                                                                        <asp:TextBox ID="txtPercentage" runat="server" Text='<%#Convert.ToDouble(Eval("FRawM_Percentage")).ToString("0.00")%>' OnTextChanged="txtPercentage_TextChanged" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');"
+                                                                                            AutoPostBack="true" CssClass="form-control MasterGridviewItem nos decimal "></asp:TextBox>
+                                                                                        <%--<asp:TextBox ID="txtPercentage" runat="server" Text='<%#Bind("QRRawMaterial_Quantity", "0.00")%>' onChange="Calculate(this)" CssClass="form-control MasterGridviewItem nos decimal " ></asp:TextBox>--%>
+                                                                                        <%--<asp:Literal ID="ltQuantity" runat="server" Text='<%#Eval("QRRawMaterial_Quantity")%>' Visible="false"></asp:Literal>--%>
+                                                                                        <asp:RequiredFieldValidator ID="rfvddlQuantity" runat="server" ControlToValidate="txtPercentage" Display="Dynamic" InitialValue="" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                                                            ErrorMessage="This is required" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                                                        <asp:RegularExpressionValidator ID="RegularExpressionValidator1" runat="server" Display="Dynamic" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS" ControlToValidate="txtPercentage" ErrorMessage="0 is not valid."
+                                                                                            ValidationExpression="^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$"></asp:RegularExpressionValidator>
+                                                                                    </div>
+
+                                                                                </ItemTemplate>
+                                                                                <FooterTemplate>
+                                                                                    <div class="col-md-12">
+                                                                                        <b>
+                                                                                            <asp:Label ID="lblPercentFoot" runat="server" Text='<%#Convert.ToDouble(Eval("FRawM_Percentage")).ToString("0.00")%>' Visible="false" CssClass=" MasterGridviewItem"></asp:Label></b>
+                                                                                    </div>
+                                                                                </FooterTemplate>
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Quantity(kg)" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader col-md-2" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">
+                                                                                <ItemTemplate>
+                                                                                    <div class="col-md-12">
+                                                                                        <%--<asp:TextBox ID="TextBox1" runat="server" Text='<%#Convert.ToDouble(Eval("Quantity_kg")).ToString("0.000")%>' OnTextChanged="txtQ_kg_TextChanged"
+                                                                  AutoPostBack="true" CssClass="form-control MasterGridviewItem nos decimal " ></asp:TextBox>--%>
+                                                                                        <asp:TextBox ID="txtQ_kg" runat="server" Text='<%#Convert.ToDouble(Eval("FRawM_QtyKg")).ToString("0.000")%>' OnTextChanged="txtQ_kg_TextChanged" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');"
+                                                                                            AutoPostBack="true" CssClass="form-control MasterGridviewItem nos decimal "></asp:TextBox>
+                                                                                        <%--<asp:TextBox ID="txtQ_kg" runat="server" Text='<%#Bind("QRRawMaterial_Quantity", "0.00")%>' onChange="Calculate(this)" CssClass="form-control MasterGridviewItem nos decimal " ></asp:TextBox>--%>
+                                                                                        <%--<asp:Literal ID="ltQuantity" runat="server" Text='<%#Eval("QRRawMaterial_Quantity")%>' Visible="false"></asp:Literal>--%>
+                                                                                        <asp:RequiredFieldValidator ID="rfvtxtQ_kg" runat="server" ControlToValidate="txtQ_kg" Display="Dynamic" InitialValue="" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                                                            ErrorMessage="This is required" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                                                        <asp:RegularExpressionValidator ID="RegExptxtQ_kg" runat="server" Display="Dynamic" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS" ControlToValidate="txtQ_kg" ErrorMessage="0 is not valid."
+                                                                                            ValidationExpression="^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$"></asp:RegularExpressionValidator>
+                                                                                    </div>
+                                                                                </ItemTemplate>
+                                                                                <FooterTemplate>
+                                                                                    <div class="col-md-12">
+                                                                                        <%--<b><asp:Label ID="lblQuantityFoot" runat="server" Text='<%#Convert.ToDouble(Eval("Quantity_kg")).ToString("0.000")%>'  Visible="false" CssClass=" MasterGridviewItem"  ></asp:Label></b>
+                                                               <br />--%>
+                                                                                        <asp:Label ID="lblQFootError" runat="server" Style="color: red;" Visible="false">Raw Material usage exceeding</asp:Label>
+                                                                                        <%--<asp:CompareValidator ID="cvtxtFoot" runat="server" ControlToValidate="txtQuantityFoot" ControlToCompare="txtQuantity" Operator="GreaterThan" ValidationGroup="MasterGroup" ErrorMessage="Raw Material usage exceeding"
+                                                                                ForeColor="Red" Display="Dynamic" Type="Date"></asp:CompareValidator>--%>
+                                                                                    </div>
+                                                                                </FooterTemplate>
+                                                                            </asp:TemplateField>
+                                                                            <asp:TemplateField HeaderText="Quantity(gm)" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader col-md-2" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">
+                                                                                <ItemTemplate>
+                                                                                    <div class="col-md-12">
+                                                                                        <%--<asp:TextBox ID="TextBox1" runat="server" Text='<%#Convert.ToDouble(Eval("Quantity_gm")).ToString("0.0")%>' OnTextChanged="txtQ_gm_TextChanged" 
+                                                                 AutoPostBack="true" CssClass="form-control MasterGridviewItem nos decimal" ></asp:TextBox>--%>
+                                                                                        <asp:TextBox ID="txtQ_gm" runat="server" Text='<%#Convert.ToDouble(Eval("FRawM_QtyGm")).ToString("0.0")%>' OnTextChanged="txtQ_gm_TextChanged" onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');"
+                                                                                            AutoPostBack="true" CssClass="form-control MasterGridviewItem nos decimal"></asp:TextBox>
+                                                                                        <%--<asp:TextBox ID="txtQ_gm" runat="server" Text='<%#Bind("QRRawMaterial_Quantity", "0.00")%>' onChange="Calculate(this)" CssClass="form-control MasterGridviewItem nos decimal " ></asp:TextBox>--%>
+                                                                                        <%--<asp:Literal ID="ltQuantity" runat="server" Text='<%#Eval("QRRawMaterial_Quantity")%>' Visible="false"></asp:Literal>--%>
+                                                                                        <asp:RequiredFieldValidator ID="rftxtQ_gm" runat="server" ControlToValidate="txtQ_gm" Display="Dynamic" InitialValue="0" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                                                            ErrorMessage="This is required" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                                                        <asp:RegularExpressionValidator ID="RegExptxtQ_gm1" runat="server" Display="Dynamic" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS" ControlToValidate="txtQ_gm" ErrorMessage="0 is not valid."
+                                                                                            ValidationExpression="^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$"></asp:RegularExpressionValidator>
+                                                                                    </div>
+                                                                                </ItemTemplate>
+                                                                                <FooterTemplate>
+                                                                                    <div runat="server" id="divfootvat">
+                                                                                        <asp:Label ID="lblTotCost" runat="server" Visible="false">Total Cost:</asp:Label>
+                                                                                        <%--<br />--%>
+                                                                                        <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" runat="server" id="hr1" visible="false" />
+                                                                                        <asp:Label ID="lblTotCostKg" runat="server" Visible="false">Cost/Kg:</asp:Label>
+                                                                                        <%--<br />--%>
+                                                                                        <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" runat="server" id="hr2" visible="false" />
+                                                                                        <asp:Label ID="lblQuanFoot" runat="server" Visible="false">Total Quantity(Kg):</asp:Label>
+                                                                                        <%--</div>
+                                                           <div class="col-md-12">--%>
+                                                                                        <b>
+                                                                                            <asp:Label ID="lblQGmfoot" runat="server" Visible="false" CssClass=" MasterGridviewItem"></asp:Label></b>
+                                                                                        <%--<b><asp:Label ID="lblQGmfoot" runat="server" Text='<%#Convert.ToDouble(Eval("Quantity_gm")).ToString("0.0")%>'  Visible="false" CssClass=" MasterGridviewItem"  ></asp:Label></b>--%>
+                                                                                        <%--<br />--%>
+                                                                                    </div>
+                                                                                </FooterTemplate>
+                                                                            </asp:TemplateField>
+
+                                                                            <asp:TemplateField HeaderText="Cost" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader col-md-2" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">
+                                                                                <ItemTemplate>
+                                                                                    <div class="col-md-12">
+                                                                                        <asp:TextBox ID="txtCost" runat="server" Text='<%#Convert.ToDouble(Eval("FRawM_Cost")).ToString("0.00")%>' onkeyup="this.value=this.value.replace(/[^\d\.]/g,'');"
+                                                                                            CssClass="form-control MasterGridviewItem" OnTextChanged="txtCost_TextChanged"></asp:TextBox>
+                                                                                        <asp:RequiredFieldValidator ID="RftxtCost" runat="server" ControlToValidate="txtCost" InitialValue="" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                                                                            ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                                                        <asp:RegularExpressionValidator ID="RegExptxtCost" runat="server" Display="Dynamic" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS" ControlToValidate="txtCost" ErrorMessage="0 is not valid."
+                                                                                            ValidationExpression="^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$"></asp:RegularExpressionValidator>
+                                                                                    </div>
+                                                                                </ItemTemplate>
+                                                                                <FooterTemplate>
+                                                                                    <div runat="server" id="divfootvat1">
+                                                                                        <strong>
+                                                                                            <asp:Label ID="lblTotalCost" runat="server" Visible="false"></asp:Label></strong>
+                                                                                        <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" runat="server" id="hr3" visible="false" />
+
+                                                                                        <b>
+                                                                                            <asp:Label ID="lblTotCostGm" runat="server" Visible="false"></asp:Label></b>
+                                                                                        <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" runat="server" id="hr4" visible="false" />
+
+                                                                                        <b>
+                                                                                            <asp:Label ID="lblQuantityFoot" runat="server" Visible="false" CssClass=" MasterGridviewItem"></asp:Label></b>
+                                                                                        <%-- <div id="divCalc" class="btn-group btn-group-xs">
+                                                                    <asp:LinkButton ID="Calc" data-toggle="tooltip" title="Calculate Total" class="btn btn-success" runat="server" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Adding...';"
+                                                                        CommandName="TotalCost" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-calculator"></i></asp:LinkButton>
+                                                            </div>--%>
+                                                                                    </div>
+
+                                                                                </FooterTemplate>
+                                                                            </asp:TemplateField>
+
+                                                                            <asp:TemplateField ItemStyle-Width="10px" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem">
+                                                                                <ItemTemplate>
+                                                                                    <div class="btn-group btn-group-xs">
+                                                                                        <asp:LinkButton ID="lnkdelete" data-toggle="tooltip" title="Delete" class="btn btn-danger" runat="server" OnClientClick="checkdelete();"
+                                                                                            CommandName="deleteLink" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-times"></i></asp:LinkButton>
+                                                                                    </div>
+                                                                                </ItemTemplate>
+                                                                                <FooterTemplate>
+                                                                                    <div id="divLknAdd" class="btn-group btn-group-xs">
+                                                                                        <asp:LinkButton ID="lnkadd" data-toggle="tooltip" title="Add" class="btn btn-info" runat="server" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Adding...';"
+                                                                                            CommandName="AddFormulaNewRow" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-plus"></i></asp:LinkButton>
+                                                                                    </div>
+                                                                                </FooterTemplate>
+                                                                            </asp:TemplateField>
+                                                                        </Columns>
+
+                                                                        <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="Right" BackColor="White" />
+                                                                        <FooterStyle HorizontalAlign="Center" BackColor="White" />
+                                                                        <PagerSettings PageButtonCount="4" />
+                                                                        <EmptyDataTemplate>
+                                                                        </EmptyDataTemplate>
+                                                                        <EmptyDataRowStyle HorizontalAlign="Center" />
+                                                                    </asp:GridView>
+                                                                    <asp:Literal runat="server" ID="Literal4"></asp:Literal>
+                                                                </div>
+                                                            </ContentTemplate>
+                                                            <Triggers>
+                                                                <asp:AsyncPostBackTrigger ControlID="gvLMS" />
+                                                            </Triggers>
+                                                        </asp:UpdatePanel>
+                                                        <div style="clear: both"></div>
+
+                                                        <div id="divBtnForm" runat="server" class="col-md-12" style="margin-bottom: 5px; display: table; margin-top: -8px;">
+                                                            <div class="col-md-6 btn-group btn-group-xs">
+                                                                <User:LMSAssignControl ID="LMSassigncontrol" runat="server" />
+                                                            </div>
+                                                            <div class="pull-right btn-group btn-group-xs">
+                                                                <asp:LinkButton ID="btnCalc" data-toggle="tooltip" Visible="false" title="Calculate Total" class="btn btn-success" runat="server"
+                                                                    OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Adding...';"><i class="fa fa-calculator"></i></asp:LinkButton>
+
+                                                                <%--<asp:Button Text="Save" runat="server" ID="btnSave" Visible="false" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                                        UseSubmitBehavior="false" class="btn btn-xs btn-info" ValidationGroup="MasterGroup" />--%>
+                                                                <%--<asp:LinkButton ID="hfcancel" CausesValidation="false" Text="Cancel" runat="server" NavigateUrl="SampleRequest.aspx" class="btn btn-alt btn-sm btn-danger" TabIndex="15" />--%>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <%--</div>--%>
+                                            <%--</div>--%>
+                                            <%--</div>--%>
+                                            <%-- Formulation Ends --%>
+                                        </ContentTemplate>
+                                        <Triggers>
+                                            <%--  <asp:AsyncPostBackTrigger ControlID="ddltourname" EventName="SelectedIndexChanged" />--%>
+                                        </Triggers>
+                                    </asp:UpdatePanel>
+                                </div>
+                                <div class="col-md-12 ">
+                                    <div class="text-center   btn-group-xs ">
+                                        <asp:UpdatePanel runat="server">
+                                            <ContentTemplate>
+                                                <asp:Button ID="btnFormulationCancel" runat="server" Text="Cancel"
+                                                    UseSubmitBehavior="false" CssClass="btn btn-alt btn-sm btn-primary " />
+                                                <asp:Button ID="btnFormulationSaveApprove" runat="server" Text="Save & Approve" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                    UseSubmitBehavior="false" ValidationGroup="MasterGroup" CssClass="btn btn-alt btn-sm btn-primary " Visible="false" />
+                                                <asp:Button ID="btnFormulationSaveNext" runat="server" Text="Save & Next" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                    UseSubmitBehavior="false" ValidationGroup="MasterGroup" CssClass="btn btn-alt btn-sm btn-primary " Visible="false" />
+
+                                                <%--   <asp:Button ID="BtnSavePayment" runat="server" Text="Save & Payment" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                UseSubmitBehavior="false" ValidationGroup="MasterGroup" CssClass="btn btn-alt btn-sm btn-primary " />--%>
+
+                                                <asp:Button ID="btnFormulationSave" runat="server" Text="Save" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                                    UseSubmitBehavior="false" ValidationGroup="MasterGroup" CssClass="btn btn-alt btn-sm btn-primary" Visible="false" />
+
+                                            </ContentTemplate>
+                                            <Triggers>
+                                                <asp:AsyncPostBackTrigger ControlID="btnSubmit" />
+                                            </Triggers>
+                                        </asp:UpdatePanel>
+
+
+                                    </div>
+                                </div>
+                                <div style="clear: both"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="clear: both"></div>
+
+
+                </div>
+                <%-- Formulation Ends --%>
+                <%--</div>--%>
+            </div>
+
+        </div>
+    </div>
+</asp:Content>
+

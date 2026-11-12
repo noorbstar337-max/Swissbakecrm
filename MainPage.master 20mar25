@@ -1,0 +1,1324 @@
+﻿<%@ Master Language="VB" CodeFile="MainPage.master.vb" Inherits="MainPage" %>
+
+<!DOCTYPE html>
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if IE 9]>         <html class="no-js lt-ie10"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js">
+<!--<![endif]-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+
+    <title>CRM</title>
+    <meta charset="utf-8">
+    <style>
+        .nav > li > a {
+            padding: 10px 20.5px !important;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1.0" />
+    <!-- Icons -->
+    <!-- The following icons can be replaced with your own, they are used by desktop and mobile browsers -->
+    <%-- <link rel="shortcut icon" href="img/favicon.ico">
+   <link rel="apple-touch-icon" href="img/icon57.png" sizes="57x57">
+    <link rel="apple-touch-icon" href="img/icon72.png" sizes="72x72">
+    <link rel="apple-touch-icon" href="img/icon76.png" sizes="76x76">
+    <link rel="apple-touch-icon" href="img/icon114.png" sizes="114x114">
+    <link rel="apple-touch-icon" href="img/icon120.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="img/icon144.png" sizes="144x144">
+    <link rel="apple-touch-icon" href="img/icon152.png" sizes="152x152">--%>
+
+    <!-- END Icons -->
+
+    <!-- Stylesheets -->
+    <!-- Bootstrap is included in its original form, unaltered -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <!-- Related styles of various icon packs and plugins -->
+    <link rel="stylesheet" href="css/plugins.css">
+
+    <!-- The main stylesheet of this template. All Bootstrap overwrites are defined in here -->
+    <link rel="stylesheet" href="css/main.css">
+    <link href="css/Responsive.css" rel="stylesheet" />
+    <!-- Include a specific file here from css/themes/ folder to alter the default theme of the template -->
+
+    <!-- The themes stylesheet of this template (for using specific theme color in individual elements - must included last) -->
+    <link rel="stylesheet" href="css/themes.css">
+    <!-- END Stylesheets -->
+	
+
+    <!-- Modernizr (browser feature detection library) & Respond.js (Enable responsive CSS code on browsers that don't support it, eg IE8) -->
+    <script src="js/vendor/modernizr-2.7.1-respond-1.4.2.min.js"></script>
+
+
+    <style>
+        .sidebar-themes li a {
+            display: block;
+            width: 44px;
+            height: 43px;
+            border-radius: 27px;
+            border-width: 2px;
+            border-style: solid;
+        }
+
+        .profile_td {
+            float: left;
+            border: 0px solid;
+            width: 100%;
+        }
+
+        #GridView1 > tbody > tr > th {
+            display: none;
+        }
+    </style>
+    <style>
+        .nav.navbar-nav-custom > li > a {
+            min-width: 38px;
+            padding: 5px 6px;
+            line-height: 13px;
+            text-align: center;
+            color: #394263;
+            position: relative;
+        }
+
+        .nav.navbar-nav-custom > li {
+            min-height: 25px;
+            float: left;
+        }
+    </style>
+    <script type="text/javascript">
+        function previewFile() {
+            var preview = document.querySelector('#<%#Image1.ClientID%>');
+            var file = document.querySelector('#<%#FileUploadControl.ClientID%>').files[0];
+            var reader = new FileReader();
+
+            reader.onloadend = function () {
+                preview.src = reader.result;
+            }
+            if (file) {
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = "";
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+        function ResetScrollPosition() {
+            setTimeout("window.scrollTo(200,200)", 0);
+        }
+
+    </script>
+    <%--<script>
+        function startTime() {
+            var today = new Date();
+            var h = today.getHours();
+            var m = today.getMinutes();
+            var s = today.getSeconds();
+            m = checkTime(m);
+            s = checkTime(s);
+            document.getElementById('txt').innerHTML = h + ":" + m + ":" + s;
+            var t = setTimeout(function () { startTime() }, 500);
+        }
+
+        function checkTime(i) {
+            if (i < 10) { i = "0" + i };  // add zero in front of numbers < 10
+            return i;
+        }
+</script>--%>
+    <script type="text/javascript">
+        function display_ct() {
+            var time = new Date()
+            var hr = time.getHours()
+            var min = time.getMinutes()
+            var sec = time.getSeconds()
+            var ampm = " PM "
+            if (hr < 12) {
+                ampm = " AM "
+            }
+            if (hr > 12) {
+                hr -= 12
+            }
+            if (hr < 10) {
+                hr = " " + hr
+            }
+            if (min < 10) {
+                min = "0" + min
+            }
+            if (sec < 10) {
+                sec = "0" + sec
+            }
+            var date = new Date()
+            var year = date.getYear()
+            if (year < 1000) {
+                year += 1900
+            }
+            var monthArray = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+            document.getElementById('ct').innerHTML = monthArray[date.getMonth()] + "  " + date.getDate() + ", " + year + "  " + hr + ":" + min + ":" + sec + ampm;
+
+            setTimeout("display_ct()", 1000)
+        }
+    </script>
+    <%--<script type = "text/javascript" >
+        function preventBack() { window.history.forward(); }
+        setTimeout("preventBack()", 0);
+        window.onunload = function () { null };
+</script>--%>
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body onload="display_ct();">
+    <form id="form1" runat="server">
+        <asp:ScriptManager ID="ScriptManager1" runat="server" ScriptMode="Release" LoadScriptsBeforeUI="false">
+        </asp:ScriptManager>
+
+        <%-- <ajaxToolkit:ToolkitScriptManager ID="scriptManager"   LoadScriptsBeforeUI="false" runat="server" ScriptMode="Release" CombineScripts="true"  />--%>
+        <asp:HiddenField ID="HiddenField1" runat="server" />
+        <asp:HiddenField ID="hfimgpath" runat="server" />
+        <div id="page-wrapper">
+
+            <div class="preloader themed-background">
+                <h1 class="push-top-bottom text-light text-center"><strong>CRM</strong></h1>
+                <div class="inner">
+                    <h3 class="text-light visible-lt-ie9 visible-lt-ie10"><strong>Loading..</strong></h3>
+                    <div class="preloader-spinner hidden-lt-ie9 hidden-lt-ie10"></div>
+                </div>
+            </div>
+            <div id="page-container" class="sidebar-no-animations">
+                <!-- Alternative Sidebar -->
+                <div id="sidebar-alt">
+                    <!-- Wrapper for scrolling functionality -->
+
+                    <div class="sidebar-scroll">
+                        <!-- Sidebar Content -->
+
+                        <div class="sidebar-content">
+                            <!-- Chat -->
+                            <!-- Chat demo functionality initialized in js/app.js -> chatUi() -->
+
+                            <!-- Chat Users -->
+
+                            <!-- END Chat Users -->
+
+                            <!-- Chat Talk -->
+
+                            <!--  END Chat Talk -->
+                            <!-- END Chat -->
+
+                            <!-- Activity -->
+
+
+                            <!-- END Activity -->
+
+                            <!-- Messages -->
+
+                            <a class="sidebar-title">
+                                <i class="gi gi-alarm fa-2x pull-right"></i><strong>Reminder</strong> (<asp:Literal ID="ltremindercount" Text="0" runat="server"></asp:Literal>)
+                            </a>
+                            <div class="sidebar-section" style="overflow: auto">
+                                <asp:Repeater ID="rpreminder" runat="server">
+                                    <ItemTemplate>
+                                        <div class="alert alert-alt">
+                                            <%#(DynamicparcelDisplayFunctions.TruncateDescription(Eval("Name"), 30))%><small class="pull-right"><%#((Eval("Rminderdate")))%></small><br>
+                                            <asp:HyperLink ID="hyactivity" runat="server"><strong><%#((Eval("Activity_Subject")))%></strong></asp:HyperLink>
+                                            <asp:LinkButton ID="Hyclose" runat="server" CommandName="dellink" data-toggle="tooltip" title="Close" ForeColor="Red"><strong><i class="fa fa-times"></i></asp:LinkButton>
+                                            <asp:HiddenField ID="hfactivitytype" runat="server" Value='<%#((Eval("Activity_Type")))%>' />
+                                            <asp:HiddenField ID="ActivityID" runat="server" Value='<%#((Eval("Activity_Id")))%>' />
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:Repeater>
+                            </div>
+
+                            <!-- END Messages -->
+                        </div>
+
+                        <!-- END Sidebar Content -->
+                    </div>
+                    <!-- END Wrapper for scrolling functionality -->
+                </div>
+                <!-- END Alternative Sidebar -->
+                <!-- Main Sidebar -->
+
+
+                <div id="sidebar">
+                    <!-- Wrapper for scrolling functionality -->
+                    <div class="sidebar-scroll">
+                        <!-- Sidebar Content -->
+                        <div class="sidebar-content">
+                            <!-- Brand -->
+                            <a href="CRMindex.aspx" class="sidebar-brand">
+                                <strong>
+                                    <asp:Label ID="lblcompany" runat="server">SwissBake</asp:Label></strong>
+
+                            </a>
+
+                            <!-- END Brand -->
+
+                            <!-- User Info -->
+                            <div id="sidebarUser" runat="server" class="sidebar-section sidebar-user clearfix">
+                                <div class="sidebar-user-avatar">
+                                    <a href="CRMindex.aspx">
+                                        <%--<img src="img/placeholders/avatars/avatar2.jpg" alt="avatar"  >--%>
+                                        <asp:Image ID="imgprofileresponsive" runat="server" />
+                                    </a>
+                                </div>
+                                <div class="sidebar-user-name">
+                                    <asp:Label ID="Label1" runat="server" Text="Admin"></asp:Label>
+                                </div>
+                                <div class="sidebar-user-links">
+                                    <a href="#modal-userProfile-settings" data-toggle="modal" data-placement="bottom" title="Profile"><i class="gi gi-user"></i></a>
+                                    <!-- Opens the user settings modal that can be found at the bottom of each page (page_footer.html in PHP version) -->
+                                    <a href="#modal-user-settings" data-toggle="modal" class="enable-tooltip" data-placement="bottom" title="Settings"><i class="gi gi-cogwheel"></i></a>
+                                    <a href="Logout.aspx" data-toggle="tooltip" data-placement="bottom" title="Logout"><i class="gi gi-exit"></i></a>
+                                </div>
+                            </div>
+                            <div id="sidebarUser1" runat="server" class="sidebar-section sidebar-user clearfix">
+                                <div class="sidebar-user-avatar">
+                                    <a href="CRMindex.aspx">
+                                        <%--<img src="img/placeholders/avatars/avatar2.jpg" alt="avatar"  >--%>
+                                        <asp:Image ID="imgprofileresponsive1" runat="server" />
+                                    </a>
+                                </div>
+                                <div class="sidebar-user-name">
+                                    <asp:Label ID="Label2" runat="server" Text="Admin"></asp:Label>
+                                </div>
+                                <div class="sidebar-user-links">
+                                    <a href="#modal-userProfile-settings" data-toggle="modal" data-placement="bottom" title="Profile"><i class="gi gi-user"></i></a>
+                                    <!-- Opens the user settings modal that can be found at the bottom of each page (page_footer.html in PHP version) -->
+                                    <a href="#modal-user-settings" data-toggle="modal" class="enable-tooltip" data-placement="bottom" title="Settings"><i class="gi gi-cogwheel"></i></a>
+                                    <a href="Logout.aspx" data-toggle="tooltip" data-placement="bottom" title="Logout"><i class="gi gi-exit"></i></a>
+                                </div>
+                            </div>
+                             <div id="sidebarUser2" runat="server" class="sidebar-section sidebar-user clearfix" visible="false" >
+                                <div class="sidebar-user-avatar">
+                                    <a href="SupportDashBoard.aspx">
+                                        <%--<img src="img/placeholders/avatars/avatar2.jpg" alt="avatar"  >--%>
+                                        <asp:Image ID="imgprofileresponsive2" runat="server" />
+                                    </a>
+                                </div>
+                                <div class="sidebar-user-name">
+                                    <asp:Label ID="Label3" runat="server" Text="Admin"></asp:Label>
+                                </div>
+                                <div class="sidebar-user-links">
+                                    <a href="#modal-userProfile-settings" data-toggle="modal" data-placement="bottom" title="Profile"><i class="gi gi-user"></i></a>
+                                    <!-- Opens the user settings modal that can be found at the bottom of each page (page_footer.html in PHP version) -->
+                                    <a href="#modal-user-settings" data-toggle="modal" class="enable-tooltip" data-placement="bottom" title="Settings"><i class="gi gi-cogwheel"></i></a>
+                                    <a href="Logout.aspx" data-toggle="tooltip" data-placement="bottom" title="Logout"><i class="gi gi-exit"></i></a>
+                                </div>
+                            </div>
+                            <!-- END User Info -->
+
+                            <!-- Theme Colors -->
+                            <!-- Change Color Theme functionality can be found in js/app.js - templateOptions() -->
+                            <a id="themepath" runat="server"></a>
+
+                            <!-- END Theme Colors -->
+
+                            <!-- Sidebar Navigation -->
+                            <ul id="sidebarResponsive" runat="server" class="sidebar-nav">
+                                <li>
+                                    <a href="index.aspx"><i class="fa fa-area-chart sidebar-nav-icon"></i>Dashboard</a>
+                                </li>
+                                <li class="sidebar-header">
+                                    <span class="sidebar-header-options clearfix"><a href="ModifyCompany.aspx" data-toggle="tooltip" title="Setup"><i class="gi gi-settings"></i></a></span>
+                                    <span class="sidebar-header-title">Company Name</span>
+                                </li>
+                                <li>
+                                    <a href="CRMindex.aspx"><i class="fa fa-fw gi gi-stopwatch icon-push sidebar-nav-icon"></i>Home</a>
+                                </li>
+                                <li>
+                                    <a href="product.aspx"><i class="fa fa-fw fa fa-cubes icon-push sidebar-nav-icon"></i>Product</a>
+                                </li>
+
+                                <li>
+                                    <a href="Lead.aspx"><i class="fa fa-fw gi gi-parents icon-push sidebar-nav-icon"></i>Lead</a>
+                                </li>
+
+                                <li>
+                                    <a href="Prospect.aspx"><i class="fa fa-users sidebar-nav-icon"></i>Prospect</a>
+                                </li>
+                                <%--<li>
+                                    <a href="Campaign.aspx"  ><i class="fa fa-fw gi gi-shop icon-push sidebar-nav-icon"></i>Campaign</a>
+                                </li>--%>
+                                <li>
+                                    <a href="Account.aspx"><i class="fa fa-users sidebar-nav-icon"></i>Account</a>
+                                </li>
+
+                                <li>
+                                    <a href="Activity.aspx"><i class="hi hi-tasks sidebar-nav-icon"></i>Activity</a>
+                                </li>
+                                <li>
+                                    <%--<a href="CRMFeedBacks.aspx"><i class="fa fa-star sidebar-nav-icon"></i>CRM Feedback</a>
+                                            <li><a href="CRMFeedBacks.aspx"><i class="fa fa-star fa-fw pull-right"></i>CRM Feedback</a></li>--%>
+                                </li>
+                                <%-- <li>
+                                    <a href="mainopportunity.aspx"><i class="gi gi-binoculars sidebar-nav-icon"></i>Opportunity</a>
+                                </li>--%>
+                                <li>
+                                    <a href="Discount.aspx"><i class="gi gi-notes_2 sidebar-nav-icon"></i>Discount</a>
+                                </li>
+                                <li>
+                                    <a href="Quotation.aspx"><i class="gi gi-notes_2 sidebar-nav-icon"></i>Quotation</a>
+                                </li>
+                                <li>
+                                    <a href="SalesOrders.aspx"><i class="gi gi-shopping_cart sidebar-nav-icon"></i>Sales Order</a>
+                                </li>
+                                <li>
+                                    <a href="SampleRequest.aspx"><i class="fa fa-retweet sidebar-nav-icon"></i>Sample Request</a>
+                                </li>
+                                <li>
+
+                                    <a href="#" class="sidebar-nav-menu"><i class="fa fa-angle-left sidebar-nav-indicator"></i><i class="fa fa-meh-o sidebar-nav-icon"></i>Support</a>
+                                    <ul>
+                                        <li>
+                                            <a href="CustomerComplaint.aspx">Add Complaint</a>
+                                        </li>
+                                        <li>
+                                            <a href="Solution.aspx">Solutions</a>
+                                        </li>
+                                        <%-- <li> 
+                                            <a href="CommingSoon.aspx">Solution</a>
+                                       </li>--%>
+                                    </ul>
+                                </li>
+                                <li runat="server" visible="false">
+                                    <a href="Addressbook.aspx"><i class="gi gi-book sidebar-nav-icon"></i>Addressbook</a>
+                                </li>
+                                <%--<li>
+                                    <a href="Email.aspx"><i class="fa fa-envelope-o sidebar-nav-icon"></i>Email</a>
+                                </li>--%>
+
+                                <li>
+                                    <a href="MIS_Report.aspx"><i class="fa fa-line-chart sidebar-nav-icon"></i>MIS Reports</a>
+                                </li>
+
+
+                                <%--<li>
+                                    <a href="CommingSoon.aspx" ><i class="fa fa-line-chart sidebar-nav-icon"></i>MIS</a>
+                                </li>--%>
+                                <li class="sidebar-header" id="adminmenu1" runat="server">
+                                    <span class="sidebar-header-options clearfix"><a href="AdminMenu.aspx" data-toggle="tooltip" title="Admin Task"><i class="gi gi-settings"></i></a></span>
+                                    <span class="sidebar-header-title">Admin</span>
+                                </li>
+                                <%--            <li>
+                                    <a href="#" class="sidebar-nav-menu"><i class="fa fa-angle-left sidebar-nav-indicator"></i><i class="fa fa-fw gi gi-parents icon-push sidebar-nav-icon"></i>Lead</a>
+                                    <ul>                                      
+                                         <li>
+                                            <a href="Industry.aspx">Industry</a>
+                                        </li>
+                                        <li>
+                                            <a href="LeadType.aspx">Lead Type</a>
+                                        </li>
+                                        <li>
+                                            <a href="Source.aspx">Source</a>
+                                        </li>
+                                        <li>
+                                            <a href="ContactType.aspx">Contact Type</a>
+                                        </li>                                       
+                                        <li>
+                                            <a href="OpportunityStage.aspx">Opportunity Stage</a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <li>
+                                    <a href="#" class="sidebar-nav-menu"><i class="fa fa-angle-left sidebar-nav-indicator"></i><i class="fa fa-fw gi gi-shop icon-push sidebar-nav-icon"></i>Campaign</a>
+                                    <ul>
+                                        <li>
+                                            <a href="Campaign.aspx">Campaign</a>
+                                        </li>
+                                        <li>
+                                            <a href="CampaignType.aspx">Campaign Type</a>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <li>
+                                    <a href="#" class="sidebar-nav-menu"><i class="fa fa-angle-left sidebar-nav-indicator"></i><i class="fa fa-fw fa fa-cubes icon-push sidebar-nav-icon"></i>Product</a>
+                                    <ul>
+                                        <li>
+                                            <a href="Product.aspx">Products</a>
+                                        </li>
+                                        <li>
+                                            <a href="Category.aspx">Category</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#" class="sidebar-nav-menu"><i class="fa fa-angle-left sidebar-nav-indicator"></i><i class="fa fa-fw gi gi-factory  icon-push sidebar-nav-icon"></i>Company</a>
+                                    <ul>
+                                        <li>
+                                            <a href="User.aspx">User</a>
+                                        </li>
+                                        <li>
+                                            <a href="SalesTarget.aspx">Sales Target</a>
+                                        </li>
+                                        <li>
+                                            <a href="ModifyCompany.aspx">Company Details</a>
+                                        </li>
+                                        <li>
+                                            <a href="department.aspx">Department</a>
+                                        </li>
+                                         <li>
+                                            <a href="designation.aspx">Designation</a>
+                                        </li>                                                                            
+                                        <li>
+                                            <a href="Region.aspx">Region</a>
+                                        </li>
+                                        <li>
+                                            <a href="UserType.aspx">User Group</a>
+                                        </li> 
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#" class="sidebar-nav-menu"><i class="fa fa-angle-left sidebar-nav-indicator"></i><i class="fa fa-fw fa-book icon-push sidebar-nav-icon"></i>Others</a>
+                                    <ul>
+                                        <li>
+                                            <a href="Level.aspx">Level</a>
+                                        </li>
+                                        <li>
+                                            <a href="privilage.aspx">Privilage</a>
+                                        </li>
+                                        <li>
+                                            <a href="Addressbook.aspx">Addressbook</a>
+                                        </li>                                        
+                                        <li>
+                                            <a href="ContactType.aspx">Contact Type</a>
+                                        </li>
+                                        
+                                    </ul>
+                                </li>--%>
+                            </ul>
+                            <ul id="sidebarResponsive1" runat="server" class="sidebar-nav">
+                                <li>
+                                    <a href="CRMindex.aspx">Home</a>
+                                </li>
+                                <li>
+                                    <a href="Rawmaterial.aspx">Item</a>
+                                </li>
+
+                                <li>
+                                    <a href="godown.aspx">Godown</a>
+                                </li>
+
+                                <li>
+                                    <a href="Principle.aspx">Principle</a>
+                                </li>
+                                <li>
+                                    <a href="VendorType.aspx">Vendor Type</a>
+                                </li>
+                                <li>
+                                    <a href="Vendor.aspx">Vendor</a>
+                                </li>
+                                <li>
+                                    <a href="QuotationRequest.aspx">QuotationRequest</a>
+                                </li>
+                                <li>
+                                    <a href="QuotationResponse.aspx">QuotationResponse</a>
+                                </li>
+
+                            </ul>
+                            <ul id="sidebarResponsive2" runat="server" class="sidebar-nav">
+                                <li>
+                                    <a href="index.aspx"><i class="fa fa-area-chart sidebar-nav-icon"></i>Dashboard</a>
+                                </li>
+                                <li class="sidebar-header">
+                                    <span class="sidebar-header-options clearfix"><a href="ModifyCompany.aspx" data-toggle="tooltip" title="Setup"><i class="gi gi-settings"></i></a></span>
+                                    <span class="sidebar-header-title">Company Name</span>
+                                </li>
+                                <li>
+                                    <a href="SupportDashBoard.aspx"><i class="fa fa-fw gi gi-stopwatch icon-push sidebar-nav-icon"></i>Home</a>
+                                </li>
+                                <li>
+
+                                    <a href="#" class="sidebar-nav-menu"><i class="fa fa-angle-left sidebar-nav-indicator"></i><i class="fa fa-meh-o sidebar-nav-icon"></i>Support</a>
+                                    <ul>
+                                        <li>
+                                            <a href="CustomerComplaint.aspx">Add Complaint</a>
+                                        </li>
+                                        <li >
+                                            <a href="Support_Ticket.aspx">Add Ticket</a> 
+                                        </li>
+                                        <li >
+                                            <a href="SupportAddLead.aspx">Add Lead</a> 
+                                        </li>
+                                       <%-- <li>
+                                            <a href="Solution.aspx">Solutions</a>
+                                        </li>--%>
+                                        <%-- <li> 
+                                            <a href="CommingSoon.aspx">Solution</a>
+                                       </li>--%>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <!-- END Sidebar Navigation -->
+
+                            <!-- Sidebar Notifications -->
+
+                            <!-- END Sidebar Notifications -->
+                        </div>
+                        <!-- END Sidebar Content -->
+                    </div>
+                    <!-- END Wrapper for scrolling functionality -->
+                </div>
+                <!-- END Main Sidebar -->
+                <div id="main-container">
+                    <header class="navbar navbar-default">
+                        <!-- Navbar Header -->
+                        <%--<div class="col-xs-12" id="top_menu">
+                  
+              </div>--%>
+                        <div class="navbar-header" style="position: absolute; z-index: 100000;">
+                            <!-- Horizontal Menu Toggle + Alternative Sidebar Toggle Button, Visible only in small screens (< 768px) -->
+                            <%--    <ul class="nav navbar-nav-custom pull-right visible-xs">
+                                
+                                <li>
+                                    <a href="javascript:void(0)" data-toggle="collapse" data-target="#horizontal-menu-collapse">Menu</a>
+                                </li>
+                              
+                            </ul>--%>
+                            <!-- END Horizontal Menu Toggle + Alternative Sidebar Toggle Button -->
+
+                            <!-- Main Sidebar Toggle Button -->
+
+                            <ul class="nav navbar-nav-custom">
+                                <li>
+                                    <a href="javascript:void(0)" onclick="App.sidebar('toggle-sidebar');" id="short_menu">
+                                        <i class="fa fa-bars fa-fw"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                            <!-- END Main Sidebar Toggle Button -->
+                        </div>
+                        <div class="col-xs-12">
+
+                            <div class="col-xs-3" style="padding: 0px;">
+                                <a  href="CRMindex.aspx" style="text-decoration: none;">
+                                    <h3 style="margin-bottom: 20px;"><%--Company Logo --%>
+                                        <%--<asp:Label ID="lblcompanyname"  Font-Bold="true" Font-Size="XX-Large"   runat="server"  Style="border-color: white;"></asp:Label>--%>
+                                        <asp:Label ID="lblcompanyname" runat="server" Font-Bold="true">SwissBake</asp:Label>
+                                    </h3>
+                                </a>
+                            </div>
+                            <div class="col-xs-3" style="padding: 0px;">
+                                <ul class="nav navbar-nav-custom pull-right">
+                                </ul>
+                            </div>
+                            <div class="col-xs-6" style="padding: 0px; float: right; padding-top: 6px;">
+
+                                <ul class="nav navbar-nav-custom pull-right">
+                                    <!-- If you do not want the main sidebar to open when the alternative sidebar is closed, just remove the second parameter: App.sidebar('toggle-sidebar-alt'); -->
+                                    <li class="hidden-xs" id="lidashboard" runat="server"><a href="index.aspx" id="adashboard" runat="server" style="margin-top: -6px; font-size: 14px;">Dashboard</a></li>
+                                    <li>
+                                        <div id="ct" class="label label-danger" style="margin-top: 17px; font-size: 14px;"></div>
+                                    </li>
+                                    <li id="licalendar" runat="server">
+                                        <a href="Calendar.aspx" target="_blank">
+                                            <i class="fa fa-calendar fa-2x" style="font-size: 22px; margin-top: 6px;"></i></a>
+                                    </li>
+                                    <li id="lialarm" runat="server"><a href="javascript:void(0)" onclick="App.sidebar('toggle-sidebar-alt', '');" id="reminderlnk" runat="server" class="animation-pulse">
+                                        <i class="gi gi-alarm fa-2x" style="font-size: 22px; margin-top: 6px;"></i>
+                                        <span class="label label-primary label-indicator">
+                                            <asp:Literal ID="ltrmcount" runat="server"></asp:Literal></span>
+                                    </a>
+                                    </li>
+                                    <!-- User Dropdown -->
+                                    <li class="dropdown">
+                                        <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">
+                                            <%--<img src="img/placeholders/avatars/avatar2.jpg" alt="avatar" id ="imgprofile" runat ="server"/>--%>
+                                            <asp:Image ID="imgprofile" runat="server" />
+                                            <i class="fa fa-angle-down"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-custom dropdown-menu-right">
+                                            <li class="dropdown-header text-center">Account</li>
+                                            <li>
+                                                <a href="#modal-userProfile-settings" data-toggle="modal">
+                                                    <i class="fa fa-user fa-fw pull-right"></i>
+                                                    Profile Settings
+                                                </a>
+                                                <!-- Opens the user settings modal that can be found at the bottom of each page (page_footer.html in PHP version) -->
+                                                <a href="#modal-user-settings" data-toggle="modal">
+                                                    <i class="fa fa-cog fa-fw pull-right"></i>
+                                                    Settings
+                                                </a>
+                                            </li>
+                                            <li class="divider"></li>
+                                            <li id="limonthlyrept" runat="server">
+                                                <a href="MonthlyPerformanceReport.aspx" target="_blank">Monthly Performance Report</a>
+                                            
+                                                <a href="Hierarchy.aspx" target="_blank">Hierarchy</a>
+                                            </li>
+                                            <li id="lidivider" runat="server" class="divider"></li>
+                                            <li>
+                                                <a id="liPersonalDoc" href="personaldocument.aspx"><i class="fa fa-book fa-fw pull-right"></i>Personal Document</a>
+                                                <a id="liCompanyDoc" runat="server" href="companydocument.aspx"><i class="gi gi-book fa-fw pull-right"></i>Company Document</a>
+                                            </li>
+                                            <li class="divider"></li>
+                                            <li>
+                                                <a href="ChangePassword.aspx"><i class="gi gi-keys fa-fw pull-right"></i>Change Password</a>
+                                                <a href="Lock.aspx"><i class="fa fa-lock fa-fw pull-right"></i>Lock Account</a>
+                                                <a href="Logout.aspx"><i class="fa fa-ban fa-fw pull-right"></i>Logout</a>
+                                            </li>
+
+                                        </ul>
+                                    </li>
+                                    <!-- END User Dropdown -->
+                                </ul>
+                            </div>
+
+                        </div>
+                        <div class="col-xs-12" id="large_menu">
+
+                            <!-- Horizontal Menu + Search -->
+                            <div id="horizontal_menu_collapse" runat="server" class="collapse navbar-collapse">
+                                <ul class="nav navbar-nav">
+
+                                    <li>
+                                        <a href="CRMindex.aspx">Home</a>
+                                    </li>
+                                    <li id="adminmenu2" runat="server">
+                                        <a href="AdminMenu.aspx">Admin</a>
+                                    </li>
+                                    <li>
+                                        <a href="product.aspx">Product</a>
+                                    </li>
+                                    <li class="dropdown">
+                                        <a href="LeadNew.aspx" class="dropdown-toggle" data-toggle="dropdown">Leads <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <asp:LinkButton ID="lnkaddlead" runat="server"><i class="fa fa-plus fa-fw pull-right"></i>Add Lead</asp:LinkButton></li>
+                                            <%--<li><a href="Lead.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Leads</a></li>--%>
+                                            <li><a href="LeadNew.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Search Leads</a></li>
+                                            <%--<li><a href="ImportLead.aspx"><i class="hi hi-download-alt fa-fw pull-right"></i>Import Leads</a></li>--%>
+                                        </ul>
+                                    </li>
+                                    <li class="dropdown">
+                                        <a href="ProspectNew.aspx" class="dropdown-toggle" data-toggle="dropdown">Prospects <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <asp:LinkButton ID="lnkaddprospect" runat="server"><i class="fa fa-plus fa-fw pull-right"></i>Add Prospect</asp:LinkButton></li>
+                                            <%--<li><a href="Prospect.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Prospects</a></li>--%>
+                                            <li><a href="ProspectNew.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Search Prospects</a></li>
+                                            <%--<li><a href="ImportProspect.aspx"><i class="hi hi-download-alt fa-fw pull-right"></i>Import Prospects</a></li>--%>
+                                        </ul>
+                                    </li>
+                                    <li class="dropdown">
+                                        <a href="AccountNew.aspx" class="dropdown-toggle" data-toggle="dropdown">Accounts <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <asp:LinkButton ID="lnkaddaccount" runat="server"><i class="fa fa-plus fa-fw pull-right"></i>Add Account</asp:LinkButton></li>
+                                            <%--<li><a href="Account.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Accounts</a></li>--%>
+                                            <li><a href="AccountNew.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Search Accounts</a></li>
+                                            <%--<li><a href="ImportAccount.aspx"><i class="hi hi-download-alt fa-fw pull-right"></i>Import Accounts</a></li>--%>
+                                        </ul>
+                                    </li>
+
+
+                                    <li class="dropdown">
+                                        <a href="ActivityNew.aspx" class="dropdown-toggle" data-toggle="dropdown">Activities <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="<%= "dsr.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>"><i class="fa fa-plus fa-fw pull-right"></i>Add DSR</a></li>
+                                            <li><a href="<%= "Reminder.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>"><i class="fa fa-plus fa-fw pull-right"></i>Add Reminder</a></li>
+                                            <%--<li><a href="<%= "ActivityTask.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>"><i class="fa fa-plus fa-fw pull-right"></i>Add Task</a></li>--%>
+                                            <%--<li><a href="<%= "ActivityEvent.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>"><i class="fa fa-plus fa-fw pull-right"></i>Add Samp./Demo</a></li>--%>
+                                            <%--<li><a href="<%= "ActivityCall.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>"><i class="fa fa-plus fa-fw pull-right"></i>Add Phone/Email</a></li>--%>
+                                            <%--<li><a href="Activity.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Activities</a></li>--%>
+                                            <li><a href="ActivityNew.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Search Activities</a></li>
+                                            <%--  <li><a href="CRMFeedBacks.aspx"><i class="fa fa-star fa-fw pull-right"></i>CRM Feedback</a></li>--%>
+                                        </ul>
+                                    </li>
+                                    <%--    <li >
+                                         <ul class="dropdown-menu">
+                                            <li><a href="Activity.aspx">Activites</a></li>
+                                            <li>
+                                                <a href="<%= "dsr.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">Add DSR</a>
+                                            </li>
+                                        </ul>
+                                    </li>--%>
+                                    <li>
+                                        <a href="Discount.aspx">Discount</a>
+                                    </li>
+                                    <li>
+                                        <a href="QuotationNew.aspx" class="dropdown-toggle" data-toggle="dropdown">Quotation <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="<%= "ModifyQuotation.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0)) + "&returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString))%>"><i class="fa fa-plus fa-fw pull-right"></i>Add Domestic Quote</a></li>
+                                            <li><a href="<%= "ModifyQuotation.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0)) + "&tp=" + HttpUtility.UrlEncode(Security.Encrypt("Export")) + "&returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString))%>"><i class="fa fa-plus fa-fw pull-right"></i>Add Export Quote</a></li>
+                                            <%--<li><a href="Quotation.aspx">Quotation</a></li>--%>
+                                            <li><a href="QuotationNew.aspx">Search Quotation</a></li>
+                                        </ul>
+                                    </li>
+                                    <%-- Modification By Mubyn Start --%>
+                                    <li class="dropdown">
+                                        <a href="SalesOrdersNew.aspx" class="dropdown-toggle" data-toggle="dropdown">Order <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="<%= "ModifySalesOrder.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt("0")) %>"><i class="fa fa-plus fa-fw pull-right"></i>Add Sales Order</a></li>
+                                            <li><a href="<%= "ModifySampleRequest.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt("0")) %>"><i class="fa fa-plus fa-fw pull-right"></i>Add Sample Request</a></li>
+                                            <%--<li><a href="SalesOrders.aspx"><i class="fa fa-reorder fa-fw pull-right"></i>Sales Order</a></li>--%>
+                                            <li><a href="SalesOrdersNew.aspx"><i class="fa fa-reorder fa-fw pull-right"></i>Search Sales Order</a></li>
+                                            <%--<li><a href="SampleRequest.aspx"><i class="fa fa-retweet fa-fw pull-right"></i>Sample Request</a></li>--%>
+                                            <li><a href="SampleRequestNew.aspx"><i class="fa fa-retweet fa-fw pull-right"></i>Search Sample Request</a></li>
+											<%--<li><a href="OrderReportNew.aspx"><i class="fa fa-retweet fa-fw pull-right"></i>Order Report</a></li>--%>
+                                        </ul>
+                                    </li>
+                                    <%-- Modification By Mubyn End --%>
+                                    <li class="dropdown">
+                                        <a href="CommingSoon.aspx" class="dropdown-toggle" data-toggle="dropdown">Support <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="ModifyCustomerComplaint.aspx?ID=jJOtHsRVwYECOhoiBc69dA%3d%3d&returnurl=y"><i class="fa fa-plus fa-fw pull-right"></i>Add Complaint</a></li>
+                                            <li id="li1" runat="server"><a href="Support_Ticket.aspx"><i class="fa fa-plus fa-fw pull-right"></i>Add Ticket</a> </li>
+                                            <li><a href="CustomerComplaint.aspx"><i class="fa fa-plus fa-fw pull-right"></i>Complaint</a></li>
+                                            <li><a href="Solution.aspx"><i class="fa fa-reorder fa-fw pull-right"></i>Solutions</a></li>
+                                            <%--<li><a href="CommingSoon.aspx"><i class="fa fa-life-bouy fa-fw pull-right"></i>Solution</a></li>--%>
+                                            <li id="lib2bsupport" runat="server"><a href="Support.aspx"><i class="fa fa-reorder fa-fw pull-right"></i>B2B Support</a> </li>
+                                        </ul>
+                                    </li>
+
+                                    <li runat="server" visible="false">
+
+                                        <a href="Addressbook.aspx">Address book</a>
+                                    </li>
+
+                                    <%--<li>
+                                        <a href="Email.aspx">Email</a>
+                                    </li>--%>
+                                    <li class="dropdown">
+                                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">MIS <i class="fa fa-angle-down"></i></a>
+                                        <%--<a href="MIS_Report.aspx">MIS</a>--%>
+                                        <ul class="dropdown-menu"> 
+                                             <li><a href="MIS_Report.aspx"><i class="fa fa-plus fa-fw pull-right"></i>MIS Report</a></li>
+                                            <li><a href="OrderReportNew.aspx"><i class="fa fa-retweet fa-fw pull-right"></i>Product Report(Order based)</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <%-- Modification By Mubyn Start --%>
+
+                                    <%-- Modification By Mubyn End --%>
+
+
+                                    <%--<li>
+                                        <a href="CommingSoon.aspx">MIS</a>
+                                    </li>--%>
+                                </ul>
+                                <%--   <form action="page_ready_search_results.html" class="navbar-form navbar-left" role="search">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search..">
+                                </div>
+                            </form>--%>
+                            </div>
+                            <div id="horizontal_menu_collapse1" runat="server" class="collapse navbar-collapse">
+                                <ul class="nav navbar-nav">
+                                    <li>
+                                        <a href="CRMindex.aspx">Home</a>
+                                    </li>
+                                    <li>
+                                        <a href="Rawmaterial.aspx">Item</a>
+                                    </li>
+                                    <%-- <li class="dropdown">
+                                        <a href="Rawmaterial.aspx" class="dropdown-toggle" data-toggle="dropdown">Raw Material <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="Rawmaterial.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Raw Material</a></li>
+                                            <li><asp:LinkButton ID="lkrawmaterial" runat="server" ><i class="fa fa-plus fa-fw pull-right"></i>Add Raw Material</asp:LinkButton></li>
+                                            
+                                        </ul>
+                                    </li>--%>
+                                    <li>
+                                        <a href="godown.aspx">Godown</a>
+                                    </li>
+
+                                    <li>
+                                        <a href="Principle.aspx">Principle</a>
+                                    </li>
+                                    <li>
+                                        <a href="VendorType.aspx">Vendor Type</a>
+                                    </li>
+
+                                    <li class="dropdown">
+                                        <a href="Vendor.aspx" class="dropdown-toggle" data-toggle="dropdown">Vendor <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="Vendor.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Vendor</a></li>
+                                            <li>
+                                                <asp:LinkButton ID="lkVendor" runat="server"><i class="fa fa-plus fa-fw pull-right"></i>Add Vendor</asp:LinkButton></li>
+
+                                        </ul>
+                                    </li>
+
+                                    <li class="dropdown">
+                                        <a href="QuotationRequest.aspx" class="dropdown-toggle" data-toggle="dropdown">Quotation Request <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <%--<li><a href="QuotationRequest.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Quotation Request</a></li>--%>
+                                            <li><a href="QuotationRequestNew.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Search Quotation Request</a></li>
+                                            <li>
+                                                <asp:LinkButton ID="lkQuotationRequest" runat="server"><i class="fa fa-plus fa-fw pull-right"></i>Add Quotation Request</asp:LinkButton></li>
+
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <%--<a href="QuotationResponse.aspx">Vendor Quotations</a>--%>
+                                        <a href="QuotationResponseNew.aspx">Search Vendor Quotations</a>
+                                    </li>
+                                    <li></li>
+                                    <li class="dropdown">
+                                        <a href="POListNew.aspx" class="dropdown-toggle" data-toggle="dropdown">PO List <i class="fa fa-angle-down"></i></a>
+
+                                        <ul class="dropdown-menu">
+                                            <%--<li><a href="POList.aspx"><i class="gi gi-parents fa-fw pull-right"></i>PO List</a></li>--%>
+                                            <li><a href="POListNew.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Search PO List</a></li>
+                                            <li><a href="createmultipo.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Create PO</a></li>
+                                            <li><a href="directpo.aspx"><i class="gi gi-parents fa-fw pull-right"></i>Direct PO</a></li>
+
+                                        </ul>
+                                    </li>
+                                </ul>
+                                <%--   <form action="page_ready_search_results.html" class="navbar-form navbar-left" role="search">
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Search..">
+                                </div>
+                            </form>--%>
+                            </div>
+
+                            <div id="horizontal_menu_collapse2" runat="server" class="collapse navbar-collapse" visible="false">
+                                <ul class="nav navbar-nav">
+
+                                    <li>
+                                        <a href="SupportDashBoard.aspx">Home</a>
+                                    </li>
+                                    <li class="dropdown">
+                                        <a href="CommingSoon.aspx" class="dropdown-toggle" data-toggle="dropdown">Support <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a href="ModifyCustomerComplaint.aspx?ID=jJOtHsRVwYECOhoiBc69dA%3d%3d&returnurl=y"><i class="fa fa-plus fa-fw pull-right"></i>Add Complaint</a></li>
+                                            <li id="li2" runat="server"><a href="Support_Ticket.aspx"><i class="fa fa-plus fa-fw pull-right"></i>Add Ticket</a> </li>
+                                            <li id="liSupAddLead" runat="server"><a href="SupportAddLead.aspx"><i class="fa fa-plus fa-fw pull-right"></i>Add Lead</a> </li>
+                                            <li runat="server" visible="false"><a href="CustomerComplaint.aspx"><i class="fa fa-plus fa-fw pull-right"></i>Complaint</a></li>
+                                            <li runat="server" visible="false"><a href="Solution.aspx"><i class="fa fa-reorder fa-fw pull-right"></i>Solutions</a></li>
+                                            <%--<li><a href="CommingSoon.aspx"><i class="fa fa-life-bouy fa-fw pull-right"></i>Solution</a></li>--%>
+                                            <li id="li3" runat="server" visible="false"><a href="Support.aspx"><i class="fa fa-reorder fa-fw pull-right"></i>B2B Support</a> </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- END Horizontal Menu + Search -->
+                        </div>
+
+                        <!-- END Navbar Header -->
+
+
+
+                    </header>
+                    <!-- END Header -->
+                    <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server">
+                    </asp:ContentPlaceHolder>
+                    <div id="page-content" style="min-height: 600px!important;">
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                        </asp:ContentPlaceHolder>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer -->
+        <footer class="clearfix">
+            <div class="col-xs-12" style="background: #3b434c; padding: 0px; color: #a2abb7;" id="footer_z">
+                <div class="container" style="padding: 15px;">
+                    <div class="pull-right">
+                        Managed by &#64; <a href="http://www.acaira.com/" target="_blank">Acaira Technologies</a>
+                    </div>
+                    <div class="pull-left">
+                        <span id="year-copy"></span>&nbsp;&copy;&nbsp;<a href="CRMindex.aspx" target="_blank">CRM</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- END Footer -->
+        <!-- Scroll to top link, initialized in js/app.js - scrollToTop() -->
+        <a href="#" id="to-top"><i class="fa fa-angle-double-up"></i></a>
+
+
+
+        <%--  User profile settings--%>
+
+        <div id="modal-userProfile-settings" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header text-center">
+                        <h2 class="modal-title"><i class="fa fa-user"></i>Profile Settings</h2>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-horizontal form-bordered">
+                            <fieldset>
+                                <div class="form-horizontal form-bordered">
+                                    <%--<asp:UpdatePanel ID="UpdatePanel5" runat="server">
+                            <ContentTemplate>
+                    <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="U_ID" AlternatingRowStyle-BorderWidth="0" style="border:0px solid;" OnRowCommand="GridView1_RowCommand">
+                        <Columns>
+                            <asp:TemplateField ItemStyle-CssClass="profile_td" ControlStyle-CssClass="profile_td">
+                                <ItemTemplate>
+                                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="col-md-3" for="example-hf-password">First Name :</label>
+                            <div class="col-md-4">
+                                  <asp:TextBox ID="txtEfirstname" runat="server" placeholder="Enter First Name" data-toggle="tooltip" style="width:80%;float:left;" title="First Name" CssClass="form-control" Visible="false" TabIndex ="1" text='<%# Eval("U_FirstName").ToString%>'></asp:TextBox>
+                             
+                                <asp:TextBox ID="txtfirstname" runat="server" placeholder="Enter First Name" data-toggle="tooltip" style="width:80%;float:left;" title="First Name" CssClass="form-control" TabIndex ="1" text='<%# Eval("U_FirstName").ToString%>'></asp:TextBox>
+                                <asp:RequiredFieldValidator ID="rqpagename" Display="Dynamic" runat="server" ControlToValidate="txtfirstname" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                    ErrorMessage="Please enter first name"></asp:RequiredFieldValidator>
+                                <div class="btn-group btn-group-xs" style="float:left;">
+                                                <asp:HyperLink ID="HyperLink1" EnableViewState="false" data-toggle="tooltip" title="Edit" class="btn btn-default" runat="server" CommandName="firstname" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-pencil"></i></asp:HyperLink>
+                                            </div>
+                            </div>
+                        </div>
+                    </div>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                            <asp:TemplateField ItemStyle-CssClass="profile_td" ControlStyle-CssClass="profile_td">
+                                <ItemTemplate>
+                                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="col-md-3" for="example-hf-password">Last Name :</label>
+                            <div class="col-md-4">
+                                   <asp:TextBox ID="txtElastname" runat="server" placeholder="Enter Last Name" data-toggle="tooltip" style="width:80%;float:left;" title="Last Name" CssClass="form-control" TabIndex ="2" Visible="false" text='<%# Eval("U_LastName").ToString%>'></asp:TextBox>
+                                <asp:TextBox ID="txtlastname" runat="server" placeholder="Enter Last Name" data-toggle="tooltip" style="width:80%;float:left;" title="Last Name" CssClass="form-control" TabIndex ="2" text='<%# Eval("U_LastName").ToString%>'></asp:TextBox>
+                                <asp:RequiredFieldValidator ID="RequiredFieldValidator3" Display="Dynamic" runat="server" ControlToValidate="txtlastname" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                    ErrorMessage="Please enter last name"></asp:RequiredFieldValidator>
+                                <div class="btn-group btn-group-xs">
+                                                <asp:HyperLink ID="HyperLink2" EnableViewState="false"
+                                                    data-toggle="tooltip" title="Edit" class="btn btn-default" runat="server" CommandName="lastname" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-pencil"></i></asp:HyperLink>
+                                            </div>
+                            </div>
+                        </div>
+                    </div>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                            <asp:TemplateField ItemStyle-CssClass="profile_td" ControlStyle-CssClass="profile_td">
+                               <ItemTemplate>
+                                   <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="col-md-3" for="example-hf-password">Mobile No :</label>
+                            <div class="col-md-4">
+                                <asp:TextBox ID="txtEmobile" runat="server" MaxLength="10" placeholder="Enter Mobile No" data-toggle="tooltip" style="width:80%;float:left;" title="Mobile No" CssClass="form-control" Visible="false" TabIndex ="4" text='<%# Eval("U_Mobile").ToString%>'></asp:TextBox>
+                                <asp:TextBox ID="txtmobile" runat="server" MaxLength="10" placeholder="Enter Mobile No" data-toggle="tooltip" style="width:80%;float:left;" title="Mobile No" CssClass="form-control" TabIndex ="4" text='<%# Eval("U_Mobile").ToString%>'></asp:TextBox>
+                                <asp:RequiredFieldValidator ID="RequiredFieldValidator5" Display="Dynamic" runat="server" ControlToValidate="txtmobile" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                    ErrorMessage="Please enter a mobile number"></asp:RequiredFieldValidator>
+                                <asp:RegularExpressionValidator ID="RegularExpressionValidator2" Display="Dynamic" ValidationGroup="MasterGroup" runat="server" CssClass="MasterValidationCSS" ErrorMessage="Please enter valid mobile number" ValidationExpression="^[0-9]{10}$" SetFocusOnError="true" ControlToValidate="txtmobile"></asp:RegularExpressionValidator>
+                           <div class="btn-group btn-group-xs">
+                                                <asp:HyperLink ID="HyperLink3" EnableViewState="false"
+                                                    data-toggle="tooltip" title="Edit" class="btn btn-default" runat="server" CommandName="mobileno" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-pencil"></i></asp:HyperLink>
+                                            </div>
+                                 </div>
+                        </div>
+                    </div>
+                               </ItemTemplate>
+                            </asp:TemplateField>
+                            <asp:TemplateField ItemStyle-CssClass="profile_td" ControlStyle-CssClass="profile_td">
+                                <ItemTemplate>
+                                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="col-md-3" for="example-hf-password">Date of Birth :</label>
+                            <div class="col-md-4">
+                                 <asp:TextBox ID="txtEdob" runat="server" TextMode ="Date"  placeholder="Enter DOB" data-toggle="tooltip" style="width:80%;float:left;" title="DOB" CssClass="form-control" Visible="false" TabIndex ="5" text='<%# Eval("U_DOB").ToString%>'></asp:TextBox>
+                                <asp:TextBox ID="txtdob" runat="server" TextMode ="Date"  placeholder="Enter DOB" data-toggle="tooltip" style="width:80%;float:left;" title="DOB" CssClass="form-control" TabIndex ="5" text='<%# CDate(Eval("U_DOB").ToString()).ToString("yyyy-MM-dd")%>'></asp:TextBox>
+                                <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ControlToValidate="txtdob" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                    ErrorMessage="Please enter DOB " Display="Dynamic"></asp:RequiredFieldValidator>
+                                <div class="btn-group btn-group-xs">
+                                                <asp:HyperLink ID="HyperLink4" EnableViewState="false" 
+                                                    data-toggle="tooltip" title="Edit" class="btn btn-default" runat="server" CommandName="dob" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-pencil"></i></asp:HyperLink>
+                                            </div>
+                            </div>
+                        </div>
+                    </div>
+                                </ItemTemplate>
+                            </asp:TemplateField>
+                        </Columns>
+                    </asp:GridView>
+                                </ContentTemplate>
+                                         </asp:UpdatePanel>--%>
+                                </div>
+                                <div class="form-group">
+                                    <asp:UpdatePanel ID="UpdatePanel3" runat="server">
+                                        <ContentTemplate>
+                                            <table class="table table-borderless table-striped" style="margin-bottom: 0px;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="width: 20%;"><strong>First Name</strong></td>
+                                                        <td>
+                                                            <a href="javascript:void(0)">
+                                                                <asp:Literal ID="lblfname" runat="server"></asp:Literal></a>
+                                                            <asp:TextBox ID="txtfirstname" runat="server" Visible="false" OnTextChanged="txtfirstname_TextChanged" AutoPostBack="true"></asp:TextBox>
+                                                            <div class="btn-group btn-group-xs">
+                                                                <asp:LinkButton ID="lbtnFirst" EnableViewState="false"
+                                                                    data-toggle="tooltip" title="Edit" class="btn btn-default" runat="server"><i class="fa fa-pencil"></i></asp:LinkButton>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Last Name</strong></td>
+                                                        <td><a href="javascript:void(0)">
+                                                            <asp:Literal ID="lbllname" runat="server"></asp:Literal></a>
+                                                            <asp:TextBox ID="txtlastname" runat="server" Visible="false" OnTextChanged="txtlastname_TextChanged" AutoPostBack="true"></asp:TextBox>
+                                                            <div class="btn-group btn-group-xs">
+                                                                <asp:LinkButton ID="lbtnLast" EnableViewState="false"
+                                                                    data-toggle="tooltip" title="Edit" class="btn btn-default" runat="server"><i class="fa fa-pencil"></i></asp:LinkButton>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Mobile no.</strong></td>
+                                                        <td><a href="javascript:void(0)">
+                                                            <asp:Literal ID="lblmobile" runat="server"></asp:Literal></a>
+                                                            <asp:TextBox ID="txtmobile" runat="server" Visible="false" OnTextChanged="txtmobile_TextChanged" AutoPostBack="true"></asp:TextBox>
+                                                            <div class="btn-group btn-group-xs">
+                                                                <asp:LinkButton ID="lbtnMobile" EnableViewState="false"
+                                                                    data-toggle="tooltip" title="Edit" class="btn btn-default" runat="server"><i class="fa fa-pencil"></i></asp:LinkButton>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><strong>Date Of Birth</strong></td>
+                                                        <td><a href="javascript:void(0)" class="label label-danger">
+                                                            <asp:Literal ID="lbldate" runat="server"></asp:Literal></a>
+                                                            <asp:TextBox ID="txtdate" runat="server" Visible="false" OnTextChanged="txtdate_TextChanged" AutoPostBack="true"></asp:TextBox>
+                                                            <div class="btn-group btn-group-xs">
+                                                                <asp:LinkButton ID="lbtndate" EnableViewState="false"
+                                                                    data-toggle="tooltip" title="Edit" class="btn btn-default" runat="server"><i class="fa fa-pencil"></i></asp:LinkButton>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </ContentTemplate>
+                                        <Triggers>
+                                            <asp:AsyncPostBackTrigger ControlID="txtfirstname" />
+                                            <asp:AsyncPostBackTrigger ControlID="txtlastname" />
+                                            <asp:AsyncPostBackTrigger ControlID="txtmobile" />
+                                            <asp:PostBackTrigger ControlID="txtdate" />
+                                        </Triggers>
+                                    </asp:UpdatePanel>
+
+
+                                    <asp:UpdatePanel ID="UpdatePanel2" runat="server">
+                                        <ContentTemplate>
+                                            <table class="table table-borderless table-striped">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="width: 20%;"><strong>Upload Image : </strong></td>
+                                                        <td>
+                                                            <input id="FileUploadControl" type="file" name="file" onchange="previewFile()" runat="server" tabindex="1" /><br />
+                                                            <asp:Image ID="Image1" runat="server" Height="100px" Width="100px" />
+                                                            <asp:RegularExpressionValidator ID="RegularExpressionValidatorfileup" runat="server" ValidationGroup="datavalidate" SetFocusOnError="true" ControlToValidate="FileUploadControl"
+                                                                ErrorMessage="Invalid Image File" ForeColor="Red"
+                                                                ValidationExpression="^([0-9a-zA-Z_\-~ :\\])+(.jpg|.JPG|.jpeg|.JPEG|.bmp|.BMP|.gif|.GIF|.png|.PNG)$"> 
+                                                            </asp:RegularExpressionValidator></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+
+                                            <div class="col-md-8">
+                                            </div>
+
+
+                                        </ContentTemplate>
+                                        <Triggers>
+                                            <asp:AsyncPostBackTrigger ControlID="FileUploadControl" />
+                                        </Triggers>
+                                    </asp:UpdatePanel>
+
+                                </div>
+                                <div class="form-group form-actions">
+                                    <div class="col-xs-12 text-right">
+                                        <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">Close</button>
+                                        <asp:LinkButton ID="btnprofilesave" runat="server" class="btn btn-sm btn-primary">Save Changes</asp:LinkButton>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <!-- END Modal Body -->
+                </div>
+            </div>
+        </div>
+
+        <%--User profile setting end--%>
+
+
+
+
+        <!-- User Settings, modal which opens from Settings link (found in top right user menu) and the Cog link (found in sidebar user info) -->
+        <div id="modal-user-settings" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header text-center">
+                        <h2 class="modal-title"><i class="fa fa-pencil"></i>Settings</h2>
+                    </div>
+                    <!-- END Modal Header -->
+
+                    <!-- Modal Body -->
+                    <div class="modal-body">
+                        <div class="form-horizontal form-bordered">
+                            <fieldset>
+                                <legend>Select Theme For Your Profile</legend>
+                                <div class="form-group">
+                                    <ul class="sidebar-section sidebar-themes clearfix" style="background: none;">
+
+                                        <%--  <li id="cl_blue" runat="server">
+                                    <a href="javascript:void(0)" class="themed-background-dark-default themed-border-default" data-theme="cl_blue" data-toggle="tooltip" title="Blue"></a>
+                                </li>--%>
+                                        <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+                                            <ContentTemplate>
+
+
+                                                <li id="cl_night" runat="server">
+                                                    <asp:LinkButton ID="LinkButton1" runat="server" class="themed-background-dark-night themed-border-night" data-theme="css/themes/night.css" data-toggle="tooltip" title="Night"></asp:LinkButton>
+                                                </li>
+                                                <li id="cl_amethyst" runat="server">
+                                                    <asp:LinkButton ID="LinkButton2" runat="server" class="themed-background-dark-amethyst themed-border-amethyst" data-theme="css/themes/amethyst.css" data-toggle="tooltip" title="Amethyst"></asp:LinkButton>
+
+
+                                                </li>
+                                                <li id="cl_modern" runat="server">
+                                                    <asp:LinkButton ID="LinkButton3" runat="server" class="themed-background-dark-modern themed-border-modern" data-theme="css/themes/modern.css" data-toggle="tooltip" title="Modern"></asp:LinkButton>
+
+                                                </li>
+                                                <li id="cl_autumn" runat="server">
+                                                    <asp:LinkButton ID="LinkButton4" runat="server" class="themed-background-dark-autumn themed-border-autumn" data-theme="css/themes/autumn.css" data-toggle="tooltip" title="Autumn"></asp:LinkButton>
+
+                                                </li>
+                                                <li id="cl_flatie" runat="server">
+                                                    <asp:LinkButton ID="LinkButton5" runat="server" class="themed-background-dark-flatie themed-border-flatie" data-theme="css/themes/flatie.css" data-toggle="tooltip" title="Flatie"></asp:LinkButton>
+
+                                                </li>
+                                                <li id="cl_spring" runat="server">
+                                                    <asp:LinkButton ID="LinkButton6" runat="server" class="themed-background-dark-spring themed-border-spring" data-theme="css/themes/spring.css" data-toggle="tooltip" title="Spring"></asp:LinkButton>
+
+
+                                                </li>
+                                                <li id="cl_fancy" runat="server">
+                                                    <asp:LinkButton ID="LinkButton7" runat="server" class="themed-background-dark-fancy themed-border-fancy" data-theme="css/themes/fancy.css" data-toggle="tooltip" title="Fancy"></asp:LinkButton>
+
+
+                                                </li>
+                                                <li id="cl_fire" runat="server">
+                                                    <asp:LinkButton ID="LinkButton8" runat="server" class="themed-background-dark-fire themed-border-fire" data-theme="css/themes/fire.css" data-toggle="tooltip" title="Fire"></asp:LinkButton>
+
+                                                </li>
+
+
+                                            </ContentTemplate>
+                                        </asp:UpdatePanel>
+                                    </ul>
+                                </div>
+
+                                <div class="form-group form-actions">
+                                    <div class="col-xs-12 text-right">
+                                        <button type="button" class="btn btn-sm btn-default" data-dismiss="modal">Close</button>
+
+                                        <asp:LinkButton ID="btnsave" runat="server" class="btn btn-sm btn-primary">Save Changes</asp:LinkButton>
+
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <!-- END Modal Body -->
+                </div>
+            </div>
+        </div>
+        <!-- END User Settings -->
+
+        <!-- Include Jquery library from Google's CDN but if something goes wrong get Jquery from local file (Remove 'http:' if you have SSL) -->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script>!window.jQuery && document.write(decodeURI('%3Cscript src="js/vendor/jquery-1.11.1.min.js"%3E%3C/script%3E'));</script>
+        <script src="js/pages/index.js"></script>
+
+
+
+        <!-- Bootstrap.js, Jquery plugins and Custom JS code -->
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/plugins.js"></script>
+        <script src="js/app.js"></script>
+
+        <script src="js/pages/readyFiles.js"></script>
+        <script>$(function () { ReadyFiles.init(); });</script>
+        <%-- <script type="text/javascript">
+              jQuery(document).ready(function ($) {
+                  $(document).ready(function () {
+                      //your code here
+
+                      $(window).bind("load", function () {
+                          // code here
+
+                          $(function Mandardecimal() {
+                              $('.decimal').keyup(function () {
+                                  var val = $(this).val();
+                                  if (isNaN(val)) {
+                                      val = val.replace(/[^0-9\.]/g, '');
+                                      if (val.split('.').length > 2)
+                                          val = val.replace(/\.+$/, "");
+                                  }
+                                  $(this).val(val);
+                              });
+                          });
+                      });
+                  });
+              });
+    </script>--%>
+        <script type="text/javascript">
+            $(function Mandardecimal() {
+
+                $('.decimal').keyup(function () {
+                    var val = $(this).val();
+                    if (isNaN(val)) {
+                        val = val.replace(/[^0-9\.]/g, '');
+                        if (val.split('.').length > 2)
+                            val = val.replace(/\.+$/, "");
+                    }
+                    $(this).val(val);
+                });
+            });
+        </script>
+        <script src="js/pages/index.js"></script>
+        <script>$(function () { Index.init(); });</script>
+		
+
+		<script type="text/javascript">
+		$(function(){
+		//	$(".chzn-select").chosen();
+		});
+		</script>
+
+        <%--<script type="text/javascript">
+            var prm = Sys.WebForms.PageRequestManager.getInstance();
+            if (prm != null) {
+                alert("prm");
+                prm.add_endRequest(function (sender, e) {
+                    if (sender._postBackSettings.panelsToUpdate != null) {
+                        alert("postBackSettings");
+                        var script = document.createElement('script');
+                        script.type = 'text/javascript';
+                        script.src = "js/vendor/bootstrap.min.js";
+                        $('body').append(script);
+
+                        var script1 = document.createElement('script');
+                        script1.type = 'text/javascript';
+                        script1.src = "js/plugins.js";
+                        $('body').append(script1);
+
+
+                        var script2 = document.createElement('script');
+                        script2.type = 'text/javascript';
+                        script2.src = "js/app.js";
+                        $('body').append(script2);
+
+
+                        var script3 = document.createElement('script');
+                        script3.type = 'text/javascript';
+                        script3.src = "http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js";
+                        $('body').append(script3);
+
+                    }
+                });
+            };
+        </script>--%>
+    </form>
+</body>
+</html>

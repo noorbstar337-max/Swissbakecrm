@@ -1,0 +1,927 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/LMSMasterPage.master" AutoEventWireup="false" CodeFile="ModifyRecipe.aspx.vb" Inherits="ModifyRecipe" %>
+
+<%@ Register TagPrefix="asp" Namespace="AjaxControlToolkit" Assembly="AjaxControlToolkit" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+    <script src="js/jquery.min.js"></script>
+    <script type="text/javascript">
+        function Validate() {
+            var isValid = false;
+            isValid = Page_ClientValidate('MasterGroup2');
+            //if (isValid) {
+            //    isValid = Page_ClientValidate('MasterGroupRecipe');
+            //}
+            //if (isValid) {
+            //    isValid = Page_ClientValidate('MasterGroupProc');
+            //}
+            return isValid;
+        }
+        function ValidateWithGrid() {
+            var isValid = false;
+            isValid = Page_ClientValidate('MasterGroup2');
+            if (isValid) {
+                isValid = Page_ClientValidate('MasterGroupRecipe');
+            }
+            if (isValid) {
+                isValid = Page_ClientValidate('MasterGroupProc');
+            }
+            return isValid;
+        }
+    </script>
+
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" runat="Server">
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <ul class="breadcrumb breadcrumb-top">
+        <li><a href="LMSDashboard.aspx">Home</a></li>
+        <li>Recipe</li>
+        <%----%>
+        <asp:HiddenField ID="strrowcount" runat="server" />
+    </ul>
+    <div class="row">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="block full ">
+                    <div class="block-title ">
+
+                        <h2><strong>Lab Management</strong></h2>
+                    </div>
+                    <ul class="nav nav-pills nav-justified clickable-steps">
+                        <li runat="server" id="liFormulation">
+                            <asp:HyperLink runat="server" ID="lnkFormulation">
+                        <span class="badge pull-right"></span>
+                        <b><i class="gi gi-group themed-color-dark"></i></b><strong>&nbsp;&nbsp;Formulation</strong>
+                            </asp:HyperLink>
+
+                        </li>
+                        <li runat="server" id="liRecipe">
+                            <asp:HyperLink runat="server" ID="lnkRecipe" Style="background-color: #1bbae1;">
+                        <b><i class="fa fa-newspaper-o   themed-color-dark"></i></b>
+                        <strong>&nbsp;&nbsp;Recipe</strong>
+
+                            </asp:HyperLink>
+
+                        </li>
+
+                        <li runat="server" id="liTrial">
+                            <asp:HyperLink runat="server" ID="lnkTrial">
+                        <span class="badge pull-right"></span>
+                        <b><i class="fa fa-gear themed-color-dark"></i></b><strong>&nbsp;&nbsp;Trial</strong>
+                            </asp:HyperLink>
+
+                        </li>
+
+                    </ul>
+                    <br />
+                    <%-- Recipe Starts --%>
+                    <%--<div class="block full ">--%>
+                    <div class="widget">
+                        <asp:HiddenField ID="hfddlId" runat="server" />
+                        <asp:HiddenField ID="hfGridId" runat="server" />
+                        <asp:HiddenField ID="hfGroup" runat="server" />
+
+                        <%--<div class="block full ">--%>
+                        <div class="widget-extra themed-background-dark">
+                            <h5 class="widget-content-light abc">
+                                <asp:UpdatePanel runat="server">
+                                    <ContentTemplate>
+                                        <strong>Recipe (<asp:Label ID="lblRecipeNo" runat="server" data-toggle="tooltip" title="Recipe No."></asp:Label>
+                                            <asp:Label runat="server" ID="lblType" Style="color: white; text-align: center;"></asp:Label>)</strong>
+                                        <strong>
+                                            <asp:Label runat="server" ID="lblapproved" Style="color: white;"></asp:Label></strong>
+                                         <a runat="server" ID="btnprint" class="btn btn-alt btn-xs btn-primary" target="_blank" style="margin-left:10px;">Print</a>                                
+                                <a runat="server" ID="btnprintblank" class="btn btn-alt btn-xs btn-primary" target="_blank">Print Blank</a> </strong>
+                                        <%--<strong style="text-align:center"><asp:Label runat="server" ID="lblType" Style="color:white; text-align:center;"></asp:Label></strong>--%>
+                                        <span class="pull-right" id="modifyspan" runat="server">By&nbsp;<a style="text-decoration: none;"><asp:Label ID="lblmodifiedname" runat="server" Font-Bold="true"></asp:Label></a>&nbsp;on&nbsp;<a style="text-decoration: none;"><asp:Label ID="lblmodifieddate" Font-Bold="true" runat="server" Font-Italic="true"></asp:Label></a>
+                                        </span>
+                                    </ContentTemplate>
+                                    <Triggers>
+                                        <%--<asp:AsyncPostBackTrigger ControlID="btnSubmit" />--%>
+                                    </Triggers>
+                                </asp:UpdatePanel>
+                            </h5>
+                        </div>
+
+                        <div class="block full ">
+
+                            <div class="widget-extra-full">
+                                <div class="form-horizontal form-bordered form-group ">
+                                    <%-- Recipe Starts --%>
+                                    <%--<div class="col-md-12">--%>
+                                    <%--<div class="widget">--%>
+
+                                    <asp:HiddenField ID="HiddenField1" runat="server" />
+
+                                    <%--<div class="block" style="display: table; width: 100%;">--%>
+                                    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+                                        <ContentTemplate>
+                                            <div id="divFormulationType" runat="server" class="col-md-3">
+                                                <label for="example-nf-email" class="col-md-6">Formulation Type</label>
+                                                <div class="col-md-6">
+                                                    <asp:DropDownList ID="ddlFormulationType" runat="server" data-toggle="tooltip" title="Select Product Type" CssClass="form-control select-chosen" TabIndex="1" AutoPostBack="true">
+                                                        <asp:ListItem Value="0">Existing Product</asp:ListItem>
+                                                        <asp:ListItem Value="1">New Product</asp:ListItem>
+                                                        <asp:ListItem Value="2">Competitor Product</asp:ListItem>
+                                                    </asp:DropDownList>
+                                                    <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ControlToValidate="ddlFormulationType" ValidationGroup="MasterGroup2" CssClass="MasterValidationCSS"
+                                                        ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                    <br />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3" id="divDDLProduct" runat="server">
+                                                <label for="example-nf-email" class="col-md-3">Product </label>
+                                                <div class="col-md-9">
+                                                    <asp:DropDownList ID="ddlProduct" runat="server" AutoPostBack="true" data-toggle="tooltip" title="Select Product" CssClass="form-control select-chosen" TabIndex="2">
+                                                    </asp:DropDownList>
+                                                    <asp:RequiredFieldValidator ID="RequiredFieldValidator3" runat="server" ControlToValidate="ddlProduct" ValidationGroup="MasterGroup2" CssClass="MasterValidationCSS"
+                                                        ErrorMessage="This is required" InitialValue="Select Product" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" id="divTxtProduct" runat="server" visible="false">
+                                                <label for="example-nf-email" class="col-md-3">Product </label>
+                                                <div class="col-md-9">
+                                                    <asp:TextBox ID="txtProduct" runat="server" data-toggle="tooltip" placeholder="Enter Product" title="Enter Product" CssClass="form-control" TabIndex="2">
+                                                    </asp:TextBox>
+                                                    <asp:RequiredFieldValidator ID="RequiredFieldValidator4" runat="server" ControlToValidate="txtProduct" ValidationGroup="MasterGroup2" CssClass="MasterValidationCSS"
+                                                        ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                </div>
+                                            </div>
+                                            <div id="divFormulationNo" runat="server" class="col-lg-3">
+                                                <label for="example-nf-email" class="col-md-4">Formulation No.</label>
+                                                <div class="col-md-8">
+                                                    <asp:DropDownList ID="ddlFormulationNo" runat="server" data-toggle="tooltip" title="Select Formulation No" CssClass="form-control select-chosen" TabIndex="1" AutoPostBack="true">
+                                                    </asp:DropDownList>
+                                                    <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" ControlToValidate="ddlFormulationNo" ValidationGroup="MasterGroup2" CssClass="MasterValidationCSS"
+                                                        ErrorMessage="This is required" InitialValue="0" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                </div>
+                                            </div>
+                                            <%--<div class="col-lg-3">
+                                                <label for="example-nf-email" class="col-md-6">Recipe No.</label>
+                                                <div class="col-md-6">
+                                                   <asp:Label ID="lblRecipeNo" runat="server" data-toggle="tooltip" CssClass="form-control"></asp:Label>
+                                                </div>
+                                            </div>
+
+                                            <%-- <div class="col-md-3" id="div4" runat="server">
+                                                        <label for="example-nf-email" class="col-md-6">Mix Type</label>
+                                                        <div class="col-md-6">
+                                                            <asp:DropDownList ID="ddlMixTypeRecipe" runat="server" data-toggle="tooltip" title="Select Product" CssClass="form-control select-chosen" TabIndex="2">
+                                                                <asp:ListItem Value="Bread">Bread</asp:ListItem>
+                                                                <asp:ListItem Value="Cake">Cake</asp:ListItem>
+                                                            </asp:DropDownList>
+                                                        </div>
+                                                        <asp:Label ID="Label25" runat="server" Style="color: red;" Visible="false">Please update Mix Type of selected Product</asp:Label>
+                                                    </div>
+
+                                            <div class="col-md-1 pull-right">
+                      <asp:Button Text="Submit" runat="server" ID="btnSubmit" OnClientClick="if (!Page_ClientValidate('MasterGroup2')){ return false; } this.disabled = true; this.value = 'Exploring...';"
+                        UseSubmitBehavior="false" class="btn btn-xs btn-success" ValidationGroup="MasterGroup2" OnClick="btnSubmit_Click" Visible="false" />  </div>    --%>
+                                            <div style="clear: both"></div>
+                                        </ContentTemplate>
+                                        <Triggers>
+                                            <%--  <asp:PostBackTrigger ControlID="gvLMS" />--%>
+                                        </Triggers>
+                                    </asp:UpdatePanel>
+
+                                    <asp:UpdatePanel ID="UpdatePanel3" runat="server">
+                                        <ContentTemplate>
+                                            <div class="col-md-12">
+                                                <asp:Label runat="server" class="col-md-1"><h6><strong>Machines</strong></h6></asp:Label>
+                                                <div class="col-md-11">
+                                                    <div class="col-md-2">
+                                                        <label for="example-nf-email" class="col-md-4">
+                                                            <h6>Mixer</h6>
+                                                        </label>
+                                                        <div class="col-md-8">
+                                                            <asp:DropDownList ID="ddlMixer" runat="server" data-toggle="tooltip" title="Select Machine 1" CssClass="form-control select-chosen" TabIndex="1">
+                                                                <asp:ListItem Value="0">A1</asp:ListItem>
+                                                                <asp:ListItem Value="1">A2</asp:ListItem>
+                                                                <asp:ListItem Value="2">A3</asp:ListItem>
+                                                            </asp:DropDownList>
+                                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator7" runat="server" ControlToValidate="ddlMixer" ValidationGroup="MasterGroup2" CssClass="MasterValidationCSS"
+                                                                ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                            <br />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label for="example-nf-email" class="col-md-4">
+                                                            <h6>Blade</h6>
+                                                        </label>
+                                                        <div class="col-md-8">
+                                                            <asp:DropDownList ID="ddlBlade" runat="server" data-toggle="tooltip" title="Select Machine 2" CssClass="form-control select-chosen" TabIndex="1">
+                                                                <asp:ListItem Value="0">B1</asp:ListItem>
+                                                                <asp:ListItem Value="1">B2</asp:ListItem>
+                                                                <asp:ListItem Value="2">B3</asp:ListItem>
+                                                            </asp:DropDownList>
+                                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator8" runat="server" ControlToValidate="ddlBlade" ValidationGroup="MasterGroup2" CssClass="MasterValidationCSS"
+                                                                ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                            <br />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label for="example-nf-email" class="col-md-4">
+                                                            <h6>Mould</h6>
+                                                        </label>
+                                                        <div class="col-md-8">
+                                                            <asp:DropDownList ID="ddlMould" runat="server" data-toggle="tooltip" title="Select Machine 3" CssClass="form-control select-chosen" TabIndex="1">
+                                                                <asp:ListItem Value="0">C1</asp:ListItem>
+                                                                <asp:ListItem Value="1">C2</asp:ListItem>
+                                                                <asp:ListItem Value="2">C3</asp:ListItem>
+                                                            </asp:DropDownList>
+                                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator9" runat="server" ControlToValidate="ddlMould" ValidationGroup="MasterGroup2" CssClass="MasterValidationCSS"
+                                                                ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                            <br />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label for="example-nf-email" class="col-md-4">
+                                                            <h6>Oven</h6>
+                                                        </label>
+                                                        <div class="col-md-8">
+                                                            <asp:DropDownList ID="ddlOven" runat="server" data-toggle="tooltip" title="Select Machine 4" CssClass="form-control select-chosen" TabIndex="1">
+                                                                <asp:ListItem Value="0">D1</asp:ListItem>
+                                                                <asp:ListItem Value="1">D2</asp:ListItem>
+                                                                <asp:ListItem Value="2">D3</asp:ListItem>
+                                                            </asp:DropDownList>
+                                                            <asp:RequiredFieldValidator ID="RequiredFieldValidator10" runat="server" ControlToValidate="ddlOven" ValidationGroup="MasterGroup2" CssClass="MasterValidationCSS"
+                                                                ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                            <br />
+                                                        </div>
+                                                    </div>
+                                                    <%--<div id="divQuantityRecipe" class="col-md-3" runat="server" visible="false">
+                                                        <label for="example-nf-email" class="col-md-5">Quantity(KG) </label>
+                                                        <div class="col-md-7">
+                                                            <asp:TextBox ID="txtQuantityRecipe" runat="server" data-toggle="tooltip" placeholder="Enter Quantity" title="Enter Quantity" CssClass="form-control decimal" TabIndex="3">
+                                                            </asp:TextBox>
+                                                            <asp:Label ID="Label26" runat="server" Style="color: red;" Visible="false">This is required</asp:Label>
+                                                            <asp:RequiredFieldValidator ID="rFtxtQuantityRecipe" runat="server" ControlToValidate="txtQuantityRecipe" ValidationGroup="MasterGroup2" CssClass="MasterValidationCSS"
+                                                                ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                            <asp:RegularExpressionValidator ID="rEtxtQuantityRecipe" runat="server" Display="Dynamic" ValidationGroup="MasterGroup2" CssClass="MasterValidationCSS" ControlToValidate="txtQuantityRecipe" ErrorMessage="0 is not valid."
+                                                                ValidationExpression="^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$"></asp:RegularExpressionValidator>
+                                                        </div>
+                                                    </div>--%>
+                                                </div>
+                                            </div>
+                                            <div style="clear: both"></div>
+                                            <br />
+                                        </ContentTemplate>
+                                        <Triggers>
+                                            <%--  <asp:PostBackTrigger ControlID="gvLMS" />--%>
+                                        </Triggers>
+                                    </asp:UpdatePanel>
+
+                                    <asp:UpdatePanel ID="UpdatePanel9" runat="server">
+                                        <ContentTemplate>
+                                            <div id="divRecipeHistory" runat="server" class="col-md-12" visible="false">
+                                                <div id="faq188f" class="panel-group">
+                                                    <div class="panel panel-default">
+                                                        <div class="panel-heading">
+                                                            <h4 class="panel-title"><a class="accordion-toggle" data-toggle="collapse" data-parent="#faq188f" href="#faq188f_q188">
+                                                                <asp:UpdatePanel ID="UpdatePanel4" runat="server" UpdateMode="Conditional">
+                                                                    <ContentTemplate>
+                                                                        <asp:Label ID="lblRecipeHistory" Text="Recipe History" runat="server"></asp:Label>
+                                                                    </ContentTemplate>
+                                                                    <Triggers>
+                                                                        <asp:AsyncPostBackTrigger ControlID="ddlFormulationNo" />
+                                                                    </Triggers>
+                                                                </asp:UpdatePanel>
+                                                            </a>
+                                                            </h4>
+                                                        </div>
+                                                        <div id="faq188f_q188" class="panel-collapse collapse in" style="max-height: 303px; overflow: auto;">
+                                                            <div class="col-md-12">
+                                                                <br />
+                                                                <div id="faq1881" class="panel-group" runat="server">
+                                                                    <asp:UpdatePanel ID="UpdatePanel2" runat="server">
+                                                                        <%--<asp:UpdatePanel ID="UpdatePanel2" runat="server" UpdateMode="Conditional">--%>
+                                                                        <ContentTemplate>
+                                                                            <asp:Repeater ID="rpRecipeHistory" runat="server">
+                                                                                <ItemTemplate>
+
+                                                                                    <div class="panel panel-default">
+                                                                                        <div class="panel-heading">
+                                                                                            <h4 class="panel-title"><a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#faq1881" href='<%#"#" + Eval("Recipe_Id").ToString%>'>
+                                                                                                <asp:UpdatePanel ID="UpdatePanel5" runat="server">
+                                                                                                    <ContentTemplate>
+                                                                                                        <asp:Label ID="lblRecipe_No" runat="server" Text='<%#Eval("Recipe_No")%>'></asp:Label>
+                                                                                                        <asp:Label ID="lblRecipe_Id" runat="server" Text='<%#Eval("Recipe_Id")%>' Visible="false"></asp:Label>
+                                                                                                        <asp:LinkButton ID="btnCopyRecipe" Text="Copy Recipe" runat="server" class="btn btn-xs btn-success pull-right" CommandName="CopyRecipe" />
+                                                                                                        <%-- <div class="pull-right">
+                                                                <asp:Label ID="lblAmt" runat="server" Text='<%#Eval("Amount")%>'></asp:Label>
+                                                                <asp:HyperLink ID="hledit" EnableViewState="false" NavigateUrl='<%# "ModifyExpense.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(Eval("Ex_Id").ToString()))%>'
+                                                                    class="btn btn-alt btn-xs btn-primary" runat="server"><i class="fa fa-pencil"></i></asp:HyperLink>
+                                                            </div>--%>
+                                                                                                    </ContentTemplate>
+
+                                                                                                </asp:UpdatePanel>
+                                                                                            </a></h4>
+                                                                                        </div>
+                                                                                        <div id='<%#Eval("Recipe_Id").ToString%>' class="panel-collapse collapse" style="height: 0px; max-height: 100px; overflow: auto;">
+                                                                                            <div class="panel-body">
+                                                                                                <%--<asp:LinkButton ID="LinkButton1" Text="" runat="server" />--%>
+                                                                                                <%--<asp:LinkButton ID="btnCopyRecipe" Text="Copy Recipe" runat="server" class="btn btn-xs btn-success pull-right" CommandName="CopyRecipe" />--%>
+                                                                                                <div style="clear: both"></div>
+
+                                                                                                <div class="col-md-6" style="border: 1px solid Black;">
+                                                                                                    <asp:Label runat="server"><b><small>Ingredients</small></b></asp:Label>
+                                                                                                    <div class="table-responsive">
+                                                                                                        <asp:GridView ID="gvRecipeIngDisplay" ShowFooter="true" GridLines="None" CssClass="table table-striped table-vcenter" HeaderStyle-Width="100"
+                                                                                                            HeaderStyle-Font-Bold="true" HeaderStyle-Font-Size="Smaller" CellPadding="0" CellSpacing="0" runat="server" AutoGenerateColumns="false">
+                                                                                                            <Columns>
+                                                                                                                <asp:TemplateField HeaderText="Name" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                                                                                    <HeaderTemplate>
+                                                                                                                        <asp:HyperLink ID="HyperLink11" runat="server">Name</asp:HyperLink>
+                                                                                                                    </HeaderTemplate>
+                                                                                                                    <ItemTemplate>
+                                                                                                                        <asp:Literal ID="ltproductname" runat="server" Text='<%#Eval("RecipeIngredient_Name")%>'></asp:Literal>
+                                                                                                                        <asp:Literal ID="ltitemid" runat="server" Text='<%#Eval("RecipeIngredient_Name")%>' Visible="false"></asp:Literal>
+
+                                                                                                                    </ItemTemplate>
+                                                                                                                </asp:TemplateField>
+                                                                                                                <asp:TemplateField HeaderText="Value" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                                                                                    <HeaderTemplate>
+                                                                                                                        <asp:HyperLink ID="HyperLink12" runat="server">Value</asp:HyperLink>
+                                                                                                                    </HeaderTemplate>
+                                                                                                                    <ItemTemplate>
+                                                                                                                        <asp:Literal ID="ltproductcode" runat="server" Text='<%#Eval("RecipeIngredient_Value")%>'></asp:Literal>
+                                                                                                                        <asp:Label ID="ltitemtypeid" runat="server" Text='<%#Eval("RecipeIngredient_Value")%>' Visible="false"></asp:Label>
+                                                                                                                    </ItemTemplate>
+                                                                                                                </asp:TemplateField>
+                                                                                                                <asp:TemplateField HeaderText="Percent" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                                                                                    <HeaderTemplate>
+                                                                                                                        <asp:HyperLink ID="HyperLink13" runat="server">Percent</asp:HyperLink>
+                                                                                                                    </HeaderTemplate>
+                                                                                                                    <ItemTemplate>
+                                                                                                                        <asp:Literal ID="ltproductWeight" runat="server" Text='<%#Eval("RecipeIngredient_Percent")%>' Visible="false"></asp:Literal>
+                                                                                                                        <asp:Literal ID="ltIngredient_Percent" runat="server" Text='<%#Eval("RecipeIngredient_Percent")%>'></asp:Literal>
+                                                                                                                    </ItemTemplate>
+                                                                                                                </asp:TemplateField>
+
+                                                                                                            </Columns>
+                                                                                                            <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="left" BackColor="White" />
+                                                                                                            <FooterStyle HorizontalAlign="left" BackColor="White" />
+                                                                                                            <PagerSettings PageButtonCount="4" />
+                                                                                                            <EmptyDataTemplate>
+                                                                                                                <asp:Label ID="lblError" runat="server" Text="No Data Found"></asp:Label><br />
+                                                                                                                <br />
+                                                                                                            </EmptyDataTemplate>
+                                                                                                            <EmptyDataRowStyle HorizontalAlign="Center" />
+                                                                                                        </asp:GridView>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                                <div class="col-md-6" style="border: 1px solid Black;">
+                                                                                                    <asp:Label runat="server"><b><small>Procedure</small></b></asp:Label>
+                                                                                                    <div class="table-responsive">
+                                                                                                        <asp:GridView ID="gvRecipeProcDisplay" ShowFooter="true" GridLines="None" CssClass="table table-striped table-vcenter" HeaderStyle-Width="100"
+                                                                                                            HeaderStyle-Font-Bold="true" HeaderStyle-Font-Size="Smaller" CellPadding="0" CellSpacing="0" runat="server" AutoGenerateColumns="false">
+                                                                                                            <Columns>
+                                                                                                                <asp:TemplateField HeaderText="Step" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                                                                                    <HeaderTemplate>
+                                                                                                                        <asp:HyperLink ID="HyperLink11" runat="server">Step</asp:HyperLink>
+                                                                                                                    </HeaderTemplate>
+                                                                                                                    <ItemTemplate>
+                                                                                                                        <asp:Literal ID="ltproductname" runat="server" Text='<%#Eval("RecipeProcedure_Step")%>'></asp:Literal>
+                                                                                                                        <asp:Literal ID="ltitemid" runat="server" Text='<%#Eval("RecipeProcedure_Step")%>' Visible="false"></asp:Literal>
+                                                                                                                    </ItemTemplate>
+                                                                                                                </asp:TemplateField>
+                                                                                                                <asp:TemplateField HeaderText="Term" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                                                                                    <HeaderTemplate>
+                                                                                                                        <asp:HyperLink ID="HyperLink12" runat="server">Term</asp:HyperLink>
+                                                                                                                    </HeaderTemplate>
+                                                                                                                    <ItemTemplate>
+                                                                                                                        <asp:Literal ID="ltproductcode" runat="server" Text='<%#Eval("RecipeProcedure_Term")%>'></asp:Literal>
+                                                                                                                        <asp:Label ID="ltitemtypeid" runat="server" Text='<%#Eval("RecipeProcedure_Term")%>' Visible="false"></asp:Label>
+                                                                                                                    </ItemTemplate>
+                                                                                                                </asp:TemplateField>
+                                                                                                                <asp:TemplateField HeaderText="Time" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                                                                                    <HeaderTemplate>
+                                                                                                                        <asp:HyperLink ID="HyperLink13" runat="server">Time</asp:HyperLink>
+                                                                                                                    </HeaderTemplate>
+                                                                                                                    <ItemTemplate>
+                                                                                                                        <asp:Literal ID="ltproductWeight" runat="server" Text='<%#Eval("RecipeProcedure_Time")%>' Visible="false"></asp:Literal>
+                                                                                                                        <asp:Literal ID="ltpackingpacking" runat="server" Text='<%#Eval("RecipeProcedure_Time")%>'></asp:Literal>
+                                                                                                                    </ItemTemplate>
+                                                                                                                </asp:TemplateField>
+
+                                                                                                            </Columns>
+                                                                                                            <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="left" BackColor="White" />
+                                                                                                            <FooterStyle HorizontalAlign="left" BackColor="White" />
+                                                                                                            <PagerSettings PageButtonCount="4" />
+                                                                                                            <EmptyDataTemplate>
+                                                                                                                <asp:Label ID="s" runat="server" Text="No Data Found"></asp:Label><br />
+                                                                                                                <br />
+                                                                                                            </EmptyDataTemplate>
+                                                                                                            <EmptyDataRowStyle HorizontalAlign="Center" />
+                                                                                                        </asp:GridView>
+                                                                                                    </div>
+                                                                                                </div>
+
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                </ItemTemplate>
+                                                                            </asp:Repeater>
+                                                                        </ContentTemplate>
+                                                                        <Triggers>
+
+                                                                            <asp:AsyncPostBackTrigger ControlID="rpRecipeHistory" />
+                                                                            <asp:AsyncPostBackTrigger ControlID="ddlFormulationNo" />
+                                                                        </Triggers>
+                                                                    </asp:UpdatePanel>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ContentTemplate>
+                                        <Triggers>
+                                            <%--  <asp:PostBackTrigger ControlID="gvLMS" />--%>
+                                        </Triggers>
+                                    </asp:UpdatePanel>
+
+                                    <%-- </div>
+                                    <div class="block" style ="display:table;width:100%;">--%>
+                                    <div class="col-md-6" style="border-right: 1px dotted red; border-top: 2px dotted red;">
+                                        <h6><strong>Ingredients</strong></h6>
+                                        <div class="table-responsive">
+                                            <div class="widget-extra-full">
+                                                <div class="form-horizontal">
+
+
+                                                    <asp:UpdatePanel ID="UpdatePanel5" runat="server">
+                                                        <ContentTemplate>
+                                                            <asp:HiddenField ID="hfFRNo" runat="server" />
+                                                            <div class="table-responsive">
+                                                                <table class="table table-vcenter  table-responsive" style="margin-bottom: 0;">
+                                                                    <tr style="background-color:#f9f9f9">
+                                                                        <td class="text-center "  style="font-size: 12px; font-weight: 600;">
+                                                                            <b>Name</b>
+                                                                        </td>
+                                                                        <td class="text-center" style="font-size: 12px; font-weight: 600;">
+                                                                            <b>Value</b>
+                                                                        </td>
+                                                                        <td class="text-center " style="font-size: 12px; font-weight: 600;">
+                                                                            <b>Percentage</b>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td class="text-center ">
+                                                                            <asp:Label runat="server" ID="lblFormNoTab"></asp:Label>
+                                                                        </td>
+                                                                        <td class="text-center "></td>
+                                                                        <td class="text-center "></td>
+                                                                    </tr>
+                                                                </table>
+                                                                <asp:GridView ID="gvIngredient" runat="server" AutoGenerateColumns="False" DataKeyNames="" AllowCustomPaging="true"
+                                                                    CssClass="table table-striped table-vcenter table-condensed" ShowFooter="true" GridLines="None">
+                                                                    <Columns>
+                                                                        <asp:BoundField DataField="RowNumber" Visible="false" />
+
+                                                                        <%--<asp:TemplateField HeaderText="Sr No." Visible="False" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="">--%>
+                                                                        <asp:TemplateField HeaderText="Sr No." Visible="False" >
+                                                                            <ItemTemplate>
+                                                                                <div class="input-group  col-md-12">
+                                                                                    <div class="text-center">
+                                                                                        <asp:Literal ID="ltRowNumberIng" runat="server" Text='<%#Eval("RowNumber")%>' Visible="False"></asp:Literal>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </ItemTemplate>
+                                                                        </asp:TemplateField>
+
+                                                                        <%--<asp:TemplateField HeaderText="Name" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="text-center col-md-6" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">--%>
+                                                                        <asp:TemplateField HeaderStyle-CssClass="text-center ">
+                                                                            <%-- <HeaderTemplate>Name<br>  
+                                                                               <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" runat="server" id="hr1" Visible="false" />
+                                                                               <asp:Label runat="server" ID="lblFRNo" Visible="false"></asp:Label>
+                                                                           </HeaderTemplate>--%>
+                                                                            <ItemTemplate>
+                                                                                <div>
+                                                                                    <%--<asp:Label ID="lblFormNo" runat="server"  CssClass=" MasterGridviewItem " text="as" ></asp:Label>--%>
+                                                                                    <asp:TextBox ID="txtIName" runat="server" Text='<%#Bind("RecipeIngredient_Name")%>' CssClass="form-control MasterGridviewItem "></asp:TextBox>
+                                                                                    <asp:Literal ID="ltRMat" runat="server" Text='<%#Eval("RecipeIngredient_Name")%>' Visible="false"></asp:Literal>
+                                                                                    <asp:RequiredFieldValidator ID="rfvtxtIName" runat="server" ControlToValidate="txtIName" Display="Dynamic" ValidationGroup="MasterGroupRecipe" CssClass="MasterValidationCSS"
+                                                                                        ErrorMessage="This is required" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                                                </div>
+                                                                            </ItemTemplate>
+                                                                        </asp:TemplateField>
+
+                                                                        <%--<asp:TemplateField HeaderText="Value" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="text-center col-md-3" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">--%>
+                                                                        <asp:TemplateField HeaderStyle-CssClass="text-center ">
+                                                                            <ItemTemplate>
+                                                                                <div>
+                                                                                    <asp:TextBox ID="txtIValue" runat="server" Text='<%#Bind("RecipeIngredient_Value")%>' CssClass="form-control MasterGridviewItem  "></asp:TextBox>
+                                                                                    <%--<asp:TextBox ID="txtIValue" onkeypress="return griddecimal(event,this);" runat="server" Text='<%#Bind("RecipeIngredient_Value")%>' CssClass="form-control MasterGridviewItem  "></asp:TextBox>--%>
+                                                                                    <asp:RequiredFieldValidator ID="rfvtxtIValue" runat="server" ControlToValidate="txtIValue" Display="Dynamic" ValidationGroup="MasterGroupRecipe" CssClass="MasterValidationCSS"
+                                                                                        ErrorMessage="This is required" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                                                    <%--<asp:RegularExpressionValidator ID="RegularExpressionValidator1" runat="server" Display="Dynamic" ValidationGroup="MasterGroupRecipe" CssClass="MasterValidationCSS" ControlToValidate="txtIValue" ErrorMessage="This is required"
+                                                                                        ValidationExpression="^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$"></asp:RegularExpressionValidator>--%>
+                                                                                </div>
+                                                                            </ItemTemplate>
+                                                                        </asp:TemplateField>
+
+                                                                        <%--<asp:TemplateField HeaderText="Percentage" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="text-center col-md-3" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">--%>
+                                                                        <asp:TemplateField HeaderStyle-CssClass="text-center ">
+                                                                            <ItemTemplate>
+                                                                                <div>
+                                                                                    <asp:TextBox ID="txtIPercent" runat="server" Text='<%#Bind("RecipeIngredient_Percent")%>' CssClass="form-control MasterGridviewItem"></asp:TextBox>
+                                                                                    <%--<asp:TextBox ID="txtIPercent" runat="server" Text='<%#Bind("RecipeIngredient_Percent")%>' onkeypress="return griddecimal(event,this);" CssClass="form-control MasterGridviewItem"></asp:TextBox>--%>
+                                                                                    <asp:RequiredFieldValidator ID="RftxtIPercent" runat="server" ControlToValidate="txtIPercent" ValidationGroup="MasterGroupRecipe" CssClass="MasterValidationCSS"
+                                                                                        ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                                                    <%--<asp:RegularExpressionValidator ID="RegExptxtIPercent" runat="server" Display="Dynamic" ValidationGroup="MasterGroupRecipe" CssClass="MasterValidationCSS" ControlToValidate="txtIPercent" ErrorMessage="This is required"
+                                                                                        ValidationExpression="^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$"></asp:RegularExpressionValidator>--%>
+                                                                                </div>
+                                                                            </ItemTemplate>
+                                                                        </asp:TemplateField>
+
+                                                                        <%--<asp:TemplateField ItemStyle-Width="10px" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem">--%>
+                                                                        <asp:TemplateField HeaderStyle-CssClass="text-center ">
+                                                                            <ItemTemplate>
+                                                                                <div class="btn-group btn-group-xs">
+                                                                                    <asp:LinkButton ID="lnkdelete" data-toggle="tooltip" title="Delete" class="btn btn-danger" runat="server" OnClientClick="checkdelete();"
+                                                                                        CommandName="deleteRecipeLink" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-times"></i></asp:LinkButton>
+                                                                                </div>
+                                                                            </ItemTemplate>
+                                                                            <FooterTemplate>
+                                                                                <div id="divLknAdd" class="btn-group btn-group-xs">
+                                                                                    <asp:LinkButton ID="lnkadd" data-toggle="tooltip" title="Add" class="btn btn-info" runat="server" OnClientClick="if (!Page_ClientValidate('MasterGroupRecipe')){ return false; } this.disabled = true; this.value = 'Adding...';"
+                                                                                        CommandName="AddRecipeNewRow" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-plus"></i></asp:LinkButton>
+                                                                                </div>
+                                                                            </FooterTemplate>
+                                                                        </asp:TemplateField>
+                                                                    </Columns>
+
+                                                                    <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="Right" BackColor="White" />
+                                                                    <FooterStyle HorizontalAlign="Center" BackColor="White" />
+                                                                    <PagerSettings PageButtonCount="4" />
+                                                                    <EmptyDataTemplate>
+                                                                        <asp:Label ID="lblError" runat="server" Text="No Data Found"></asp:Label><br />
+                                                                        <br />
+                                                                    </EmptyDataTemplate>
+                                                                    <EmptyDataRowStyle HorizontalAlign="Center" />
+                                                                </asp:GridView>
+                                                                <asp:Literal runat="server" ID="Literal1"></asp:Literal>
+                                                            </div>
+                                                        </ContentTemplate>
+                                                        <Triggers>
+                                                            <asp:AsyncPostBackTrigger ControlID="gvIngredient" />
+                                                        </Triggers>
+                                                    </asp:UpdatePanel>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <%--<div style="clear: both"></div>--%>
+                                        <asp:UpdatePanel ID="UpdatePanel8" runat="server">
+                                            <ContentTemplate>
+                                                <asp:Label runat="server"><h6><strong>Remarks</strong></h6></asp:Label>
+                                                <div class="table-responsive">
+                                                    <div class="widget-extra-full">
+                                                        <asp:TextBox ID="txtRemarkIngre" runat="server" placeholder="Enter Remarks" TextMode="MultiLine" Columns="1" Rows="3" data-toggle="tooltip" title="Remarks" CssClass="form-control"></asp:TextBox>
+                                                    </div>
+                                                </div>
+                                            </ContentTemplate>
+                                            <Triggers>
+                                                <asp:AsyncPostBackTrigger ControlID="gvIngredient" />
+                                            </Triggers>
+                                        </asp:UpdatePanel>
+
+                                    </div>
+                                    <div class="col-md-6" style="border-left: 1px dotted red; border-top: 2px dotted red;">
+                                        <h6><strong>Procedure</strong></h6>
+
+                                        <div class="table-responsive">
+                                            <div class="widget-extra-full">
+                                                <div class="form-horizontal">
+                                                    <asp:UpdatePanel ID="UpdatePanel7" runat="server">
+                                                        <ContentTemplate>
+                                                            <div class="table-responsive">
+                                                                <asp:GridView ID="gvProcedure" runat="server" AutoGenerateColumns="False" DataKeyNames="" AllowCustomPaging="true"
+                                                                    CssClass="table table-striped table-vcenter table-condensed" ShowFooter="true" GridLines="None">
+                                                                    <Columns>
+                                                                        <asp:BoundField DataField="RowNumber" Visible="false" />
+
+                                                                        <asp:TemplateField HeaderText="Sr No." Visible="False" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="">
+                                                                            <ItemTemplate>
+                                                                                <div class="input-group  col-md-12">
+                                                                                    <div class="text-center">
+                                                                                        <asp:Literal ID="ltRowNumberProc" runat="server" Text='<%#Eval("RowNumber")%>' Visible="False"></asp:Literal>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </ItemTemplate>
+                                                                        </asp:TemplateField>
+
+                                                                        <asp:TemplateField HeaderText="Step" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="text-center col-md-4" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">
+                                                                            <ItemTemplate>
+                                                                                <div class="col-md-12">
+                                                                                    <asp:TextBox ID="txtProcStep" runat="server" Text='<%#Bind("RecipeProcedure_Step")%>' CssClass="form-control MasterGridviewItem "></asp:TextBox>
+                                                                                    <asp:Literal ID="ltRMat" runat="server" Text='<%#Eval("RecipeProcedure_Step")%>' Visible="false"></asp:Literal>
+                                                                                    <asp:RequiredFieldValidator ID="rfvtxtProcStep" runat="server" ControlToValidate="txtProcStep" Display="Dynamic" ValidationGroup="MasterGroupProc" CssClass="MasterValidationCSS"
+                                                                                        ErrorMessage="This is required" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                                                </div>
+                                                                            </ItemTemplate>
+                                                                        </asp:TemplateField>
+
+                                                                        <asp:TemplateField HeaderText="Term" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="text-center col-md-4" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">
+                                                                            <ItemTemplate>
+                                                                                <div class="col-md-12">
+                                                                                    <asp:TextBox ID="txtProcTerm" runat="server" Text='<%#Bind("RecipeProcedure_Term")%>' CssClass="form-control MasterGridviewItem "></asp:TextBox>
+                                                                                    <asp:RequiredFieldValidator ID="rfvtxtProcTerm" runat="server" ControlToValidate="txtProcTerm" Display="Dynamic" ValidationGroup="MasterGroupProc" CssClass="MasterValidationCSS"
+                                                                                        ErrorMessage="This is required" SetFocusOnError="true"></asp:RequiredFieldValidator>
+                                                                                </div>
+                                                                            </ItemTemplate>
+                                                                        </asp:TemplateField>
+
+                                                                        <asp:TemplateField HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="text-center col-md-4" ItemStyle-CssClass="MasterGridviewItem" ItemStyle-VerticalAlign="Middle">
+                                                                            <HeaderTemplate>Time/Value <i class="fa fa-clock-o"></i></HeaderTemplate>
+                                                                            <ItemTemplate>
+                                                                                <div class="col-md-12">
+                                                                                    <div class="input-group bootstrap-timepicker">
+                                                                                        <%--<asp:TextBox ID="txtProcTime" runat="server" Text='<%#Bind("RecipeProcedure_Time")%>' placeHolder="HH:MM" CssClass="form-control MasterGridviewItem" onkeypress="return onlyNos(event,this);" onkeyup="insertColon(this,'txtProcTime');" onblur="Coloncheck(this,'txtProcTime');" MaxLength="5"></asp:TextBox>--%>
+                                                                                        <asp:TextBox ID="txtProcTime" runat="server" Text='<%#Bind("RecipeProcedure_Time")%>' CssClass="form-control MasterGridviewItem"></asp:TextBox>
+
+                                                                                        <asp:RequiredFieldValidator ID="RftxtProcTime" runat="server" ControlToValidate="txtProcTime" ValidationGroup="MasterGroupProc" CssClass="MasterValidationCSS"
+                                                                                            ErrorMessage="This is required" Display="Dynamic"></asp:RequiredFieldValidator>
+                                                                                        <%--<asp:RegularExpressionValidator ID="RegExptxtProcTime" runat="server" Display="Dynamic" ValidationGroup="MasterGroupProc" CssClass="MasterValidationCSS"	ControlToValidate="txtProcTime" ErrorMessage="0 is not valid."
+																	ValidationExpression="^(?=.*[1-9])(?:[1-9]\d*\.?|0?\.)\d*$"></asp:RegularExpressionValidator>--%>
+                                                                                        <%--<asp:RegularExpressionValidator id=RegularExpressionValidator1 runat="server" ErrorMessage="* Please enter in correct format for Time." Display="Dynamic" ControlToValidate="txtProcTime" 
+                                                                        ValidationExpression="^([1-9]|1[0-2]|0[1-9]){1}(:[0-5][0-9][aApP][mM]){1}$ " ValidationGroup="MasterGroupProc"></asp:RegularExpressionValidator>--%>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </ItemTemplate>
+                                                                        </asp:TemplateField>
+
+                                                                        <asp:TemplateField ItemStyle-Width="10px" HeaderStyle-ForeColor="#666666" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem">
+                                                                            <ItemTemplate>
+                                                                                <div class="btn-group btn-group-xs">
+                                                                                    <asp:LinkButton ID="lnkdelete" data-toggle="tooltip" title="Delete" class="btn btn-danger" runat="server" OnClientClick="checkdelete();"
+                                                                                        CommandName="deleteProcedureLink" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-times"></i></asp:LinkButton>
+                                                                                </div>
+                                                                            </ItemTemplate>
+                                                                            <FooterTemplate>
+                                                                                <div id="divLknAdd" class="btn-group btn-group-xs">
+                                                                                    <asp:LinkButton ID="lnkadd" data-toggle="tooltip" title="Add" class="btn btn-info" runat="server" OnClientClick="if (!Page_ClientValidate('MasterGroupProc')){ return false; } this.disabled = true; this.value = 'Adding...';"
+                                                                                        CommandName="AddProcedureNewRow" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>"><i class="fa fa-plus"></i></asp:LinkButton>
+                                                                                </div>
+                                                                            </FooterTemplate>
+                                                                        </asp:TemplateField>
+                                                                    </Columns>
+
+                                                                    <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="Right" BackColor="White" />
+                                                                    <FooterStyle HorizontalAlign="Center" BackColor="White" />
+                                                                    <PagerSettings PageButtonCount="4" />
+                                                                    <EmptyDataTemplate>
+                                                                        <asp:Label ID="lblError" runat="server" Text="No Data Found"></asp:Label><br />
+                                                                        <br />
+                                                                    </EmptyDataTemplate>
+                                                                    <EmptyDataRowStyle HorizontalAlign="Center" />
+                                                                </asp:GridView>
+                                                                <asp:Literal runat="server" ID="Literal2"></asp:Literal>
+                                                            </div>
+                                                        </ContentTemplate>
+                                                        <Triggers>
+                                                            <asp:AsyncPostBackTrigger ControlID="gvProcedure" />
+                                                        </Triggers>
+                                                    </asp:UpdatePanel>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div style="clear: both"></div>
+                                        <asp:UpdatePanel ID="UpdatePanel6" runat="server">
+                                            <ContentTemplate>
+                                                <h6><strong>Remarks</strong></h6>
+                                                <div class="table-responsive">
+                                                    <div class="widget-extra-full">
+                                                        <asp:TextBox ID="txtRemarkProc" runat="server" placeholder="Enter Remarks" TextMode="MultiLine" Columns="1" Rows="3" data-toggle="tooltip" title="Remarks" CssClass="form-control"></asp:TextBox>
+                                                    </div>
+                                                </div>
+                                            </ContentTemplate>
+                                            <Triggers>
+                                                <asp:AsyncPostBackTrigger ControlID="gvProcedure" />
+                                            </Triggers>
+                                        </asp:UpdatePanel>
+                                    </div>
+
+                                    <div style="clear: both"></div>
+
+                                    <div class="col-md-12" style="margin-bottom: 11px; display: table; margin-top: -8px; padding-bottom: 2em;">
+                                        <div class="col-md-6 btn-group btn-group-xs">
+                                            <User:LMSAssignControl ID="LMSassigncontrol" runat="server" />
+                                        </div>
+
+                                    </div>
+
+
+                                    <%--  <div class="col-md-8 col-lg-12">
+                                        <div class="block">
+                                            <div id="divAdminMenu" class="row media-filter-items" runat="server"></div>
+                                        </div>
+                                    </div>--%>
+                                    <%--</div>--%>
+                                    <%--</div>--%>
+                                    <%--</div>--%>
+                                    <%-- Recipe Ends --%>
+                                </div>
+                            </div>
+                            <%--</div>--%>
+                        </div>
+
+                    <div style="clear: both"></div>
+                    <%--</div>--%>
+
+                    <div class="col-md-12 ">
+                        <div class="text-center btn-group-xs ">
+                            <asp:UpdatePanel runat="server">
+                                <ContentTemplate>
+                                    <%--  <asp:Button ID="btnRecipePrevious" runat="server" Text="Previous"
+                                        UseSubmitBehavior="false" ValidationGroup="MemberGroup" CssClass="btn btn-alt btn-sm  btn-primary " />--%>
+                                    <asp:Button ID="btnRecipeSaveApprove" runat="server" Text="Approve" OnClientClick="if (!ValidateWithGrid()){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                        UseSubmitBehavior="false" ValidationGroup="MasterGroup" CssClass="btn btn-alt btn-sm btn-primary " Visible="false" />
+                                    <asp:Button ID="btnRecipeDisApprove" runat="server" Text="Reject" OnClientClick="if (!ValidateWithGrid()){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                        UseSubmitBehavior="false" ValidationGroup="MasterGroup" CssClass="btn btn-alt btn-sm btn-primary " Visible="false" />
+                                    <asp:Button ID="btnRecipeSaveNext" runat="server" Text="Save & Next" OnClientClick="if (!Validate()){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                        UseSubmitBehavior="false" CssClass="btn btn-alt btn-sm  btn-primary " Visible="false" />
+                                    <%--<asp:Button ID="btnRecipeSaveNext" runat="server" Text="Save & Next" OnClientClick="if (!Page_ClientValidate('MemberGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                UseSubmitBehavior="false" ValidationGroup="MasterGroupProc MasterGroupRecipe" CssClass="btn btn-alt btn-sm  btn-primary " />--%>
+
+                                    <asp:Button ID="btnRecipeSaveNew" runat="server" Text="Save As New" OnClientClick="if (!Validate()){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                        UseSubmitBehavior="false" CssClass="btn btn-alt btn-sm btn-primary " Visible="false" />
+
+                                    <asp:Button ID="btnRecipeCancel" runat="server" Text="Cancel"
+                                        UseSubmitBehavior="false" CssClass="btn btn-alt btn-sm btn-primary " />
+
+                                </ContentTemplate>
+                                <Triggers>
+                                    <%--<asp:AsyncPostBackTrigger ControlID="btnSubmit" />--%>
+                                </Triggers>
+                            </asp:UpdatePanel>
+                        </div>
+
+                    </div>
+                    </div>
+
+
+                    <%-- Recipe Ends --%>
+                </div>
+            </div>
+            <asp:Button ID="Button1" runat="server" UseSubmitBehavior="false" />
+
+            <asp:ModalPopupExtender ID="mpe" runat="server" BehaviorID="mpe" PopupControlID="pnlPopup" TargetControlID="Button1"
+                CancelControlID="btnNo">
+            </asp:ModalPopupExtender>
+            <asp:Panel ID="pnlPopup" runat="server">
+                <div class="modal-dialog ">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <asp:LinkButton ID="btnNo" runat="server"></asp:LinkButton><h5 class="modal-title">
+                                <asp:Label ID="lblheading" Text="Select Recipe" runat="server"></asp:Label></h5>
+                        </div>
+                        <div class="modal-body" style="overflow: auto">
+
+                            <asp:UpdatePanel ID="UpdatePanel10" runat="server">
+                                <ContentTemplate>
+                                    <div id="divPopup" runat="server" class="col-md-12">
+                                        <div id="faq188f1" class="panel-group">
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title"><a class="accordion-toggle" data-toggle="collapse" data-parent="#faq188f1" href="#faq188f1_q188">
+                                                        <asp:UpdatePanel ID="UpdatePanel11" runat="server" UpdateMode="Conditional">
+                                                            <ContentTemplate>
+                                                                <asp:Label ID="lblRecipePop" Text="Recipe" runat="server"></asp:Label>
+                                                            </ContentTemplate>
+                                                            <Triggers>
+                                                            </Triggers>
+                                                        </asp:UpdatePanel>
+                                                    </a>
+
+                                                        <%--    <h4></h4>
+                                                      
+                                                        <h4></h4>
+                                                      
+                                                        <h4></h4>
+                                                      
+                                                        <h4></h4>
+                                                      
+                                                        <h4></h4>--%>
+
+                                                        <h4></h4>
+
+                                                        <h4></h4>
+
+                                                        <h4></h4>
+
+                                                        <h4></h4>
+
+                                                        <h4></h4>
+
+                                                    </h4>
+                                                </div>
+                                                <div id="faq188f1_q188" class="panel-collapse collapse in" style="max-height: 303px; overflow: auto;">
+                                                    <div class="col-md-12">
+                                                        <br />
+                                                        <div id="Divfaq188f11" class="panel-group" runat="server">
+                                                            <asp:UpdatePanel ID="UpdatePanel12" runat="server">
+                                                                <ContentTemplate>
+                                                                    <asp:Repeater ID="rpPopUp" runat="server">
+                                                                        <ItemTemplate>
+
+                                                                            <div class="panel panel-default">
+                                                                                <div class="panel-heading">
+                                                                                    <h4 class="panel-title"><a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#faq1881" href='<%#"#" + Eval("Recipe_Id").ToString%>'>
+                                                                                        <asp:UpdatePanel ID="UpdatePanel5" runat="server">
+                                                                                            <ContentTemplate>
+                                                                                                <asp:Label ID="lblRecipe_NoPop" runat="server" Text='<%#Eval("Recipe_No")%>'></asp:Label>
+                                                                                                <asp:Label ID="lblRecipe_IdPop" runat="server" Text='<%#Eval("Recipe_Id")%>' Visible="false"></asp:Label>
+                                                                                                <asp:LinkButton ID="btnEditRecipePop" Text="Edit Recipe" runat="server" class="btn btn-xs btn-danger pull-right" CommandName="EditRecipe" />
+                                                                                            </ContentTemplate>
+                                                                                        </asp:UpdatePanel>
+                                                                                    </a></h4>
+                                                                                </div>
+                                                                                <div id='<%#Eval("Recipe_Id").ToString%>' class="panel-collapse collapse" style="height: 0px; max-height: 100px; overflow: auto;">
+                                                                                    <div class="panel-body">
+                                                                                        <div style="clear: both"></div>
+
+                                                                                        <div class="col-md-6" style="border: 1px solid Black;">
+                                                                                            <asp:Label runat="server"><b><small>Ingredients</small></b></asp:Label>
+                                                                                            <div class="table-responsive">
+                                                                                                <asp:GridView ID="gvRecipeIngPOP" ShowFooter="true" GridLines="None" CssClass="table table-striped table-vcenter" HeaderStyle-Width="100"
+                                                                                                    HeaderStyle-Font-Bold="true" HeaderStyle-Font-Size="Smaller" CellPadding="0" CellSpacing="0" runat="server" AutoGenerateColumns="false">
+                                                                                                    <Columns>
+                                                                                                        <asp:TemplateField HeaderText="Name" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                                                                            <HeaderTemplate>
+                                                                                                                <asp:HyperLink ID="HyperLink11" runat="server">Name</asp:HyperLink>
+                                                                                                            </HeaderTemplate>
+                                                                                                            <ItemTemplate>
+                                                                                                                <asp:Literal ID="ltproductname" runat="server" Text='<%#Eval("RecipeIngredient_Name")%>'></asp:Literal>
+                                                                                                                <asp:Literal ID="ltitemid" runat="server" Text='<%#Eval("RecipeIngredient_Name")%>' Visible="false"></asp:Literal>
+
+                                                                                                            </ItemTemplate>
+                                                                                                        </asp:TemplateField>
+                                                                                                        <asp:TemplateField HeaderText="Value" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                                                                            <HeaderTemplate>
+                                                                                                                <asp:HyperLink ID="HyperLink12" runat="server">Value</asp:HyperLink>
+                                                                                                            </HeaderTemplate>
+                                                                                                            <ItemTemplate>
+                                                                                                                <asp:Literal ID="ltproductcode" runat="server" Text='<%#Eval("RecipeIngredient_Value")%>'></asp:Literal>
+                                                                                                                <asp:Label ID="ltitemtypeid" runat="server" Text='<%#Eval("RecipeIngredient_Value")%>' Visible="false"></asp:Label>
+                                                                                                            </ItemTemplate>
+                                                                                                        </asp:TemplateField>
+                                                                                                        <asp:TemplateField HeaderText="Percent" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                                                                            <HeaderTemplate>
+                                                                                                                <asp:HyperLink ID="HyperLink13" runat="server">Percent</asp:HyperLink>
+                                                                                                            </HeaderTemplate>
+                                                                                                            <ItemTemplate>
+                                                                                                                <asp:Literal ID="ltproductWeight" runat="server" Text='<%#Eval("RecipeIngredient_Percent")%>' Visible="false"></asp:Literal>
+                                                                                                                <asp:Literal ID="ltIngredient_Percent" runat="server" Text='<%#Eval("RecipeIngredient_Percent")%>'></asp:Literal>
+                                                                                                            </ItemTemplate>
+                                                                                                        </asp:TemplateField>
+
+                                                                                                    </Columns>
+                                                                                                    <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="left" BackColor="White" />
+                                                                                                    <FooterStyle HorizontalAlign="left" BackColor="White" />
+                                                                                                    <PagerSettings PageButtonCount="4" />
+                                                                                                    <EmptyDataTemplate>
+                                                                                                        <asp:Label ID="lblError" runat="server" Text="No Data Found"></asp:Label><br />
+                                                                                                        <br />
+                                                                                                    </EmptyDataTemplate>
+                                                                                                    <EmptyDataRowStyle HorizontalAlign="Center" />
+                                                                                                </asp:GridView>
+                                                                                            </div>
+                                                                                        </div>
+
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+                                                                        </ItemTemplate>
+                                                                    </asp:Repeater>
+                                                                </ContentTemplate>
+                                                                <Triggers>
+                                                                </Triggers>
+                                                            </asp:UpdatePanel>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ContentTemplate>
+                                <Triggers>
+                                    <asp:PostBackTrigger ControlID="Button1" />
+                                </Triggers>
+                            </asp:UpdatePanel>
+                        </div>
+                        <%--<div class="modal-footer">
+                            <asp:Button ID="btnsave" runat="server" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                UseSubmitBehavior="false" class="btn btn-sm btn-primary" ValidationGroup="MasterGroup" Text="Save" TabIndex="8"></asp:Button>
+                        </div>--%>
+                    </div>
+                </div>
+
+            </asp:Panel>
+        </div>
+    </div>
+</asp:Content>
+

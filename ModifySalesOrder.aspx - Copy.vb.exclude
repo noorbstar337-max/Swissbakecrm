@@ -1,0 +1,1040 @@
+﻿Imports System.Web.Services
+
+Partial Class ModifySalesOrder
+    Inherits System.Web.UI.Page
+    Dim MainID As Integer
+    Dim countrate As Double = 0.0
+    Dim countrate1 As Double = 0.0
+    Dim FooterTotalAmount As Double = 0.0
+    Dim VatAmount As Double = 0.0
+    Dim countrydt As DataTable
+    Dim statedt As DataTable
+    Dim strvat As New List(Of String)
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        If Session("UserId") = Nothing Then
+            TryCast(Me.Master, MainPage).MaintainSession()
+            Try
+                If Not IsPostBack Then
+                    txtorderdate.Text = DateAndTime.Now.ToString("yyyy-MM-ddTHH:mm")
+                    txtpodate.Text = DateAndTime.Now.ToString("yyyy-MM-dd")
+                    fillaccount()
+                    fillcompany()
+                    FillBillingAddressDetail()
+                    FillShippingAddressDetail()
+                    FillTaxdetails()
+                    FillAccountdetails()
+                    assigncontrol.Uhftype.Value = "Order"
+                    'assigncontrol.Uhftypeid.Value = ddrelatedtypeid.SelectedValue
+                    Session("OrderProduct") = Nothing
+                    Me.txtsearch.Attributes.Add("onkeyup", String.Format("javascript:__doPostBack('{0}','')", Me.UpdatePanel1.ClientID))
+                Else
+                    Dim target As String = Me.Request.Form("__EVENTTARGET")
+                    If Not String.IsNullOrEmpty(target) AndAlso target.Equals(Me.UpdatePanel1.ClientID) Then
+                        If Not String.IsNullOrEmpty(Me.txtsearch.Text) Then
+                            FillSearch()
+                        Else
+                            FillProductGrid()
+                        End If
+                    End If
+                End If
+            Catch ex As Exception
+                Dim error1 As String = ex.Message.Replace(Chr(34), "")
+                error1 = error1.Replace(Chr(39), "")
+                ExecptionBLL.Insert("ModifySalesOrder", "Page_Load", error1, Session("UserId"))
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            End Try
+        Else
+            Try
+                If Not IsPostBack Then
+                    txtorderdate.Text = DateAndTime.Now.ToString("yyyy-MM-ddTHH:mm")
+                    txtpodate.Text = DateAndTime.Now.ToString("yyyy-MM-dd")
+                    fillaccount()
+                    fillcompany()
+                    FillBillingAddressDetail()
+                    FillShippingAddressDetail()
+                    FillTaxdetails()
+                    FillAccountdetails()
+                    assigncontrol.Uhftype.Value = "Order"
+                    'assigncontrol.Uhftypeid.Value = ddrelatedtypeid.SelectedValue
+                    Session("OrderProduct") = Nothing
+                    Me.txtsearch.Attributes.Add("onkeyup", String.Format("javascript:__doPostBack('{0}','')", Me.UpdatePanel1.ClientID))
+                Else
+                    Dim target As String = Me.Request.Form("__EVENTTARGET")
+                    If Not String.IsNullOrEmpty(target) AndAlso target.Equals(Me.UpdatePanel1.ClientID) Then
+                        If Not String.IsNullOrEmpty(Me.txtsearch.Text) Then
+                            FillSearch()
+                        Else
+                            FillProductGrid()
+                        End If
+                    End If
+                End If
+            Catch ex As Exception
+                Dim error1 As String = ex.Message.Replace(Chr(34), "")
+                error1 = error1.Replace(Chr(39), "")
+                ExecptionBLL.Insert("ModifySalesOrder", "Page_Load", error1, Session("UserId"))
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            End Try
+        End If
+        End Sub
+
+    Public Sub fillaccount()
+        Try
+            Dim ds As DataSet = MainBLL.DropdownWithtypeAndID("AccountDropDown", "Account", Session("UserId"))
+            ddrelatedtypeid.DataSource = ds
+            ddrelatedtypeid.DataTextField = "Acc_Name"
+            ddrelatedtypeid.DataValueField = "Acc_Id"
+            ddrelatedtypeid.DataBind()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "fillaccount", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub fillcompany()
+        Try
+            Dim ds As DataSet = MainBLL.Dropdown("CompanyDropDown")
+            ddlcompany.DataSource = ds
+            ddlcompany.DataTextField = "Company_Name"
+            ddlcompany.DataValueField = "Company_ID"
+            ddlcompany.DataBind()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "fillcompany", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    'Protected Sub ddrelatedtype_TextChanged(sender As Object, e As EventArgs) Handles ddrelatedtype.TextChanged
+    '    Try
+    '        If (ddrelatedtype.SelectedValue = "Account") Then
+    '            Dim ds As DataSet = MainBLL.DropdownWithtype("AccountDropDown", "Account")
+    '            ddrelatedtypeid.DataSource = ds
+    '            ddrelatedtypeid.DataTextField = "Acc_Name"
+    '            ddrelatedtypeid.DataValueField = "Acc_Id"
+    '            ddrelatedtypeid.DataBind()
+    '        ElseIf (ddrelatedtype.SelectedValue = "None") Then
+    '            ddrelatedtypeid.DataSource = ""
+    '            ddrelatedtypeid.DataBind()
+    '        End If
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert("ModifySalesOrder", "ddrelatedtype_TextChanged", error1, Session("UserId"))
+    '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '    End Try
+    'End Sub
+
+    Protected Sub btnopen_Click(sender As Object, e As EventArgs) Handles btnopen.Click
+        Try
+            btnsave.Enabled = True
+            btnsave.Text = "Save"
+            mpe.Show()
+            FillProductGrid()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "btnopen_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    '<WebMethod()> _
+    'Public Shared Function GetCustomers(pageIndex As Integer) As DataSet
+    '    Dim ds As DataSet = ProductBLL.CRMProductViewAll(pageIndex)
+    '    Return ds
+    'End Function
+
+
+    Public Sub FillProductGrid()
+        Try
+            If Session("OrderProduct") IsNot Nothing Then
+                Dim dt As DataTable = DirectCast(Session("OrderProduct"), DataTable)
+                If dt.Rows.Count > 0 Then
+                    For Each row As DataRow In dt.Rows
+                        Dim a As String = ""
+                        strvat.Add(row("ProductId").ToString)
+
+                    Next
+                End If
+            End If
+
+            GridView1.DataSource = ProductBLL.CRMProductViewAll(ddrelatedtypeid.SelectedValue)
+            GridView1.DataBind()
+
+
+            For Each value As String In strvat
+                For Each row As GridViewRow In GridView1.Rows
+                    Dim lblproductId = DirectCast(row.FindControl("lblproductId"), Label)
+                    If lblproductId.Text = value Then
+                        row.Visible = False
+                    End If
+                Next
+            Next
+
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "FillProductGrid", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub btnQuickOpen_Click(sender As Object, e As EventArgs) Handles btnQuickOpen.Click
+        Try
+            btnsave.Enabled = True
+            btnsave.Text = "Save"
+            mpe.Show()
+            FillProductRecGrid()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "btnQuickOpen_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub FillProductRecGrid()
+        Try
+            If Session("OrderProduct") IsNot Nothing Then
+                Dim dt As DataTable = DirectCast(Session("OrderProduct"), DataTable)
+                If dt.Rows.Count > 0 Then
+                    For Each row As DataRow In dt.Rows
+                        Dim a As String = ""
+                        strvat.Add(row("ProductId").ToString)
+
+                    Next
+                End If
+            End If
+
+            GridView1.DataSource = ProductBLL.CRMProductViewRec(ddrelatedtypeid.SelectedValue)
+            GridView1.DataBind()
+
+
+            For Each value As String In strvat
+                For Each row As GridViewRow In GridView1.Rows
+                    Dim lblproductId = DirectCast(row.FindControl("lblproductId"), Label)
+                    If lblproductId.Text = value Then
+                        row.Visible = False
+                    End If
+                Next
+            Next
+
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "FillProductGrid", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub FillSearch()
+        Try
+            GridView1.DataSource = ProductBLL.SearchCRMProduct(ddrelatedtypeid.SelectedValue, txtsearch.Text.Trim)
+            GridView1.DataBind()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "FillSearch", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub txtOrderQty_TextChanged(sender As Object, e As EventArgs)
+        Try
+            Dim rd As TextBox = DirectCast(sender, TextBox)
+            Dim row As GridViewRow = DirectCast(rd.NamingContainer, GridViewRow)
+            Dim txtOrderQty As TextBox = TryCast(row.FindControl("txtOrderQty"), TextBox)
+            Dim ltrate As Label = TryCast(row.FindControl("lblrate"), Label)
+            Dim ltproductWeight As Label = TryCast(row.FindControl("ltproductWeight"), Label)
+            Dim ltkg As Label = TryCast(row.FindControl("lblkgs"), Label)
+            Dim ltamount As Label = TryCast(row.FindControl("lbltotalamount1"), Label)
+            Dim lblvat As Label = TryCast(row.FindControl("lblvat"), Label)
+            Dim lbldiscount As Label = TryCast(row.FindControl("lbldiscount"), Label)
+            If txtOrderQty.Text = "" Then
+                txtOrderQty.Text = 1
+            End If
+            If txtOrderQty.Text.Contains(".") Then
+                txtOrderQty.Text = Math.Floor(CDbl(txtOrderQty.Text))
+            End If
+            If lbldiscount.Text = "" Then
+            Else
+                countrate = lbldiscount.Text / 100
+                countrate1 = ltrate.Text * countrate
+                ltrate.Text = ltrate.Text - countrate1
+            End If
+            ltkg.Text = ltproductWeight.Text * txtOrderQty.Text
+            ltamount.Text = (ltkg.Text * ltrate.Text).ToString("N2")
+            ltrate.Text = CDbl(ltrate.Text).ToString("N2")
+            Dim Vat As Double = Convert.ToDouble((lblvat.Text * ltamount.Text) / 100)
+            ltamount.Text = (ltamount.Text + Vat).ToString("N2")
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "txtOrderQty_TextChanged", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub txt_TextChanged(sender As Object, e As EventArgs)
+
+    End Sub
+
+    Protected Sub btnsave_Click(sender As Object, e As EventArgs) Handles btnsave.Click
+        Try
+            Dim count As Integer
+            If Session("OrderProduct") Is Nothing Then
+                count = 0
+                Dim dt As New DataTable
+                dt.Columns.Add("ItemDt_ID", GetType(Integer))
+                dt.Columns.Add("ProductId", GetType(Integer))
+                dt.Columns.Add("Product_Name", GetType(String))
+                dt.Columns.Add("Product_Code", GetType(String))
+                dt.Columns.Add("Packing_Packing", GetType(String))
+                dt.Columns.Add("Packing_Weight", GetType(String))
+                dt.Columns.Add("Product_Rate", GetType(String))
+                dt.Columns.Add("ItemDt_Rate", GetType(String))
+                dt.Columns.Add("ItemDt_Qty", GetType(String))
+                dt.Columns.Add("Product_Vat", GetType(String))
+                For Each row As GridViewRow In GridView1.Rows
+                    Dim txtOrderQty = DirectCast(row.FindControl("txtOrderQty"), TextBox)
+                    Dim lblproductId = DirectCast(row.FindControl("lblproductId"), Label)
+                    Dim lblname = DirectCast(row.FindControl("lblname"), Label)
+                    Dim lblcode = DirectCast(row.FindControl("lblcode"), Label)
+                    Dim lblunit = DirectCast(row.FindControl("lblunit"), Label)
+                    Dim ltproductWeight = DirectCast(row.FindControl("ltproductWeight"), Label)
+                    Dim Label1 = DirectCast(row.FindControl("Label1"), Label)
+                    Dim lblamount = DirectCast(row.FindControl("lbltotalamount1"), Label)
+                    Dim lblvat = DirectCast(row.FindControl("lblvat"), Label)
+                    Dim lblkgs = DirectCast(row.FindControl("lblkgs"), Label)
+                    Dim lblrate = DirectCast(row.FindControl("lblrate"), Label)
+                    Dim hfrate = DirectCast(row.FindControl("hfrate"), HiddenField)
+                    hfrate.Value = lblrate.Text
+                    Dim ckselect = DirectCast(row.FindControl("ckselect"), CheckBox)
+                    Dim hfdiscountrate = DirectCast(row.FindControl("hfdiscountrate"), HiddenField)
+                    Dim lbldiscount = DirectCast(row.FindControl("lbldiscount"), Label)
+                    If ckselect.Checked = True Then
+                        If txtOrderQty.Text = "0" Then
+                        Else
+                            If String.IsNullOrEmpty(txtOrderQty.Text) Then
+                                txtOrderQty.Text = 1
+                            End If
+                            If lbldiscount.Text = "" Then
+                            Else
+                                countrate = lbldiscount.Text / 100
+                                countrate1 = lblrate.Text * countrate
+                                lblrate.Text = lblrate.Text - countrate1
+                            End If
+                            lblkgs.Text = ltproductWeight.Text * txtOrderQty.Text
+                            lblamount.Text = (Math.Round(Convert.ToDouble(lblkgs.Text)) * Math.Round(Convert.ToDouble(lblrate.Text))).ToString("N2")
+                            Dim Vat As Double = Convert.ToDouble((lblvat.Text * lblamount.Text) / 100)
+                            'lblamount.Text = (lblamount.Text + Vat).ToString("N2")
+                            dt.Rows.Add(count, lblproductId.Text, lblname.Text, lblcode.Text, lblunit.Text, ltproductWeight.Text, hfrate.Value, lblrate.Text, txtOrderQty.Text,
+                                        lblvat.Text)
+                            count = count + 1
+                        End If
+                    End If
+                Next
+                Session("OrderProduct") = dt
+            Else
+                Dim dt As DataTable = DirectCast(Session("OrderProduct"), DataTable)
+                count = dt.Rows.Count
+                For Each row As GridViewRow In GridView1.Rows
+                    Dim txtOrderQty = DirectCast(row.FindControl("txtOrderQty"), TextBox)
+                    Dim lblproductId = DirectCast(row.FindControl("lblproductId"), Label)
+                    Dim lblname = DirectCast(row.FindControl("lblname"), Label)
+                    Dim lblcode = DirectCast(row.FindControl("lblcode"), Label)
+                    Dim lblunit = DirectCast(row.FindControl("lblunit"), Label)
+                    Dim ltproductWeight = DirectCast(row.FindControl("ltproductWeight"), Label)
+                    Dim Label1 = DirectCast(row.FindControl("Label1"), Label)
+                    Dim lblamount = DirectCast(row.FindControl("lbltotalamount1"), Label)
+                    Dim lblvat = DirectCast(row.FindControl("lblvat"), Label)
+                    Dim lblkgs = DirectCast(row.FindControl("lblkgs"), Label)
+                    Dim lblrate = DirectCast(row.FindControl("lblrate"), Label)
+                    Dim hfrate = DirectCast(row.FindControl("hfrate"), HiddenField)
+                    hfrate.Value = lblrate.Text
+                    Dim ckselect = DirectCast(row.FindControl("ckselect"), CheckBox)
+                    Dim hfdiscountrate = DirectCast(row.FindControl("hfdiscountrate"), HiddenField)
+                    Dim lbldiscount = DirectCast(row.FindControl("lbldiscount"), Label)
+                    If ckselect.Checked = True Then
+                        If txtOrderQty.Text = "0" Then
+                        Else
+                            If String.IsNullOrEmpty(txtOrderQty.Text) Then
+                                txtOrderQty.Text = 1
+                            End If
+                            If lbldiscount.Text = "" Then
+                            Else
+                                countrate = lbldiscount.Text / 100
+                                countrate1 = lblrate.Text * countrate
+                                lblrate.Text = lblrate.Text - countrate1
+                            End If
+                            lblkgs.Text = ltproductWeight.Text * txtOrderQty.Text
+                            lblamount.Text = (Math.Round(Convert.ToDouble(lblkgs.Text)) * Math.Round(Convert.ToDouble(lblrate.Text))).ToString("N2")
+                            Dim Vat As Double = Convert.ToDouble((lblvat.Text * lblamount.Text) / 100)
+                            'lblamount.Text = (lblamount.Text + Vat).ToString("N2")
+                            dt.Rows.Add(count, lblproductId.Text, lblname.Text, lblcode.Text, lblunit.Text, ltproductWeight.Text, hfrate.Value, lblrate.Text, txtOrderQty.Text,
+                                        lblvat.Text)
+                            count = count + 1
+                        End If
+                    End If
+                Next
+                Session("OrderProduct") = dt
+            End If
+            FillMainProduct()
+            FillProductGrid()
+            'mpe.Show()
+            'mpe.Hide()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "btnsave_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Public Sub FillMainProduct()
+        Try
+            Dim sb As New StringBuilder
+            Dim amount As Double = 0
+            If Session("OrderProduct") IsNot Nothing Then
+                Dim dt As DataTable = DirectCast(Session("OrderProduct"), DataTable)
+                If dt.Rows.Count > 0 Then
+                    grditemproduct.DataSource = Session("OrderProduct")
+                    grditemproduct.DataBind()
+                End If
+                If grditemproduct.Rows.Count > 0 Then
+                    Dim lttotalamount As Label = DirectCast(grditemproduct.FooterRow.FindControl("lttotalamount"), Label)
+                    Dim lttotalvat As Label = DirectCast(grditemproduct.FooterRow.FindControl("lttotalvat"), Label)
+                    Dim lttotalkg As Label = DirectCast(grditemproduct.FooterRow.FindControl("lttotalkg"), Label)
+                    Dim lblfreight As Label = DirectCast(grditemproduct.FooterRow.FindControl("lblfreight"), Label)
+
+                    Dim VatAmount As Double = 0
+                    Dim totalkg As Double = 0
+                    Dim FooterTotalAmount As Double = 0
+                    For i As Integer = 0 To grditemproduct.Rows.Count - 1
+                        Dim ltamount As Label = DirectCast(grditemproduct.Rows(i).FindControl("ltamount"), Label)
+                        Dim lblvatinrs As Label = DirectCast(grditemproduct.Rows(i).FindControl("lblvatinrs"), Label)
+                        Dim ltkg As Label = DirectCast(grditemproduct.Rows(i).FindControl("ltkg"), Label)
+                        VatAmount = VatAmount + CDbl(lblvatinrs.Text)
+                        FooterTotalAmount = FooterTotalAmount + CDbl(ltamount.Text)
+                        totalkg = totalkg + Convert.ToDouble(ltkg.Text)
+                    Next
+                    If String.IsNullOrEmpty(txtfreight.Text) Then
+                        lblfreight.Text = 0.ToString("N2")
+                    Else
+                        lblfreight.Text = Math.Round(Convert.ToDouble(txtfreight.Text)).ToString("N2")
+                    End If
+
+                    FooterTotalAmount = FooterTotalAmount + VatAmount + Convert.ToDouble(lblfreight.Text)
+                    hfgrandtotal.Value = FooterTotalAmount - Convert.ToDouble(lblfreight.Text)
+                    hftotalvat.Value = VatAmount
+                    lttotalamount.Text = Math.Round(FooterTotalAmount).ToString("N2")
+                    lttotalvat.Text = Math.Round(VatAmount).ToString("N2")
+                    lttotalkg.Text = totalkg.ToString + " Kg"
+                End If
+            Else
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "FillMainProduct", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    'Protected Sub txtquantity_TextChanged(sender As Object, e As EventArgs)
+    '    Try
+    '        Dim rd As TextBox = DirectCast(sender, TextBox)
+    '        Dim row As GridViewRow = DirectCast(rd.NamingContainer, GridViewRow)
+    '        Dim txtquantity As TextBox = TryCast(row.FindControl("txtquantity"), TextBox)
+    '        Dim ltrate As Label = TryCast(row.FindControl("ltrate"), Label)
+    '        Dim ltitemid As Label = TryCast(row.FindControl("ltitemid"), Label)
+    '        Dim ltproductWeight As Label = TryCast(row.FindControl("ltproductWeight"), Label)
+    '        Dim ltkg As Label = TryCast(row.FindControl("ltkg"), Label)
+    '        Dim ltamount As Label = TryCast(row.FindControl("ltamount"), Label)
+    '        Dim lblvat As Label = TryCast(row.FindControl("lblvat"), Label)
+    '        Dim lblvatinrs As Label = TryCast(row.FindControl("lblvatinrs"), Label)
+    '        If txtquantity.Text = "" Then
+    '            txtquantity.Text = 1
+    '        End If
+    '        If txtquantity.Text.Contains(".") Then
+    '            txtquantity.Text = Math.Floor(CDbl(txtquantity.Text))
+    '        End If
+    '        ltkg.Text = ltproductWeight.Text * txtquantity.Text
+    '        ltamount.Text = (ltkg.Text * ltrate.Text)
+    '        Dim Vat As Double = Convert.ToDouble((lblvat.Text * ltamount.Text) / 100)
+    '        lblvatinrs.Text = Vat.ToString("N2")
+    '        ltamount.Text = (ltamount.Text + Vat).ToString("N2")
+    '        If grditemproduct.Rows.Count > 0 Then
+    '            Dim lttotalamount As Label = DirectCast(grditemproduct.FooterRow.FindControl("lttotalamount"), Label)
+    '            Dim lttotalvat As Label = DirectCast(grditemproduct.FooterRow.FindControl("lttotalvat"), Label)
+    '            For i As Integer = 0 To grditemproduct.Rows.Count - 1
+    '                ltamount = DirectCast(grditemproduct.Rows(i).FindControl("ltamount"), Label)
+    '                lblvatinrs = DirectCast(grditemproduct.Rows(i).FindControl("lblvatinrs"), Label)
+    '                VatAmount = VatAmount + lblvatinrs.Text
+    '                FooterTotalAmount = FooterTotalAmount + ltamount.Text
+    '            Next
+    '            lttotalamount.Text = FooterTotalAmount.ToString("N2")
+    '            lttotalvat.Text = VatAmount.ToString("N2")
+    '        End If
+    '        'ItemDetailBLL.Update(txtquantity.Text, ltamount.Text, ltitemid.Text)
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert("ItemDetailControl", "txtquantity_TextChanged", error1, Session("UserId"))
+    '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '    End Try
+    'End Sub
+
+    Protected Sub GridView1_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles grditemproduct.RowCommand
+        If e.CommandName = "deletelink" Then
+            Try
+                Dim btn As LinkButton = TryCast(e.CommandSource, LinkButton)
+                Dim row As GridViewRow = TryCast(btn.NamingContainer, GridViewRow)
+                Dim ltitemid As Label = TryCast(row.FindControl("ltitemid"), Label)
+                Dim dt As DataTable
+                dt = DirectCast(Session("OrderProduct"), DataTable)
+                If dt.Rows.Count >= 0 Then
+                    For Each rows As DataRow In dt.Rows
+                        Dim a As Integer
+                        If rows("ItemDt_ID").ToString = ltitemid.Text Then
+                            a = CDbl(rows("ItemDt_ID").ToString)
+                            dt.Rows.Remove(rows)
+                            Session("OrderProduct") = dt
+                            FillMainProduct()
+                            Exit For
+                        End If
+                    Next
+                End If
+                If grditemproduct.Rows.Count > 0 Then
+                    Dim lttotalamount As Label = DirectCast(grditemproduct.FooterRow.FindControl("lttotalamount"), Label)
+                    Dim lttotalvat As Label = DirectCast(grditemproduct.FooterRow.FindControl("lttotalvat"), Label)
+                    Dim VatAmount As Double = 0
+                    Dim FooterTotalAmount As Double = 0
+                    For i As Integer = 0 To grditemproduct.Rows.Count - 1
+                        Dim ltamount As Label = DirectCast(grditemproduct.Rows(i).FindControl("ltamount"), Label)
+                        Dim lblvatinrs As Label = DirectCast(grditemproduct.Rows(i).FindControl("lblvatinrs"), Label)
+                        VatAmount = VatAmount + CDbl(lblvatinrs.Text)
+                        FooterTotalAmount = FooterTotalAmount + CDbl(ltamount.Text)
+                    Next
+                    FooterTotalAmount = FooterTotalAmount + VatAmount
+                    lttotalamount.Text = FooterTotalAmount.ToString("N2")
+                    lttotalvat.Text = VatAmount.ToString("N2")
+                End If
+            Catch ex As Exception
+                Dim error1 As String = ex.Message.Replace(Chr(34), "")
+                error1 = error1.Replace(Chr(39), "")
+                ExecptionBLL.Insert("ModifySalesOrder", "deletelink", error1, Session("UserId"))
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            End Try
+        ElseIf e.CommandName = "Editlink" Then
+            Dim btn As LinkButton = TryCast(e.CommandSource, LinkButton)
+            Dim row As GridViewRow = TryCast(btn.NamingContainer, GridViewRow)
+            Dim lnkedit As LinkButton = TryCast(row.FindControl("lnkedit"), LinkButton)
+            Dim lkupdate As LinkButton = TryCast(row.FindControl("lkupdate"), LinkButton)
+            Dim lnkdelete As LinkButton = TryCast(row.FindControl("lnkdelete"), LinkButton)
+            Dim txtquantity As TextBox = TryCast(row.FindControl("txtquantity"), TextBox)
+            Dim ltquantity As Label = TryCast(row.FindControl("ltquantity"), Label)
+            ltquantity.Visible = False
+            txtquantity.Visible = True
+            lkupdate.Visible = True
+            lnkdelete.Visible = False
+            lnkedit.Text = "Cancel"
+            lnkedit.CommandName = "Cancellink"
+            lnkedit.CssClass = "btn btn-xs btn-warning"
+        ElseIf e.CommandName = "Cancellink" Then
+            Dim btn As LinkButton = TryCast(e.CommandSource, LinkButton)
+            Dim row As GridViewRow = TryCast(btn.NamingContainer, GridViewRow)
+            Dim lnkedit As LinkButton = TryCast(row.FindControl("lnkedit"), LinkButton)
+            Dim lkupdate As LinkButton = TryCast(row.FindControl("lkupdate"), LinkButton)
+            Dim lnkdelete As LinkButton = TryCast(row.FindControl("lnkdelete"), LinkButton)
+            Dim txtquantity As TextBox = TryCast(row.FindControl("txtquantity"), TextBox)
+            Dim ltquantity As Label = TryCast(row.FindControl("ltquantity"), Label)
+            ltquantity.Visible = True
+            txtquantity.Visible = False
+            lkupdate.Visible = False
+            lnkdelete.Visible = True
+            lnkedit.Text = "Edit"
+            lnkedit.CommandName = "Editlink"
+            lnkedit.CssClass = "btn btn-primary"
+        ElseIf e.CommandName = "updatelink" Then
+            Dim btn As LinkButton = TryCast(e.CommandSource, LinkButton)
+            Dim row As GridViewRow = TryCast(btn.NamingContainer, GridViewRow)
+            Dim txtquantity As TextBox = TryCast(row.FindControl("txtquantity"), TextBox)
+            Dim ltrate As Label = TryCast(row.FindControl("ltrate"), Label)
+            Dim ltitemid As Label = TryCast(row.FindControl("ltitemid"), Label)
+            Dim ltproductWeight As Label = TryCast(row.FindControl("ltproductWeight"), Label)
+            Dim ltkg As Label = TryCast(row.FindControl("ltkg"), Label)
+            Dim ltamount As Label = TryCast(row.FindControl("ltamount"), Label)
+            Dim lnkedit As LinkButton = TryCast(row.FindControl("lnkedit"), LinkButton)
+            Dim lkupdate As LinkButton = TryCast(row.FindControl("lkupdate"), LinkButton)
+            Dim lnkdelete As LinkButton = TryCast(row.FindControl("lnkdelete"), LinkButton)
+            Dim ltquantity As Label = TryCast(row.FindControl("ltquantity"), Label)
+            Dim lblvat As Label = TryCast(row.FindControl("lblvat"), Label)
+            If txtquantity.Text = "" Then
+                txtquantity.Text = 1
+            End If
+            If txtquantity.Text.Contains(".") Then
+                txtquantity.Text = Math.Floor(CDbl(txtquantity.Text))
+            End If
+            ltkg.Text = ltproductWeight.Text * txtquantity.Text
+            ltamount.Text = ltkg.Text * ltrate.Text
+            Dim Vat As Double = Convert.ToDouble((lblvat.Text * ltamount.Text) / 100)
+            ltamount.Text = (ltamount.Text + Vat).ToString("N2")
+            ltrate.Text = CDbl(ltrate.Text).ToString("N2")
+            ItemDetailBLL.Update(txtquantity.Text, ltamount.Text, ltitemid.Text)
+            ltquantity.Text = txtquantity.Text
+            ltquantity.Visible = True
+            txtquantity.Visible = False
+            lkupdate.Visible = False
+            lnkdelete.Visible = True
+            lnkedit.Text = "Edit"
+            lnkedit.CommandName = "Editlink"
+            lnkedit.CssClass = "btn btn-primary"
+            If grditemproduct.Rows.Count > 0 Then
+                Dim lttotalamount As Label = DirectCast(grditemproduct.FooterRow.FindControl("lttotalamount"), Label)
+                For i As Integer = 0 To grditemproduct.Rows.Count - 1
+                    ltamount = DirectCast(grditemproduct.Rows(i).FindControl("ltamount"), Label)
+                    FooterTotalAmount = (FooterTotalAmount + ltamount.Text).ToString("N2")
+                Next
+                lttotalamount.Text = FooterTotalAmount.ToString("N2")
+            End If
+        End If
+    End Sub
+
+    Protected Sub grditemproduct_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles grditemproduct.RowDataBound
+        Try
+            If e.Row.RowType = DataControlRowType.DataRow Then
+                Dim ltproductid As Label = DirectCast(e.Row.FindControl("ltproductid"), Label)
+                Dim txtquantity As TextBox = TryCast(e.Row.FindControl("txtquantity"), TextBox)
+                Dim ltrate As Label = TryCast(e.Row.FindControl("ltrate"), Label)
+                Dim ltitemid As Label = TryCast(e.Row.FindControl("ltitemid"), Label)
+                Dim ltproductWeight As Label = TryCast(e.Row.FindControl("ltproductWeight"), Label)
+                Dim ltkg As Label = TryCast(e.Row.FindControl("ltkg"), Label)
+                Dim ltamount As Label = TryCast(e.Row.FindControl("ltamount"), Label)
+                Dim lblvat As Label = TryCast(e.Row.FindControl("lblvat"), Label)
+                Dim lblvatinrs As Label = TryCast(e.Row.FindControl("lblvatinrs"), Label)
+                Dim hflblvatinrs As HiddenField = TryCast(e.Row.FindControl("hflblvatinrs"), HiddenField)
+                Dim hfltamount As HiddenField = TryCast(e.Row.FindControl("hfltamount"), HiddenField)
+                If txtquantity.Text = "" Then
+                    txtquantity.Text = 1
+                End If
+                If txtquantity.Text.Contains(".") Then
+                    txtquantity.Text = Math.Floor(CDbl(txtquantity.Text))
+                End If
+                ltrate.Text = Math.Round(Convert.ToDouble(ltrate.Text)).ToString
+                ltkg.Text = ltproductWeight.Text * txtquantity.Text
+                hfltamount.Value = Math.Round(CDbl(ltkg.Text) * CDbl(ltrate.Text))
+                ltamount.Text = Math.Round(CDbl(ltkg.Text) * CDbl(ltrate.Text)).ToString("N2")
+                'ltrate.Text = CDbl(ltrate.Text).ToString("N2")
+                ltrate.Text = Math.Round(Convert.ToDouble(ltrate.Text)).ToString("N2")
+                Dim Vat As Double = Math.Round(Convert.ToDouble((lblvat.Text * ltamount.Text) / 100))
+                hflblvatinrs.Value = Vat
+                lblvatinrs.Text = Math.Round(Vat).ToString("N2")
+                'ltamount.Text = (ltamount.Text + Vat).ToString("N2")
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "grditemproduct_RowDataBound", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub btnadd_Click(sender As Object, e As EventArgs) Handles btnadd.Click
+        Try
+            'lblcst.Text = "-" Or lblpan.Text = "-" Or lblvat.Text = "-" Or
+            If lbladdressbill.Text = "" Or lbladdressShip.Text = "" Then
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('Address details required!')", True)
+            Else
+                If grditemproduct.Rows.Count > 0 Then
+                    If Convert.ToInt32(hfgrandtotal.Value) > 0 Then
+                        Dim rnd As New Random()
+                        Dim verfirycode As Integer = rnd.[Next](10000, 999999)
+                        Dim dice As String = "OD" + rnd.[Next](10000, 999999).ToString() + " "
+                        txtorderdate.Text = Convert.ToDateTime(txtorderdate.Text).ToString("yyyy-MM-dd HH:mm ")
+                        Dim OrderID As Integer = OrderBLL.InsertCRM(dice, ddrelatedtypeid.SelectedValue, hfgrandtotal.Value, "Pending", ddpayment.SelectedValue,
+                                                 hftotalvat.Value, txtfreight.Text.Trim, Session("UserId"), txtpono.Text.Trim, txtpodate.Text.Trim, txtorderdate.Text, txttermdelivery.Text.Trim, txttermpayment.Text.Trim, txtdispach.Text.Trim, ddlcompany.SelectedValue)
+                        Dim totalamount As Double = 0
+                        Dim vattotal As Double = 0
+
+                        For i As Integer = 0 To grditemproduct.Rows.Count - 1
+                            Dim index As Integer = grditemproduct.Rows(i).RowIndex
+                            Dim ltproductid As Label = DirectCast(grditemproduct.Rows(i).FindControl("ltproductid"), Label)
+                            Dim txtquantity As TextBox = TryCast(grditemproduct.Rows(i).FindControl("txtquantity"), TextBox)
+                            Dim ltrate As Label = TryCast(grditemproduct.Rows(i).FindControl("ltrate"), Label)
+                            Dim ltkg As Label = TryCast(grditemproduct.Rows(i).FindControl("ltkg"), Label)
+                            Dim lblvat As Label = TryCast(grditemproduct.Rows(i).FindControl("lblvat"), Label)
+                            Dim ltamount As Label = TryCast(grditemproduct.Rows(i).FindControl("ltamount"), Label)
+                            Dim hfltamount As HiddenField = TryCast(grditemproduct.Rows(i).FindControl("hfltamount"), HiddenField)
+                            Dim lblvatinrs As Label = TryCast(grditemproduct.Rows(i).FindControl("lblvatinrs"), Label)
+                            Dim hflblvatinrs As HiddenField = TryCast(grditemproduct.Rows(i).FindControl("hflblvatinrs"), HiddenField)
+                            OrderBLL.Main_Order_Details(OrderID, ltproductid.Text, txtquantity.Text, ltrate.Text, Math.Round(CDbl(hfltamount.Value)), Math.Round(CDbl(hflblvatinrs.Value)))
+
+                        Next
+                        ' OrderBLL.UpdateOrderAmount(totalamount, vattotal, OrderID)
+                        'grditemproduct.DataSource = ""
+                        'grditemproduct.DataBind()
+                        'Session("OrderProduct") = Nothing
+                        'ddrelatedtype.SelectedValue = "None"
+                        'ddrelatedtype_TextChanged(Nothing, Nothing)
+                        'ddpayment.SelectedValue = "Select Payment Mode"
+                        assigncontrol.AddAssignTo(OrderID)
+                        Response.Redirect("EmailSalesOrder.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(OrderID)))
+                    Else
+                        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + ("Order amount should be greater than zero !!!").ToString + "')", True)
+                    End If
+                Else
+                    ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + ("Please Select Item Before Placing Order").ToString + "')", True)
+                End If
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "btnadd_Click", error1, Session("UserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+
+    Public Sub FillBillingAddressDetail()
+        Try
+            countrydt = MainBLL.Dropdown("CountryDropDown").Tables(0)
+            statedt = MainBLL.Dropdown("ALLStateDropDown").Tables(0)
+            MainID = ddrelatedtypeid.SelectedValue
+            Dim dt As DataSet = MainBLL.ViewByID(MainID, "ProspectBillingAddressViewByID")
+            Dim dtUser As New DataTable
+            dtUser = dt.Tables(0)
+            If dtUser.Rows.Count > 0 Then
+                Dim drLogin As DataRow
+                drLogin = dtUser.Rows(0)
+                If String.IsNullOrEmpty(drLogin("AccAddr_Name").ToString()) Then
+                    lblnamebill.Visible = False
+                Else
+                    lblnamebill.Visible = True
+                    lblnamebill.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Name").ToString())
+                End If
+                If String.IsNullOrEmpty(drLogin("AccAddr_Email").ToString()) Then
+                    lblemailbill.Visible = False
+                Else
+                    lblemailbill.Visible = True
+                    lblemailbill.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Email").ToString())
+                End If
+                If String.IsNullOrEmpty(drLogin("AccAddr_Telephone").ToString()) Then
+                    lbltelephonebill.Visible = False
+                Else
+                    lbltelephonebill.Visible = True
+                    lbltelephonebill.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Telephone").ToString())
+                End If
+                If String.IsNullOrEmpty(drLogin("AccAddr_Address").ToString()) Then
+                    lbladdressbill.Text = ""
+                    lbladdressbill.Visible = False
+                Else
+                    lbladdressbill.Visible = True
+                    lbladdressbill.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Address").ToString())
+                End If
+                If String.IsNullOrEmpty(drLogin("AccAddr_Pincode").ToString()) Then
+                    lblpincodebill.Visible = False
+                Else
+                    lblpincodebill.Visible = True
+                    lblpincodebill.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Pincode").ToString())
+                End If
+                If String.IsNullOrEmpty(drLogin("AccAddr_City").ToString()) Then
+                    lblCitybill.Visible = False
+                Else
+                    lblCitybill.Visible = True
+                    lblCitybill.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_City").ToString())
+                End If
+                Dim country As Array = countrydt.Select("ID = '" + drLogin("AccAddr_Country").ToString() + "'")
+                If country.Length <> 0 Then
+                    lblcountrybill.Text = country(0)(1).ToString + " "
+                End If
+                Dim state As Array = statedt.Select("ID = '" + drLogin("AccAddr_State").ToString() + "'")
+                If state.Length <> 0 Then
+                    lblsatatebill.Text = state(0)(1).ToString
+                End If
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "FillBillingAddressDetail", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+
+    Public Sub FillShippingAddressDetail()
+        Try
+            countrydt = MainBLL.Dropdown("CountryDropDown").Tables(0)
+            statedt = MainBLL.Dropdown("ALLStateDropDown").Tables(0)
+            MainID = ddrelatedtypeid.SelectedValue
+            Dim dt As DataSet = MainBLL.ViewByID(MainID, "ProspectShippingAddressViewByID")
+            Dim dtUser As New DataTable
+            dtUser = dt.Tables(0)
+            If dtUser.Rows.Count > 0 Then
+                Dim drLogin As DataRow
+                drLogin = dtUser.Rows(0)
+                If String.IsNullOrEmpty(drLogin("AccAddr_Name").ToString()) Then
+                    lblnameship.Visible = False
+                Else
+                    lblnameship.Visible = True
+                    lblnameship.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Name").ToString())
+                End If
+                If String.IsNullOrEmpty(drLogin("AccAddr_Email").ToString()) Then
+                    lblemailship.Visible = False
+                Else
+                    lblemailship.Visible = True
+                    lblemailship.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Email").ToString())
+                End If
+                If String.IsNullOrEmpty(drLogin("AccAddr_Telephone").ToString()) Then
+                    lbltelephoneship.Visible = False
+                Else
+                    lbltelephoneship.Visible = True
+                    lbltelephoneship.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Telephone").ToString())
+                End If
+                If String.IsNullOrEmpty(drLogin("AccAddr_Address").ToString()) Then
+                    lbladdressShip.Text = ""
+                    lbladdressShip.Visible = False
+                Else
+                    lbladdressShip.Visible = True
+                    lbladdressShip.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Address").ToString())
+                End If
+                If String.IsNullOrEmpty(drLogin("AccAddr_Pincode").ToString()) Then
+                    lblpincodeship.Visible = False
+                Else
+                    lblpincodeship.Visible = True
+                    lblpincodeship.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_Pincode").ToString())
+                End If
+                If String.IsNullOrEmpty(drLogin("AccAddr_City").ToString()) Then
+                    lblCityship.Visible = False
+                Else
+                    lblCityship.Visible = True
+                    lblCityship.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("AccAddr_City").ToString())
+                End If
+                Dim country As Array = countrydt.Select("ID = '" + drLogin("AccAddr_Country").ToString() + "'")
+                If country.Length <> 0 Then
+                    lblcountryship.Text = country(0)(1).ToString + " "
+                End If
+                Dim state As Array = statedt.Select("ID = '" + drLogin("AccAddr_State").ToString() + "'")
+                If state.Length <> 0 Then
+                    lblsatateship.Text = state(0)(1).ToString
+                End If
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "FillShippingAddressDetail", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+
+    Public Sub FillTaxdetails()
+        Try
+            MainID = ddrelatedtypeid.SelectedValue
+            Dim dt As DataSet = MainBLL.ViewByID(MainID, "TaxdetailViewByID")
+            If dt.Tables.Count > 0 Then
+                Dim dtCustomer As New DataTable
+                dtCustomer = dt.Tables(0)
+                If dtCustomer.Rows.Count > 0 Then
+                    Dim drCustomerRow As DataRow
+                    drCustomerRow = dtCustomer.Rows(0)
+                    If String.IsNullOrEmpty(drCustomerRow("Cust_Pan").ToString()) Then
+                        lblpan.Text = "-"
+                    Else
+                        lblpan.Text = DynamicparcelDataManipulation.FixNullFromDB(drCustomerRow("Cust_Pan").ToString())
+                    End If
+                    If String.IsNullOrEmpty(drCustomerRow("Cust_Tin").ToString()) Then
+                        lblcst.Text = "-"
+                    Else
+                        lblcst.Text = DynamicparcelDataManipulation.FixNullFromDB(drCustomerRow("Cust_Tin").ToString())
+                    End If
+                    If String.IsNullOrEmpty(drCustomerRow("Cust_Vat").ToString()) Then
+                        lblvat.Text = "-"
+                    Else
+                        lblvat.Text = DynamicparcelDataManipulation.FixNullFromDB(drCustomerRow("Cust_Vat").ToString())
+                    End If
+                End If
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "FillTaxdetails", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+
+    Public Sub FillAccountdetails()
+        Try
+            MainID = ddrelatedtypeid.SelectedValue
+            Dim dt As DataSet = MainBLL.ViewByID(MainID, "AccountViewByID")
+            If dt.Tables.Count > 0 Then
+                Dim dtCustomer As New DataTable
+                dtCustomer = dt.Tables(0)
+                If dtCustomer.Rows.Count > 0 Then
+                    Dim drCustomerRow As DataRow
+                    drCustomerRow = dtCustomer.Rows(0)
+                    If String.IsNullOrEmpty(drCustomerRow("Acc_Name").ToString()) Then
+                        lblaccname.Visible = False
+                    Else
+                        lblaccname.Text = DynamicparcelDataManipulation.FixNullFromDB(drCustomerRow("Acc_Name").ToString())
+                    End If
+                    If String.IsNullOrEmpty(drCustomerRow("Contact_ContactPerson").ToString()) Then
+                        lblaccontact.Visible = False
+                    Else
+                        lblaccontact.Text = DynamicparcelDataManipulation.FixNullFromDB(drCustomerRow("Contact_ContactPerson").ToString())
+                    End If
+                    If String.IsNullOrEmpty(drCustomerRow("Contact_Landline").ToString()) Then
+                        lbltelephone.Visible = False
+                    Else
+                        lbltelephone.Text = DynamicparcelDataManipulation.FixNullFromDB(drCustomerRow("Contact_Landline").ToString())
+                    End If
+                    If String.IsNullOrEmpty(drCustomerRow("Contact_Mobile").ToString()) Then
+                        lblacphone.Visible = False
+                    Else
+                        lblacphone.Text = DynamicparcelDataManipulation.FixNullFromDB(drCustomerRow("Contact_Mobile").ToString())
+                    End If
+                    If String.IsNullOrEmpty(drCustomerRow("Contact_Email").ToString()) Then
+                        lblaccemail.Visible = False
+                    Else
+                        lblaccemail.Text = DynamicparcelDataManipulation.FixNullFromDB(drCustomerRow("Contact_Email").ToString())
+                    End If
+                End If
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "FillAccountdetails", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+
+    Protected Sub ddrelatedtypeid_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddrelatedtypeid.SelectedIndexChanged
+        FillBillingAddressDetail()
+        FillShippingAddressDetail()
+        FillTaxdetails()
+        FillAccountdetails()
+        Session("OrderProduct") = Nothing
+        grditemproduct.DataSource = ""
+        grditemproduct.DataBind()
+    End Sub
+
+    Protected Sub btnsaveclose_Click(sender As Object, e As EventArgs) Handles btnsaveclose.Click
+        Try
+            Dim count As Integer
+            If Session("OrderProduct") Is Nothing Then
+                count = 0
+                Dim dt As New DataTable
+                dt.Columns.Add("ItemDt_ID", GetType(Integer))
+                dt.Columns.Add("ProductId", GetType(Integer))
+                dt.Columns.Add("Product_Name", GetType(String))
+                dt.Columns.Add("Product_Code", GetType(String))
+                dt.Columns.Add("Packing_Packing", GetType(String))
+                dt.Columns.Add("Packing_Weight", GetType(String))
+                dt.Columns.Add("Product_Rate", GetType(String))
+                dt.Columns.Add("ItemDt_Rate", GetType(String))
+                dt.Columns.Add("ItemDt_Qty", GetType(String))
+                dt.Columns.Add("Product_Vat", GetType(String))
+                For Each row As GridViewRow In GridView1.Rows
+                    Dim txtOrderQty = DirectCast(row.FindControl("txtOrderQty"), TextBox)
+                    Dim lblproductId = DirectCast(row.FindControl("lblproductId"), Label)
+                    Dim lblname = DirectCast(row.FindControl("lblname"), Label)
+                    Dim lblcode = DirectCast(row.FindControl("lblcode"), Label)
+                    Dim lblunit = DirectCast(row.FindControl("lblunit"), Label)
+                    Dim ltproductWeight = DirectCast(row.FindControl("ltproductWeight"), Label)
+                    Dim Label1 = DirectCast(row.FindControl("Label1"), Label)
+                    Dim lblamount = DirectCast(row.FindControl("lbltotalamount1"), Label)
+                    Dim lblvat = DirectCast(row.FindControl("lblvat"), Label)
+                    Dim lblkgs = DirectCast(row.FindControl("lblkgs"), Label)
+                    Dim lblrate = DirectCast(row.FindControl("lblrate"), Label)
+                    Dim hfrate = DirectCast(row.FindControl("hfrate"), HiddenField)
+                    hfrate.Value = lblrate.Text
+                    Dim ckselect = DirectCast(row.FindControl("ckselect"), CheckBox)
+                    Dim hfdiscountrate = DirectCast(row.FindControl("hfdiscountrate"), HiddenField)
+                    Dim lbldiscount = DirectCast(row.FindControl("lbldiscount"), Label)
+                    If ckselect.Checked = True Then
+                        If txtOrderQty.Text = "0" Then
+                        Else
+                            If String.IsNullOrEmpty(txtOrderQty.Text) Then
+                                txtOrderQty.Text = 1
+                            End If
+                            If lbldiscount.Text = "" Then
+                            Else
+                                countrate = lbldiscount.Text / 100
+                                countrate1 = lblrate.Text * countrate
+                                lblrate.Text = lblrate.Text - countrate1
+                            End If
+                            lblkgs.Text = ltproductWeight.Text * txtOrderQty.Text
+                            lblamount.Text = (lblkgs.Text * lblrate.Text).ToString("N2")
+                            Dim Vat As Double = Convert.ToDouble((lblvat.Text * lblamount.Text) / 100)
+                            'lblamount.Text = (lblamount.Text + Vat).ToString("N2")
+                            dt.Rows.Add(count, lblproductId.Text, lblname.Text, lblcode.Text, lblunit.Text, ltproductWeight.Text, hfrate.Value, lblrate.Text, txtOrderQty.Text,
+                                        lblvat.Text)
+                            count = count + 1
+                        End If
+                    End If
+                Next
+                Session("OrderProduct") = dt
+            Else
+                Dim dt As DataTable = DirectCast(Session("OrderProduct"), DataTable)
+                count = dt.Rows.Count
+                For Each row As GridViewRow In GridView1.Rows
+                    Dim txtOrderQty = DirectCast(row.FindControl("txtOrderQty"), TextBox)
+                    Dim lblproductId = DirectCast(row.FindControl("lblproductId"), Label)
+                    Dim lblname = DirectCast(row.FindControl("lblname"), Label)
+                    Dim lblcode = DirectCast(row.FindControl("lblcode"), Label)
+                    Dim lblunit = DirectCast(row.FindControl("lblunit"), Label)
+                    Dim ltproductWeight = DirectCast(row.FindControl("ltproductWeight"), Label)
+                    Dim Label1 = DirectCast(row.FindControl("Label1"), Label)
+                    Dim lblamount = DirectCast(row.FindControl("lbltotalamount1"), Label)
+                    Dim lblvat = DirectCast(row.FindControl("lblvat"), Label)
+                    Dim lblkgs = DirectCast(row.FindControl("lblkgs"), Label)
+                    Dim lblrate = DirectCast(row.FindControl("lblrate"), Label)
+                    Dim hfrate = DirectCast(row.FindControl("hfrate"), HiddenField)
+                    hfrate.Value = lblrate.Text
+                    Dim ckselect = DirectCast(row.FindControl("ckselect"), CheckBox)
+                    Dim hfdiscountrate = DirectCast(row.FindControl("hfdiscountrate"), HiddenField)
+                    Dim lbldiscount = DirectCast(row.FindControl("lbldiscount"), Label)
+                    If ckselect.Checked = True Then
+                        If txtOrderQty.Text = "0" Then
+                        Else
+                            If String.IsNullOrEmpty(txtOrderQty.Text) Then
+                                txtOrderQty.Text = 1
+                            End If
+                            If lbldiscount.Text = "" Then
+                            Else
+                                countrate = lbldiscount.Text / 100
+                                countrate1 = lblrate.Text * countrate
+                                lblrate.Text = lblrate.Text - countrate1
+                            End If
+                            lblkgs.Text = ltproductWeight.Text * txtOrderQty.Text
+                            lblamount.Text = (lblkgs.Text * lblrate.Text).ToString("N2")
+                            Dim Vat As Double = Convert.ToDouble((lblvat.Text * lblamount.Text) / 100)
+                            'lblamount.Text = (lblamount.Text + Vat).ToString("N2")
+                            dt.Rows.Add(count, lblproductId.Text, lblname.Text, lblcode.Text, lblunit.Text, ltproductWeight.Text, hfrate.Value, lblrate.Text, txtOrderQty.Text,
+                                        lblvat.Text)
+                            count = count + 1
+                        End If
+                    End If
+                Next
+                Session("OrderProduct") = dt
+            End If
+            FillMainProduct()
+            mpe.Hide()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifySalesOrder", "btnsaveclose_Click", error1, Session("UserId"))
+            'ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+
+   
+End Class

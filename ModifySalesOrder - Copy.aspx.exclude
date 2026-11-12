@@ -1,0 +1,640 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MainPage.master" AutoEventWireup="false" CodeFile="ModifySalesOrder.aspx.vb" Inherits="ModifySalesOrder" %>
+
+<%@ Register TagPrefix="asp" Namespace="AjaxControlToolkit" Assembly="AjaxControlToolkit" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+    <script type="text/javascript">
+        function checkdelete() {
+            if (confirm('Are you Sure want to Delete?')) {
+                document.getElementById('<%=deletestatus.ClientID %>').value = "yes";
+                return true
+            }
+            else {
+                document.getElementById('<%=deletestatus.ClientID %>').value = "no";
+                return true
+            }
+        }
+        function calculateFinalPrice(txtquantity, hfkg) {
+            debugger;
+            var hfPacking_Weight = document.getElementById(txtquantity.id.replace('txtquantity', 'hfPacking_Weight'))
+            var ltrate = document.getElementById(txtquantity.id.replace('txtquantity', 'ltrate'))
+            var lblvat = document.getElementById(txtquantity.id.replace('txtquantity', 'lblvat'))
+            var lblvatinrs = document.getElementById(txtquantity.id.replace('txtquantity', 'lblvatinrs'))
+            var ltamount = document.getElementById(txtquantity.id.replace('txtquantity', 'ltamount'))
+            var ltkg = document.getElementById(txtquantity.id.replace('txtquantity', 'ltkg'))
+            var hfltamount = document.getElementById(txtquantity.id.replace('txtquantity', 'hfltamount'))
+            var hflblvatinrs = document.getElementById(txtquantity.id.replace('txtquantity', 'hflblvatinrs'))
+            
+            ltkg.textContent = hfPacking_Weight.value * txtquantity.value
+            var amount = 0
+            var vatinr = 0
+            amount = parseFloat(ltrate.textContent) * parseFloat(ltkg.textContent);
+            vatinr = amount * parseFloat(lblvat.textContent) / 100;
+            hfltamount.value = Math.round(amount);
+            hflblvatinrs.value = Math.round(vatinr);
+            ltamount.textContent = Math.round(parseFloat(ltrate.textContent) * parseFloat(ltkg.textContent)).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+            lblvatinrs.textContent =Math.round(vatinr).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+            Read_Data();
+        }
+
+        function Read_Data() {
+            var total = 0;
+            var vat = 0;
+            var grandtoatal = 0;
+            var totalkg = 0;
+            var Grid_Table = document.getElementById('<%= grditemproduct.ClientID%>');
+            var Freight = document.getElementById('<%= txtfreight.ClientID %>');
+            for (var row = 1; row < Grid_Table.rows.length - 1; row++) {
+
+                vat = parseFloat(vat) + parseFloat(Grid_Table.rows[row].cells[7].textContent.split("(")[0].replace(/[^0-9.]/g, ""));
+                total = parseFloat(total) + parseFloat(Grid_Table.rows[row].cells[8].textContent.replace(/[^0-9.]/g, ""));
+                totalkg = parseFloat(totalkg) + parseFloat(Grid_Table.rows[row].cells[6].textContent.replace(/[^0-9.]/g, ""));
+            }
+            if (!Freight.value.length>0)
+            {
+                Freight.value = 0;
+            }
+            grandtoatal = vat + total + parseFloat(Freight.value)
+            Grid_Table.rows[row].cells[6].innerHTML = "<b>" + totalkg + " Kg</b>";
+            Grid_Table.rows[row].cells[8].innerHTML = "<b><i class='fa fa-rupee'></i> " + Math.round(vat).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + parseFloat(Freight.value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>" + "<hr style='border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;'>" + "<b><i class='fa fa-rupee'></i> " + Math.round(grandtoatal).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') + "</b>";
+            document.getElementById('<%=hftotalvat.ClientID%>').value = vat;
+            document.getElementById('<%=hfgrandtotal.ClientID%>').value = grandtoatal - parseFloat(Freight.value);
+            return false;
+        }
+    </script>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" runat="Server">
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <asp:HiddenField ID="hfsubtotal" runat="server" />
+    <asp:HiddenField ID="hfquantity" runat="server" />
+    <asp:HiddenField ID="hftotalq" runat="server" />
+    <asp:HiddenField ID="hfvat" runat="server" />
+    <asp:HiddenField ID="hfgrand" runat="server" />
+    <asp:HiddenField ID="deletestatus" runat="server" />
+    <asp:HiddenField ID="HiddenField2" runat="server" />
+    <asp:HiddenField ID="HiddenField3" runat="server" />
+    <asp:HiddenField ID="HiddenField1" runat="server" />
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="content-header">
+                <div class="header-section">
+                    <h1 style="font-weight: 400;">
+                        <%-- <i class="hi hi-tasks" style="margin: -8px"></i>Modify Task<br>--%>
+                    New Sale Order
+                    </h1>
+                </div>
+            </div>
+            <ul class="breadcrumb breadcrumb-top">
+                <li><a href="index.aspx">Home</a></li>
+                <li><a href="SalesOrders.aspx">Sale Order</a></li>
+                <li>
+                   New Sale Order</li>
+                <%-- <li>Modify Task</li>--%>
+            </ul>
+            <div class="col-md-12">
+                <div class="widget" style="display:table; width:100%">
+                    <div class="widget-extra themed-background-dark">
+                        <h4 class="widget-content-light">
+                            <strong>Sales</strong> Order
+                        </h4>
+                    </div>
+                    <div class="widget-extra-full">
+                        <div class="form-horizontal form-bordered">
+                            <div class="col-md-12">
+                                <br />
+                            </div>
+                            <div class="col-md-12">
+                                <div class="col-md-12">
+                                    <div class="col-md-1">
+                                        <label class="control-label" for="example-hf-password">Account:</label>
+                                    </div>
+                                    <div class="col-md-11">
+                                        <asp:DropDownList ID="ddrelatedtypeid" runat="server" AutoPostBack="true" name="example-chosen" class="select-chosen" data-toggle="tooltip" title="Related Type ID" TabIndex="1"></asp:DropDownList>
+                                    <br />
+                                       <br /> 
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="col-md-5">
+                                        <label class="control-label" for="example-hf-password">Payment Mode</label>
+                                    </div>
+                                    <div class="col-md-7">
+                                    <asp:DropDownList ID="ddpayment" runat="server" class="select-chosen" TabIndex="2">
+                                        <asp:ListItem Value="Select Payment Mode" Selected="True">Select Payment Mode</asp:ListItem>
+                                        <asp:ListItem Value="Bank Transfer">Bank Transfer</asp:ListItem>
+                                        <asp:ListItem Value="Cheque">Cheque</asp:ListItem>
+                                    </asp:DropDownList>
+                                    <asp:RequiredFieldValidator ID="RequiredFieldValidator6" runat="server" ControlToValidate="ddpayment" InitialValue="Select Payment Mode" ValidationGroup="MasterGroup" CssClass="MasterValidationCSS"
+                                        ErrorMessage="Please select payment mode" Display="Dynamic"></asp:RequiredFieldValidator>
+                                        <br />
+                                        <br />
+                                        </div> 
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="col-md-5">
+                                        <label class="control-label" for="example-hf-password">PO. Number</label>
+                                    </div>
+                                    <div class="col-md-7">
+                                    <asp:TextBox ID="txtpono" runat="server" placeholder="Enter PO. Number" data-toggle="tooltip" title="Enter PO. Number" TabIndex="3"
+                                        CssClass="form-control"></asp:TextBox>
+                                        <br />                                        
+                                        </div> 
+                                </div>
+                                </div> 
+                            <div class="col-md-12">
+                                
+                                <div class="col-md-4">
+                                    <div class="col-md-5">
+                                        <label class="control-label" for="example-hf-password">PO. Date</label>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <asp:TextBox ID="txtpodate" runat="server" placeholder="Enter PO. Date" data-toggle="tooltip" title="Enter PO. Date" TabIndex="4"
+                                            CssClass="form-control" TextMode="Date"></asp:TextBox>
+                                        <br />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="col-md-5">
+                                        <label class="control-label" for="example-hf-password">Order Date</label>
+                                    </div>
+                                    <div class="col-md-7" style="padding-right: 0px;">
+                                        <asp:TextBox ID="txtorderdate" runat="server" placeholder="Enter Order Date" data-toggle="tooltip" title="Enter Order Date" TabIndex="5"
+                                        CssClass="form-control" TextMode="DateTimeLocal" ></asp:TextBox>
+                                        <br />
+                                    </div>
+                                </div> 
+                                <div class="col-md-4">
+                                    <div class="col-md-5">
+                                        <label class="control-label" for="example-hf-password">Dispatch Through</label>
+                                    </div>
+                                    <div class="col-md-7">
+                                    <asp:TextBox ID="txtdispach" runat="server" placeholder="Enter Dispatch Through" data-toggle="tooltip" title="Enter Dispatch Through" TabIndex="6"
+                                        CssClass="form-control"></asp:TextBox>
+                                        </div> 
+                                </div>                               
+                            </div>
+
+                            <div class="col-md-12">                                
+                                <div class="col-md-4">
+                                    <div class="col-md-5">
+                                        <label class="control-label" for="example-hf-password">Terms of Delivery</label>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <asp:TextBox ID="txttermdelivery" runat="server" placeholder="Enter Terms of Delivery" data-toggle="tooltip" title="Enter Terms of Delivery" TabIndex="7"
+                                            CssClass="form-control"></asp:TextBox>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="col-md-5">
+                                        <label class="control-label" for="example-hf-password">Terms of Payment</label>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <asp:TextBox ID="txttermpayment" runat="server" placeholder="Enter Terms of Payment" data-toggle="tooltip" title="Enter Terms of Payment" TabIndex="8"
+                                        CssClass="form-control" ></asp:TextBox>
+                                        <br />
+                                    </div>
+                                </div> 
+                                <div class="col-md-4">
+                                    <div class="col-md-5">
+                                        <label class="control-label" for="example-hf-password">Freight</label>
+                                    </div>
+                                    <div class="col-md-7">
+                                        <asp:TextBox ID="txtfreight" runat="server" placeholder="Enter Freight" data-toggle="tooltip" title="Enter Freight" TabIndex="9"
+                                        CssClass="form-control" onblur="Read_Data();" ></asp:TextBox>
+                                    </div>
+                                </div>                                
+                            </div>
+                            <div class="col-md-12" runat="server" visible="false" >                                
+                                <div class="col-md-4">
+                                    <div class="col-md-5">
+                                        <label class="control-label" for="example-hf-password">Billed From</label>
+                                    </div>
+                                    <div class="col-md-7">
+                                       <asp:DropDownList ID="ddlcompany" runat="server"  name="example-chosen" class="select-chosen" data-toggle="tooltip" title="Billed From" TabIndex="10"></asp:DropDownList>
+                                    </div>
+                                </div>
+                              </div> 
+
+                            <div style="clear: both;"></div>
+                            <br />
+                            <div class="col-md-12">
+                                
+                                <%--<div class="col-md-4">
+                                    <div class="checkbox">
+                                                    <label for="example-checkbox1">
+                                                        <asp:CheckBox ID="chknotax" runat="server"  Text="No taxation detail available"/>                                                        
+                                                    </label>
+                                                </div>
+                                    </div> 
+                                </div> --%>
+                            <div style="clear: both;"></div>
+                            <div class="col-md-12">
+                                <!-- Company Info -->
+                                <div class="col-sm-3">
+                                    <h4 class="themed-color"><strong>Account Details</strong></h4>
+                                    <address>
+                                        <asp:Label ID="lblaccname" runat="server"></asp:Label><br />
+                                        <asp:Label ID="lblaccontact" runat="server"></asp:Label><br />
+                                        <i class="fa fa-phone"></i>
+                                        <asp:Label ID="lbltelephone" runat="server"></asp:Label><br />
+                                        <i class="gi gi-iphone"></i>
+                                        <asp:Label ID="lblacphone" runat="server"></asp:Label><br />
+                                        <i class="fa fa-envelope-o"></i>
+                                        <asp:Label ID="lblaccemail" runat="server"></asp:Label>
+                                    </address>
+                                </div>
+                                <div class="col-sm-3">
+                                    <h4 class="themed-color"><strong>Billing Address</strong></h4>
+                                    <address>
+                                        <asp:Label ID="lblnamebill" runat="server"></asp:Label><br />
+                                        <asp:Label ID="lbladdressbill" runat="server"></asp:Label><br />
+                                        <asp:Label ID="lblcountrybill" runat="server"></asp:Label>
+                                        <asp:Label ID="lblsatatebill" runat="server"></asp:Label><br />
+                                        <asp:Label ID="lblCitybill" runat="server"></asp:Label>
+                                        <asp:Label ID="lblpincodebill" runat="server"></asp:Label><br />
+                                        <i class="fa fa-phone"></i>
+                                        <asp:Label ID="lbltelephonebill" runat="server"></asp:Label><br />
+                                        <i class="fa fa-envelope-o"></i>
+                                        <asp:Label ID="lblemailbill" runat="server"></asp:Label>
+                                    </address>
+                                </div>
+                                <div class="col-sm-3">
+                                    <h4 class="themed-color"><strong>Shipping Address</strong></h4>
+                                    <address>
+                                        <asp:Label ID="lblnameship" runat="server"></asp:Label><br />
+                                        <asp:Label ID="lbladdressShip" runat="server"></asp:Label><br />
+                                        <asp:Label ID="lblcountryship" runat="server"></asp:Label>
+                                        <asp:Label ID="lblsatateship" runat="server"></asp:Label><br />
+                                        <asp:Label ID="lblCityship" runat="server"></asp:Label>
+                                        <asp:Label ID="lblpincodeship" runat="server"></asp:Label><br />
+                                        <i class="fa fa-phone"></i>
+                                        <asp:Label ID="lbltelephoneship" runat="server"></asp:Label><br />
+                                        <i class="fa fa-envelope-o"></i>
+                                        <asp:Label ID="lblemailship" runat="server"></asp:Label>
+                                    </address>
+                                </div>
+                                <div class="col-sm-3">
+                                    <h4 class="themed-color"><strong>TAX. Details</strong></h4>
+                                    <address>
+                                        <b>
+                                            <label class="control-label" for="example-hf-password">CST:  </label>
+                                        </b>
+                                        <a style="text-decoration: none;">
+                                            <asp:Label ID="lblcst" runat="server"></asp:Label></a><br />
+                                        <b>
+                                            <label class="control-label" for="example-hf-password">PAN:  </label>
+                                        </b>
+                                        <a style="text-decoration: none;">
+                                            <asp:Label ID="lblpan" runat="server"></asp:Label></a>
+                                        <br />
+                                        <b>
+                                            <label class="control-label" for="example-hf-password">VAT:  </label>
+                                        </b>
+                                        <a style="text-decoration: none;">
+                                            <asp:Label ID="lblvat" runat="server"></asp:Label></a>
+                                    </address>
+                                </div>
+                            </div>
+                            
+                            <hr />
+                                <div class="col-md-12">                               
+                                    <User:AssignControl ID="assigncontrol" runat="server" />    
+                                </div>                                
+                                                    
+                                <div class="col-md-12">                                   
+                                    <asp:LinkButton ID="btnopen" Text="Add Item" ValidationGroup="MasterGroup" runat="server" class="btn btn-alt btn-xs btn-primary" TabIndex="11" />
+                                    <asp:LinkButton ID="btnQuickOpen" Text="Quick Add Item" ValidationGroup="MasterGroup" runat="server" class="btn btn-alt btn-xs btn-primary" TabIndex="11" />                                    
+                                    <br />
+                                    <br />
+                                 </div>                                
+                                                
+                            <div class="col-md-12">
+                                <asp:UpdatePanel ID="UpdatePanel2" runat="server" UpdateMode="Conditional">
+                                    <ContentTemplate>
+                                        <asp:HiddenField ID="hftotalvat" runat="server" />
+    <asp:HiddenField ID="hfgrandtotal" runat="server" />
+                                        <div class="table-responsive">
+                                            <asp:GridView ID="grditemproduct" ShowFooter="true" GridLines="None" CssClass="table table-striped table-vcenter" HeaderStyle-Width="100" HeaderStyle-Font-Bold="true" HeaderStyle-Font-Size="Smaller" CellPadding="0" CellSpacing="0" runat="server" AutoGenerateColumns="false">
+                                                <Columns>
+                                                    <asp:TemplateField HeaderText="Product Name" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink11" runat="server">Product Name</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="ltproductname" runat="server" Text='<%#Eval("Product_Name")%>'></asp:Label>
+                                                            <asp:Label ID="ltitemid" runat="server" Text='<%#Eval("ItemDt_ID")%>' Visible="false"></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="Product Code" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink12" runat="server">Product Code</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="ltproductcode" runat="server" Text='<%#Eval("Product_Code")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="SKU" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink13" runat="server">SKU</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:HiddenField ID="hfPacking_Weight" runat="server" Value='<%#Eval("Packing_Weight")%>' />
+                                                            <asp:Label ID="ltproductWeight" runat="server" Text='<%#Eval("Packing_Weight")%>' Visible="false"></asp:Label>
+                                                            <asp:Label ID="ltpackingpacking" runat="server" Text='<%#Eval("Packing_Packing")%>'></asp:Label>
+                                                            <asp:Label ID="ltproductid" runat="server" Text='<%#Eval("ProductId")%>' Visible="false"></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="PrdRate" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink15" runat="server">Rate/kg</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-rupee"></i>&nbsp;
+                                                            <asp:Label ID="ltPrdrate" runat="server" Text='<%#Eval("Product_Rate")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="Rate" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink15" runat="server">Discounted Rate/kg</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-rupee"></i>&nbsp;
+                                                            <asp:Label ID="ltrate" runat="server" Text='<%#Eval("ItemDt_Rate")%>'></asp:Label>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="No.Of Pack" ItemStyle-Width="100px" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink14" runat="server">No.Of Pack</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <div class="col-md-12">
+                                                                <asp:TextBox ID="txtquantity" runat="server" onblur="calculateFinalPrice(this,'hfkg')" onkeyup="this.value=this.value.replace(/\D/g,'');" Text='<%#Eval("ItemDt_Qty")%>' Height="25" data-toggle="tooltip" title="Enter Qunatity"
+                                                                    CssClass="form-control" MaxLength="3" TabIndex="12"></asp:TextBox>
+                                                                <asp:Label ID="ltquantity" runat="server" Visible="false" Text='<%#Eval("ItemDt_Qty")%>'></asp:Label>
+                                                            </div>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="KG" HeaderStyle-CssClass="" ItemStyle-CssClass="" FooterStyle-VerticalAlign="Top">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink17" runat="server">KG</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <asp:Label ID="ltkg" Text='<%#Eval("Packing_Weight")%>' runat="server"></asp:Label>
+                                                            <asp:HiddenField ID="hfkg" runat="server" Value='<%#Eval("Packing_Weight")%>' />
+                                                            kg
+                                            <%-- <asp:Label ID="lblvat" runat="server" Text='<%#Eval("Product_Vat")%>' Visible="false" />--%>
+                                                        </ItemTemplate>
+                                                        <FooterTemplate>
+                                                            <asp:Label ID="lttotalkg" runat="server" Font-Bold="true" style="position:absolute;  margin-top: -23px;"></asp:Label>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="Vat" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink17" runat="server">VAT</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-rupee"></i>&nbsp;
+                                                            <asp:Label ID="lblvatinrs" runat="server" Text='<%#Eval("Product_Vat")%>' />
+                                                            <asp:HiddenField ID="hflblvatinrs" runat="server"/>
+                                                            (<asp:Label ID="lblvat" runat="server" Text='<%#Eval("Product_Vat")%>' />%)
+                                                            
+                                                        </ItemTemplate>
+                                                        <FooterTemplate>
+                                                            Total VAT:<br />
+                                                            <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" />
+                                                            Freight:<br />
+                                                            <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" />
+                                                            Total Amount:
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField HeaderText="Amount" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink18" runat="server">Amount</asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <i class="fa fa-rupee"></i>&nbsp;
+                                                            <asp:Label ID="ltamount" runat="server"></asp:Label>
+                                                            <asp:HiddenField ID="hfltamount" runat="server" />
+                                                        </ItemTemplate>
+                                                        <FooterTemplate>
+                                                            <%--Total Amount:<b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--%><b><i class="fa fa-rupee"></i>&nbsp;
+                                                                <asp:Label ID="lttotalvat" Text='78500' runat="server"></asp:Label>
+
+                                                            </b>
+                                                            <br />
+                                                            <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" />
+                                                            <b><i class="fa fa-rupee"></i>&nbsp;
+                                                                <asp:Label ID="lblfreight" Text='78500' runat="server"></asp:Label>
+
+                                                            </b>
+                                                            <br />
+                                                            <hr style="border: 0; border-top: 1px solid #eee; margin-top: 4px; margin-bottom: 4px;" />
+                                                            <b><i class="fa fa-rupee"></i>&nbsp;
+                                                                <asp:Label ID="lttotalamount" Text='78500' runat="server"></asp:Label>
+
+                                                            </b>
+                                                        </FooterTemplate>
+                                                    </asp:TemplateField>
+                                                    <asp:TemplateField ItemStyle-Width="" HeaderStyle-CssClass="" ItemStyle-CssClass="">
+                                                        <HeaderTemplate>
+                                                            <asp:HyperLink ID="HyperLink1" runat="server"></asp:HyperLink>
+                                                        </HeaderTemplate>
+                                                        <ItemTemplate>
+                                                            <div class="btn-group btn-group-xs">
+                                                                <asp:LinkButton ID="lnkdelete" data-toggle="tooltip" title="Delete" class="btn btn-xs btn-danger" runat="server" OnClientClick="checkdelete();"
+                                                                    CommandName="deletelink" CommandArgument="<%# CType(Container,GridViewRow).RowIndex %>">Delete</asp:LinkButton>
+                                                            </div>
+                                                        </ItemTemplate>
+                                                    </asp:TemplateField>
+                                                </Columns>
+                                                <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="left" BackColor="White" />
+                                                <FooterStyle HorizontalAlign="left" BackColor="White" />
+                                                <PagerSettings PageButtonCount="4" />
+                                                <EmptyDataTemplate>
+                                                    <asp:Label ID="s" runat="server" Text="No Item Found"></asp:Label><br />
+                                                    <br />
+                                                </EmptyDataTemplate>
+                                                <EmptyDataRowStyle HorizontalAlign="Center" />
+                                            </asp:GridView>
+                                        </div>
+
+                                    </ContentTemplate>
+                                    <Triggers>
+                                        <asp:AsyncPostBackTrigger ControlID="GridView1" />
+                                        <asp:AsyncPostBackTrigger ControlID="btnsave" />
+                                        <asp:AsyncPostBackTrigger ControlID="btnsaveclose" />
+                                        <asp:AsyncPostBackTrigger ControlID="grditemproduct" />
+                                    </Triggers>
+                                </asp:UpdatePanel>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <asp:LinkButton ID="btnShow" runat="server" Text=""></asp:LinkButton>
+                    <asp:ModalPopupExtender ID="mpe" runat="server" PopupControlID="pnlPopup" TargetControlID="btnShow"
+                        CancelControlID="btnNo">
+                    </asp:ModalPopupExtender>
+                    <asp:Panel ID="pnlPopup" runat="server" Style="display: none">
+                        <div class="modal-dialog modal-lg" style="overflow-y: scroll; position: fixed; top: 0; bottom: 0; left: 0; right: 0; overflow: auto; width: 1192px;">
+                            <div class="modal-content" style="top: 1%; overflow-x: hidden; overflow-y: auto; outline: none; margin-top: 0; top: 50%; overflow: visible;">
+                                <div class="modal-header">
+                                    <asp:LinkButton ID="btnNo" class="close" runat="server">&times;</asp:LinkButton>
+                                    <h3 class="modal-title">Add Product</h3>
+                                </div>
+                                <div class="modal-body" style="overflow: auto; height: 400px;">
+                                    <div class="table-options clearfix">
+                                        <div class="col-sm-5 col-xs-4">
+                                            <div class="dataTables_length" id="example-datatable_length">
+                                                <%-- <asp:DropDownList ID="ddpagesize" AutoPostBack="true" runat="server" CssClass="form-control">
+                                                    <asp:ListItem Text="10" Value="10"></asp:ListItem>
+                                                    <asp:ListItem Text="20" Value="20"></asp:ListItem>
+                                                    <asp:ListItem Text="30" Value="30"></asp:ListItem>
+                                                </asp:DropDownList>--%>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4 col-xs-12">
+                                            <div id="example-datatable_filter" class="dataTables_filter">
+                                                <label>
+                                                    <div class="input-group">
+                                                        <asp:TextBox ID="txtsearch" runat="server" class="form-control" placeholder="Search" /><span class="input-group-addon">
+                                                            <i class="fa fa-search"></i></span>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-xs-12">
+                                            <asp:Button ID="btnshowall" EnableViewState="false" runat="server" Text="Show All" CssClass="btn btn-alt btn-sm btn-info" />
+                                        </div>
+                                    </div>
+                                    <asp:UpdatePanel ID="UpdatePanel1" runat="server" UpdateMode="Conditional">
+                                        <ContentTemplate>
+                                            <div class="table-responsive">
+                                                <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="Product_Id"
+                                                    CssClass="table table-striped table-vcenter table-hover">
+                                                    <Columns>
+                                                        <asp:TemplateField HeaderText="Select" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="Product_Id">
+                                                            <ItemTemplate>
+                                                                <asp:CheckBox ID="ckselect" runat="server" />
+                                                                <asp:Label ID="lblproductId" runat="server" Text='<%#Eval("Product_Id")%>' Visible="false" />
+                                                                <%--   <asp:Label ID="lbldiscount" runat="server" Text='<%#Eval("Discount_Discount")%>' Visible="false"></asp:Label>
+                                                            <asp:Label ID="lblrate" runat="server" Text='<%#Eval("Product_Rate")%>' Visible="false" />
+                                                            <asp:Label ID="lblvat" runat="server" Text='<%#Eval("Product_Vat")%>' Visible="false" />--%>
+                                                                <%-- <asp:Label ID="lblunit" runat="server" Text='<%#Eval("Packing_weight")%>' Visible="false" />--%>
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+                                                        <asp:TemplateField HeaderText="No of Pack" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="PrdCategory_Name" ItemStyle-Width="101">
+                                                            <ItemTemplate>
+                                                                <asp:Label ID="lblstock" runat="server" Text='<%#Eval("Product_Stock")%>' Visible="false"></asp:Label>
+                                                                <asp:TextBox ID="txtOrderQty" runat="server" Style="width: 54px;" min="0"></asp:TextBox>
+                                                                <%-- onblur="calculateFinalPrice(this,'hfproductWeight')" --%>
+                                                                <asp:Label ID="lblout" runat="server" Text="Out Of Stock" Style="color: red; font-weight: bold;"
+                                                                    Visible="false"></asp:Label>
+                                                                <asp:Label ID="lblamount" runat="server" Visible="false"></asp:Label>
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+                                                        <asp:TemplateField HeaderText="Category" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="PrdCategory_Name">
+                                                            <ItemTemplate>
+                                                                <asp:Label ID="lblCategory" runat="server" Text='<%#Eval("PrdCategory_Name")%>' />
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+                                                        <asp:TemplateField HeaderText="Product Name" ItemStyle-CssClass="MasterGridviewItem" HeaderStyle-CssClass="MasterGridviewHeader" SortExpression="Product_Name">
+                                                            <ItemTemplate>
+                                                                <asp:Label ID="lblname" runat="server" Text='<%#Eval("Product_Name")%>' />
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+                                                        <asp:TemplateField HeaderText="Code" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="Product_Code">
+                                                            <ItemTemplate>
+                                                                <asp:Label ID="lblcode" runat="server" Text='<%#Eval("Product_Code")%>' />
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+                                                        <asp:TemplateField HeaderText="SKU" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="Packing_Packing">
+                                                            <ItemTemplate>
+                                                                <asp:Label ID="lblunit" runat="server" Text='<%#Eval("Packing_Packing")%>' />
+                                                                <asp:Label ID="ltproductWeight" runat="server" Text='<%#Eval("Packing_Weight")%>' Visible="false"></asp:Label>
+                                                                <asp:HiddenField ID="hfproductWeight" runat="server" Value='<%#Eval("Packing_Weight")%>' />
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+                                                        <asp:TemplateField HeaderText="Rate / kg" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="Product_Rate" Visible="false">
+                                                            <ItemTemplate>
+                                                                <asp:Label ID="lbldiscount" runat="server" Text='<%#Eval("Discount_Discount")%>' Visible="false" />
+                                                                <i class="fa fa-rupee"></i>&nbsp;
+                                                                <asp:HiddenField ID="hfdiscount" runat="server" Value='<%#Eval("Discount_Discount")%>' />
+                                                                <asp:Label ID="lblrate" runat="server" Text='<%#Eval("Product_Rate")%>' />
+                                                                <asp:HiddenField ID="hfrate" runat="server" Value='<%#Eval("Product_Rate")%>' />
+                                                                <asp:HiddenField ID="hfdiscountrate" runat="server" />
+                                                                <asp:Label ID="lblvat" runat="server" Text='<%#Eval("Product_Vat")%>' Visible="false" />
+                                                                <asp:HiddenField ID="hfvat" runat="server" Value='<%#Eval("Product_Vat")%>' />
+                                                                <asp:Label ID="Label1" runat="server"></asp:Label><br />
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+                                                        <asp:TemplateField HeaderText="Kgs" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="Product_Code" Visible="false">
+                                                            <ItemTemplate>
+                                                                <asp:Label ID="lblkgs" runat="server" Text="-"></asp:Label>
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+                                                        <asp:TemplateField HeaderText="Amount" HeaderStyle-CssClass="MasterGridviewHeader" ItemStyle-CssClass="MasterGridviewItem" SortExpression="Product_Code" Visible="false">
+                                                            <ItemTemplate>
+                                                                <asp:Label ID="lbltotalamount2" runat="server" Visible="false"></asp:Label>
+                                                                <asp:Label ID="lbltotalamount" runat="server" Visible="false"></asp:Label>
+                                                                <asp:Label ID="lbltotalamount1" runat="server" Text="-"></asp:Label>
+                                                            </ItemTemplate>
+                                                        </asp:TemplateField>
+                                                    </Columns>
+                                                    <PagerStyle CssClass="MasterGridviewPaging" HorizontalAlign="Right" BackColor="White" />
+
+                                                    <FooterStyle HorizontalAlign="Center" BackColor="White" />
+                                                    <PagerSettings PageButtonCount="4" />
+
+                                                    <EmptyDataTemplate>
+                                                        <asp:Label ID="s" runat="server" Text="No Record Found"></asp:Label><br />
+                                                        <br />
+                                                    </EmptyDataTemplate>
+                                                    <EmptyDataRowStyle HorizontalAlign="Center" />
+                                                </asp:GridView>
+                                            </div>
+                                        </ContentTemplate>
+                                        <Triggers>
+                                            <asp:AsyncPostBackTrigger ControlID="btnsave" />
+                                            <asp:AsyncPostBackTrigger ControlID="btnopen" />
+                                             <asp:AsyncPostBackTrigger ControlID="btnQuickOpen" />
+                                            <asp:AsyncPostBackTrigger ControlID="btnshowall" />
+                                        </Triggers>
+                                    </asp:UpdatePanel>
+                                </div>
+                                <asp:UpdatePanel ID="UpdatePanel3" runat="server" UpdateMode="Conditional">
+                                    <ContentTemplate>
+                                        <div class="modal-footer">
+                                            <asp:Button ID="btnsave" runat="server" class="btn btn-sm btn-primary" ValidationGroup="ProductItemGroup" Text="Save changes"></asp:Button>
+                                            <asp:Button ID="btnsaveclose" runat="server" class="btn btn-sm btn-primary" ValidationGroup="ProductItemGroup" Text="Save & Close"></asp:Button>
+                                        </div>
+                                    </ContentTemplate>
+                                    <Triggers>
+                                        <asp:AsyncPostBackTrigger ControlID="btnopen" />
+                                         <asp:AsyncPostBackTrigger ControlID="btnQuickOpen" />
+                                    </Triggers>
+                                </asp:UpdatePanel>
+                            </div>
+                        </div>
+                    </asp:Panel>
+                    <asp:UpdateProgress ID="UpdateProgress1" AssociatedUpdatePanelID="" runat="server" DisplayAfter="0">
+                        <ProgressTemplate>
+                            <br />
+                            <div class="divWaiting">
+                                <i class="fa fa-sun-o fa-spin" id="LoadingUpadatePanel"></i>
+                            </div>
+                        </ProgressTemplate>
+                    </asp:UpdateProgress>
+                </div>
+            </div>
+        </div>
+             <div class="col-md-12" style="margin-bottom: 11px; display: table; margin-top: -8px">
+                <div class="pull-right">
+                     <asp:Button Text="Save" runat="server" ID="btnadd" OnClientClick="if (!Page_ClientValidate('MasterGroup')){ return false; } this.disabled = true; this.value = 'Saving...';"
+                                        UseSubmitBehavior="false" class="btn btn-alt btn-sm btn-primary" ValidationGroup="MasterGroup" TabIndex="13" />
+                    <asp:LinkButton ID="hfcancel" CausesValidation="false" Text="Cancel" runat="server" NavigateUrl="~/SalesOrders.aspx" class="btn btn-alt btn-sm btn-danger" TabIndex="14" />
+                </div>
+            </div>
+    </div>
+</asp:Content>
+

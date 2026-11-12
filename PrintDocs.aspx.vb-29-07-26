@@ -1,0 +1,540 @@
+﻿Imports CrystalDecisions.Shared
+Imports CrystalDecisions.CrystalReports.Engine
+Imports System.Threading
+
+'Imports System.Runtime.Serialization
+
+
+Partial Class PrintDocs
+    Inherits _PageBaseClass
+    Dim MainID As Integer
+    Dim type As String
+    Public dsReport As New DataSet
+    Public dtReport, dt1, dt2 As New DataTable
+    Public reportHead As String = ""
+    Public doc As New CrystalDecisions.CrystalReports.Engine.ReportDocument()
+    'Dim mergeDt As New CrystalDecisions.Shared.MIReportDataSet
+    Dim CrExportOptions As ExportOptions
+    Dim cryRpt As New ReportDocument()
+    Dim CrDiskFileDestinationOptions As New DiskFileDestinationOptions()
+    Dim CrFormatTypeOptions As New PdfRtfWordFormatOptions()
+	Dim TcsApplicable As Boolean = False
+	
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        GenetrateReport()
+    End Sub
+    'Public Sub ExportTOPdf(pid As Integer)
+    '    Dim crConnectionInfo As New ConnectionInfo()
+
+
+
+    '    Dim CrExportOptions As New ExportOptions()
+    '    Dim CrDiskFileDestinationOptions As New DiskFileDestinationOptions()
+    '    Dim CrFormatTypeOptions As New PdfRtfWordFormatOptions()
+    '    ' Dim dtRow, dtRow1 As New DataTable()
+
+
+
+    '    Dim dsreport As New DataSet
+    '    dsreport.Tables.Add("CryRt_CustBill")
+    '    dsreport.Tables.Add("CryRt_CustShip")
+    '    dsreport.Tables.Add("CryRt_QtnItems")
+    '    Dim dt1 As New DataTable("CryRt_CustBill")
+    '    Dim dt2 As New DataTable("CryRt_CustShip")
+    '    Dim dt3 As New DataTable("CryRt_QtnItems")
+
+    '    'dt1 = QuotationBLL.crystaldetails("crystalbilladdr", 601).Tables(0)
+    '    'dt2 = QuotationBLL.crystaldetails("crystalshipaddr", 601).Tables(0)
+    '    'dt3 = QuotationBLL.crystaldetails("crystalQtnExpItem", 42).Tables(0)
+
+
+    '    dt1 = QuotationBLL.crystaldetails("crystalbilladdr", 659).Tables(0)
+    '    dt2 = QuotationBLL.crystaldetails("crystalshipaddr", 659).Tables(0)
+    '    dt3 = QuotationBLL.crystaldetails("crystalQtnExpItem", 24).Tables(0)
+
+    '    '  dsreport.Merge(dt1)
+    '    dsreport.Tables("CryRt_CustBill").Merge(dt1)
+    '    dsreport.Tables("CryRt_CustShip").Merge(dt2)
+    '    dsreport.Tables("CryRt_QtnItems").Merge(dt3)
+
+    '    '  QuotationID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+    '    Dim CustId As Integer = QuotationBLL.GetCustId(pid)
+
+    '    cryRpt.Load(Server.MapPath("") + "\CrystalReport\qtnExp.rpt")
+
+
+    '    'string str = Server.MapPath("") + "\\App_Data\\TATAPGA.mdb";
+    '    ' Dim str As String = Server.MapPath("") + "\App_Data"
+
+
+    '    Dim host As String = HttpContext.Current.Request.Url.Host
+
+    '    'If host = "localhost" Then
+    '    '   cryRpt.SetDatabaseLogon("sa", "Acaira@123", "SERVER", "db_swissbake")
+    '    ' Else
+    '    cryRpt.SetDatabaseLogon("swissbake", "qwertyuiop", "103.231.209.42", "dbswissbake")
+
+    '    ' End If
+
+    '    cryRpt.SetDataSource(dsreport)
+    '    cryRpt.Subreports.Item("AccShipAddr").SetDataSource(dsreport.Tables("crystalshipaddr"))
+    '    cryRpt.Subreports.Item("QtnItems").SetDataSource(dsreport.Tables("crystalQtnExpItem"))
+    '    cryRpt.VerifyDatabase()
+
+    '    CrExportOptions = cryRpt.ExportOptions
+    '    CrExportOptions.ExportDestinationType = ExportDestinationType.DiskFile
+    '    CrExportOptions.DestinationOptions = CrDiskFileDestinationOptions
+    '    CrExportOptions.FormatOptions = CrFormatTypeOptions
+    '    'string output = Server.MapPath("") + "\\" + dt3.Rows[0]["Quotation_No"].ToString() + ".pdf";
+    '    Dim filename As String = dt3.Rows(0)("Quotation_No").ToString()
+    '    filename = filename.Replace(",", " ")
+    '    filename = filename.Replace("/", "")
+
+    '    Dim output As String = (Convert.ToString(Server.MapPath("") + "\") & filename) + ".pdf"
+    '    cryRpt.ExportToDisk(ExportFormatType.PortableDocFormat, output)
+    '    cryRpt.Close()
+    '    cryRpt.Dispose()
+    '    '  DownloadNDelete(output)
+
+    'End Sub
+    Public Sub GenetrateReport()
+        If Request.QueryString("tpy") = "Quotation" Then
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            type = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("type")))
+            Try
+
+                Dim dsreport As New DataSet
+                dsreport.Tables.Add("CryRt_CustBill")
+                dsreport.Tables.Add("CryRt_CustShip")
+                dsreport.Tables.Add("CryRt_QtnItems")
+                Dim dt1 As New DataTable("CryRt_CustBill")
+                Dim dt2 As New DataTable("CryRt_CustShip")
+                Dim dt3 As New DataTable("CryRt_QtnItems")
+
+                'dt1 = QuotationBLL.crystaldetails("crystalbilladdr", 601).Tables(0)
+                'dt2 = QuotationBLL.crystaldetails("crystalshipaddr", 601).Tables(0)
+                'dt3 = QuotationBLL.crystaldetails("crystalQtnExpItem", 42).Tables(0)
+
+
+                Dim CustId As Integer = QuotationBLL.GetCustId(MainID)
+                dt1 = QuotationBLL.crystaldetails("crystalbilladdr", CustId).Tables(0)
+                dt2 = QuotationBLL.crystaldetails("crystalshipaddr", CustId).Tables(0)
+                dt3 = QuotationBLL.crystaldetails("crystalQtnExpAllItem", MainID).Tables(0)
+
+                If Not String.IsNullOrEmpty(dt3.Rows(0)("Tcs_Amount").ToString()) Then
+                    If (Convert.ToInt32(dt3.Rows(0)("Tcs_Amount")) > 0) Then
+                        TcsApplicable = True
+                    End If
+                End If
+
+
+
+                '  dsreport.Merge(dt1)
+                dsreport.Tables("CryRt_CustBill").Merge(dt1)
+                dsreport.Tables("CryRt_CustShip").Merge(dt2)
+
+                dt3.Rows(0)("Quotation_FlightNo") = dt3.Rows(0)("BankId")
+                dt3.AcceptChanges()
+
+                dsreport.Tables("CryRt_QtnItems").Merge(dt3)
+                'If dsReport.Tables(0).Rows.Count > 0 Then
+
+
+
+                If type = "USD" Then
+                    doc.Load(Server.MapPath("\CrystalReport\QtnExp.rpt"))
+                ElseIf type = "EURO" Then
+                    doc.Load(Server.MapPath("\CrystalReport\QtnExp.rpt"))
+                Else
+                    If (TcsApplicable = True) Then
+                        doc.Load(Server.MapPath("\CrystalReport\TCSQtnDom.rpt"))
+                    Else
+                        doc.Load(Server.MapPath("\CrystalReport\QtnDom.rpt"))
+                    End If
+                End If
+                '  reportBLL.FixDatabase(doc)
+                '  doc.SetDatabaseLogon(reportBLL.dbUser, reportBLL.dbPass, reportBLL.serverName, reportBLL.dbName)
+                Dim host As String = HttpContext.Current.Request.Url.Host
+
+                'If host = "localhost" Then
+                ' doc.SetDatabaseLogon("sa", "Acaira@123", "SERVER", "db_swissbake")
+                ' Else
+                doc.SetDatabaseLogon("swissbake", "qwertyuiop", "103.231.209.42", "NewDBswissbake")
+
+                ' End If
+
+
+
+                doc.SetDataSource(dsreport)
+                doc.Subreports.Item("AccShipAddr").SetDataSource(dsreport.Tables("crystalshipaddr"))
+                doc.Subreports.Item("QtnItems").SetDataSource(dsreport.Tables("crystalQtnExpItem"))
+                'doc.Refresh()
+                ''Bank detail
+                Dim BankId As Integer = 0
+
+                If dt3.Rows.Count > 0 Then
+
+                    If dt3.Columns.Contains("BankId") AndAlso
+       Not IsDBNull(dt3.Rows(0)("BankId")) Then
+
+                        Integer.TryParse(
+            dt3.Rows(0)("BankId").ToString(),
+            BankId
+        )
+
+                    End If
+
+                End If
+
+                SetBankDetails(BankId)
+                'end bank detail
+                doc.VerifyDatabase()
+                CrExportOptions = doc.ExportOptions
+                With CrExportOptions
+                    .ExportDestinationType = ExportDestinationType.DiskFile
+                    .ExportDestinationOptions = CrDiskFileDestinationOptions
+                    .FormatOptions = CrFormatTypeOptions
+
+                    '.ExportFormatType = ExportFormatType.PortableDocFormat
+                End With
+
+                Dim pdfPath As String = Server.MapPath("PrintDocs/")
+
+                'Try
+                '    doc.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Response, False, Server.MapPath("").ToString() & "\GeneratePdfReport\Agreement.pdf")
+                '    ' doc.ExportToDisk(ExportFormatType.PortableDocFormat, pdfPath.ToString & "\Agreement.pdf")
+                'Catch ex As Exception
+                '    Dim str As String = ex.ToString
+                'End Try
+
+                Dim filename As String = dt3.Rows(0)("Quotation_No").ToString()
+                filename = filename.Replace(",", " ")
+                filename = filename.Replace("/", "")
+
+                Dim output As String = (Convert.ToString(Server.MapPath("") + "\PrintDocs\") & filename) + ".pdf"
+
+                doc.ExportToDisk(ExportFormatType.PortableDocFormat, output)
+
+
+                ' Response.Redirect("~\PrintDocs\" + filename + ".pdf", False)
+                ' '  Response.Redirect(output, True)
+
+                ' DownloadNDelete(output)
+                doc.Dispose()
+                DownloadNDelete1(output, "")
+                'System.IO.File.Delete(output)
+                'doc.ExportToHttpResponse(CrystalDecisions.Shared.ExportFormatType.PortableDocFormat, Response,True, "Report")
+            Catch ex As Exception
+                Throw 'ex
+            End Try
+        ElseIf Request.QueryString("tpy") = "Proforma" Then
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            type = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("type")))
+            Try
+
+                If type = "USD" Then
+
+                    doc.Load(Server.MapPath("\CrystalReport\ProformaExp.rpt"))
+                Else
+                    doc.Load(Server.MapPath("\CrystalReport\ProformaDom.rpt"))
+                End If
+               
+                Dim host As String = HttpContext.Current.Request.Url.Host
+
+                'If host = "localhost" Then
+                ' doc.SetDatabaseLogon("sa", "Acaira@123", "SERVER", "db_swissbake")
+                ' Else
+                doc.SetDatabaseLogon("swissbake", "qwertyuiop", "103.231.209.42", "NewDBswissbake")
+
+                ' End If
+
+
+                Dim dsreport As New DataSet
+                dsreport.Tables.Add("CryRt_CustBill")
+                dsreport.Tables.Add("CryRt_CustShip")
+                dsreport.Tables.Add("CryRt_QtnItems")
+                dsreport.Tables.Add("CryRt_Proforma")
+                Dim dt1 As New DataTable("CryRt_CustBill")
+                Dim dt2 As New DataTable("CryRt_CustShip")
+                Dim dt3 As New DataTable("CryRt_QtnItems")
+                Dim dt4 As New DataTable("CryRt_Proforma")
+
+                'dt1 = QuotationBLL.crystaldetails("crystalbilladdr", 601).Tables(0)
+                'dt2 = QuotationBLL.crystaldetails("crystalshipaddr", 601).Tables(0)
+                'dt3 = QuotationBLL.crystaldetails("crystalQtnExpItem", 42).Tables(0)
+
+
+                Dim CustId As Integer = QuotationBLL.GetCustId(MainID)
+                dt1 = QuotationBLL.crystaldetails("crystalbilladdr", CustId).Tables(0)
+                dt2 = QuotationBLL.crystaldetails("crystalshipaddr", CustId).Tables(0)
+                dt3 = QuotationBLL.crystaldetails("crystalQtnExpAllItem", MainID).Tables(0)
+                dt4 = ProformaBLL.crystalProforma("crystalProforma", MainID).Tables(0)
+
+                '  dsreport.Merge(dt1)
+                dsreport.Tables("CryRt_CustBill").Merge(dt1)
+                dsreport.Tables("CryRt_CustShip").Merge(dt2)
+                dsreport.Tables("CryRt_QtnItems").Merge(dt3)
+                dsreport.Tables("CryRt_Proforma").Merge(dt4)
+
+                'If dsReport.Tables(0).Rows.Count > 0 Then
+
+                doc.SetDataSource(dsreport)
+                doc.Subreports.Item("AccShipAddr").SetDataSource(dsreport.Tables("crystalshipaddr"))
+                doc.Subreports.Item("QtnItems").SetDataSource(dsreport.Tables("crystalQtnExpItem"))
+                'doc.Refresh()
+
+                ''Bank detail
+
+                Dim BankId As Integer = 0
+
+                If dt4.Rows.Count > 0 AndAlso
+   dt4.Columns.Contains("BankId") AndAlso
+   Not IsDBNull(dt4.Rows(0)("BankId")) Then
+
+                    Integer.TryParse(
+        dt4.Rows(0)("BankId").ToString(),
+        BankId
+    )
+
+                End If
+
+                'If BankId not available in Proforma then take from Quotation
+                If BankId = 0 AndAlso dt3.Rows.Count > 0 Then
+
+                    If dt3.Columns.Contains("BankId") AndAlso
+       Not IsDBNull(dt3.Rows(0)("BankId")) Then
+
+                        Integer.TryParse(
+            dt3.Rows(0)("BankId").ToString(),
+            BankId
+        )
+
+                    End If
+
+                End If
+
+                SetBankDetails(BankId)
+                ''end bank detail
+                doc.VerifyDatabase()
+                CrExportOptions = doc.ExportOptions
+                With CrExportOptions
+                    .ExportDestinationType = ExportDestinationType.DiskFile
+                    .ExportDestinationOptions = CrDiskFileDestinationOptions
+                    .FormatOptions = CrFormatTypeOptions
+
+                    '.ExportFormatType = ExportFormatType.PortableDocFormat
+                End With
+
+                Dim pdfPath As String = Server.MapPath("PrintDocs/")
+
+                'Try
+                '    doc.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Response, False, Server.MapPath("").ToString() & "\GeneratePdfReport\Agreement.pdf")
+                '    ' doc.ExportToDisk(ExportFormatType.PortableDocFormat, pdfPath.ToString & "\Agreement.pdf")
+                'Catch ex As Exception
+                '    Dim str As String = ex.ToString
+                'End Try
+
+                Dim filename As String = dt4.Rows(0)("Proforma_No").ToString()
+                filename = filename.Replace(",", " ")
+                filename = filename.Replace("/", "")
+
+                Dim output As String = (Convert.ToString(Server.MapPath("") + "\PrintDocs\") & filename) + ".pdf"
+
+                doc.ExportToDisk(ExportFormatType.PortableDocFormat, output)
+
+
+                ' Response.Redirect("~\Emaildocs\" + filename + ".pdf", False)
+                ' '  Response.Redirect(output, True)
+
+                ' DownloadNDelete(output)
+				
+                doc.Dispose()
+                DownloadNDelete1(output, "")
+            Catch ex As Exception
+                Throw ex
+            End Try
+        ElseIf Request.QueryString("tpy") = "Price" Then
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            type = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("type")))
+            ' MainID = ((Request.QueryString("Id")))
+            ' type = (Request.QueryString("type"))
+            Try
+
+                'If type = "USD" Then
+
+                '    doc.Load(Server.MapPath("\CrystalReport\ProformaExp.rpt"))
+                'Else
+                '    doc.Load(Server.MapPath("\CrystalReport\ProformaDom.rpt"))
+                'End If
+                doc.Load(Server.MapPath("\CrystalReport\PriceList.rpt"))
+                Dim host As String = HttpContext.Current.Request.Url.Host
+
+                'If host = "localhost" Then
+                ' doc.SetDatabaseLogon("sa", "Acaira@123", "SERVER", "db_swissbake")
+                ' Else
+                doc.SetDatabaseLogon("swissbake", "qwertyuiop", "103.231.209.42", "NewDBswissbake")
+
+                ' End If
+
+
+                Dim dsreport As New DataSet
+                dsreport.Tables.Add("dtPricelist")
+             
+                Dim dt1 As New DataTable("dtPricelist")
+               
+
+                'dt1 = QuotationBLL.crystaldetails("crystalbilladdr", 601).Tables(0)
+                'dt2 = QuotationBLL.crystaldetails("crystalshipaddr", 601).Tables(0)
+                'dt3 = QuotationBLL.crystaldetails("crystalQtnExpItem", 42).Tables(0)
+
+
+                '   Dim CustId As Integer = QuotationBLL.GetCustId(MainID)
+                dt1 = ProductBLL.ViewPricelist(MainID).Tables(0)
+           
+                '  dsreport.Merge(dt1)
+                dsreport.Tables("dtPricelist").Merge(dt1)
+                '   dsreport.Tables("CryRt_CustShip").Merge(dt2)
+               
+
+                'If dsReport.Tables(0).Rows.Count > 0 Then
+
+                doc.SetDataSource(dsreport)
+                'doc.Subreports.Item("AccShipAddr").SetDataSource(dsreport.Tables("crystalshipaddr"))
+                doc.Subreports.Item("QtnItems").SetDataSource(dsreport.Tables("dtPricelist"))
+                'doc.Refresh()
+                doc.VerifyDatabase()
+                CrExportOptions = doc.ExportOptions
+                With CrExportOptions
+                    .ExportDestinationType = ExportDestinationType.DiskFile
+                    .ExportDestinationOptions = CrDiskFileDestinationOptions
+                    .FormatOptions = CrFormatTypeOptions
+
+                    '.ExportFormatType = ExportFormatType.PortableDocFormat
+                End With
+
+                Dim pdfPath As String = Server.MapPath("PrintDocs/")
+
+                'Try
+                '    doc.ExportToHttpResponse(ExportFormatType.PortableDocFormat, Response, False, Server.MapPath("").ToString() & "\GeneratePdfReport\Agreement.pdf")
+                '    ' doc.ExportToDisk(ExportFormatType.PortableDocFormat, pdfPath.ToString & "\Agreement.pdf")
+                'Catch ex As Exception
+                '    Dim str As String = ex.ToString
+                'End Try
+
+                Dim filename As String = type 'dt4.Rows(0)("Proforma_No").ToString()
+                filename = filename.Replace(",", " ")
+                filename = filename.Replace("/", "")
+
+                Dim output As String = (Convert.ToString(Server.MapPath("") + "\PrintDocs\") & filename) + ".pdf"
+
+                doc.ExportToDisk(ExportFormatType.PortableDocFormat, output)
+
+
+                ' Response.Redirect("~\PrintDocs\" + filename + ".pdf", False)
+                ' '  Response.Redirect(output, True)
+
+                ' DownloadNDelete(output)
+                doc.Dispose()
+                DownloadNDelete1(output, "")
+            Catch ex As Exception
+                Throw ex
+            End Try
+        End If
+
+    End Sub
+    ''============ Bank detail section===============
+    Private Sub SetBankDetails(ByVal BankId As Integer)
+
+        Dim tblBank As DataTable
+        Dim bankQRCodePath As String = ""
+
+        tblBank = MainBLL.GetBankById(BankId).Tables(0)
+
+        If tblBank IsNot Nothing AndAlso tblBank.Rows.Count > 0 Then
+
+            bankQRCodePath = Server.MapPath(
+            "~/images/BankQRCode/" &
+            Convert.ToString(tblBank.Rows(0)("QRCode")) &
+            ".png"
+        )
+
+            doc.SetParameterValue("AccountName",
+                              Convert.ToString(tblBank.Rows(0)("Description")))
+
+            doc.SetParameterValue("BankName",
+                              Convert.ToString(tblBank.Rows(0)("Name")))
+
+            doc.SetParameterValue("AccountNumber",
+                              Convert.ToString(tblBank.Rows(0)("AccountNum")))
+
+            doc.SetParameterValue("BankBranch",
+                              Convert.ToString(tblBank.Rows(0)("Branch")))
+
+            doc.SetParameterValue("IFSCCode",
+                              Convert.ToString(tblBank.Rows(0)("IFSCCode")))
+
+            doc.SetParameterValue("AccountType", "Current")
+            doc.SetParameterValue("BankId", BankId)
+            doc.SetParameterValue("BankQRCodePath", bankQRCodePath)
+
+        Else
+
+            doc.SetParameterValue("AccountName",
+                              "Swiss Bake Ingredients Pvt. Ltd.")
+
+            doc.SetParameterValue("BankName", "Kotak Bank")
+
+            doc.SetParameterValue("AccountNumber", "7411221116")
+
+            doc.SetParameterValue("BankBranch", "Mumbai Central")
+
+            doc.SetParameterValue("IFSCCode", "KKBK0001348")
+
+            doc.SetParameterValue("AccountType", "Current")
+
+            doc.SetParameterValue("BankId", BankId)
+
+            doc.SetParameterValue(
+            "BankQRCodePath",
+            Server.MapPath("~/images/BankQRCode/KOTAK_Bank.png")
+        )
+
+        End If
+
+    End Sub
+    ''=============End back detail section ===========
+    Public Sub DownloadNDelete(sFilePath As String)
+        Try
+            Response.Clear()
+            Response.AddHeader("Content-Disposition", "attachment; filename=" + Path.GetFileName(sFilePath))
+            Response.ContentType = Path.GetExtension(sFilePath)
+            Response.WriteFile(sFilePath)
+            Response.Flush()
+            Thread.Sleep(2000)
+            System.IO.File.Delete(sFilePath)
+            'Response.Close();
+
+
+            Response.[End]()
+
+        Catch ex As Exception
+        End Try
+    End Sub
+	
+	 Public Sub DownloadNDelete1(sFilePath As String, ByVal barcodePath As String)
+        Try
+		 ' Dim client As New WebClient()
+            ' Dim buffer As [Byte]() = client.DownloadData(sFilePath)
+
+            ' If buffer IsNot Nothing Then
+                ' Response.ContentType = "application/pdf"
+                ' Response.AddHeader("content-length", buffer.Length.ToString())
+                ' Response.BinaryWrite(buffer)
+            ' End If
+            ' System.IO.File.Delete(sFilePath)
+            ' System.IO.File.Delete(barcodePath)
+			Response.Redirect("/PrintDoc/" + Path.GetFileName(sFilePath).ToString.Replace(".pdf", ""))
+		Catch ex As Exception
+        End Try
+    End Sub
+End Class

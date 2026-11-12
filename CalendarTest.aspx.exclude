@@ -1,0 +1,45 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MainPage.master" AutoEventWireup="false" CodeFile="CalendarTest.aspx.vb" Inherits="CalendarTest" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+    <style>
+        .google-visualization-orgchart-lineleft {
+	border-left: 2px solid #333!important;
+}
+.google-visualization-orgchart-linebottom {
+	border-bottom: 2px solid #333!important;
+}
+.google-visualization-orgchart-lineright {
+	border-right: 2px solid #333!important;
+}
+    </style>
+ <%-- <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js">
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            DisplayCurrentTime();
+        });
+        function DisplayCurrentTime() {
+            var dt = new Date();
+            var refresh = 1000; //Refresh rate 1000 milli sec means 1 sec
+            var cDate = (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
+            document.getElementById('cTime').innerHTML = cDate + " – " + dt.toLocaleTimeString();
+            window.setTimeout('DisplayCurrentTime()', refresh);
+        }
+    </script>--%>
+     <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1','packages':['orgchart']}]}"></script>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder2" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <%-- <h4>
+        Show/Display Local Computer's Current live time as clock in webpage using jQuery</h4>
+    <div>
+        <asp:Label ID="cTime" runat="server" ClientIDMode="Static" BackColor="#ffff00" 
+        Font-Bold="true" />
+    </div>--%>
+    <div id="chart_div"">
+
+       </div>
+   
+</asp:Content>
+

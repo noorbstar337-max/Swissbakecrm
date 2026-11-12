@@ -1,0 +1,759 @@
+﻿Imports APPCODE.DAL
+
+Public Class OrderBLL
+    Private Shared _spname As String = "_spOrder"
+    
+    Public Shared Function UpdateOrder(ByVal Order_ID As Integer, ByVal Order_OrderStatus As String, ByVal Order_ModifiedID As Integer,
+                                       ByVal Order_PoNo As String, ByVal Order_PoDate As String) As Integer
+        Dim sqlparams(6) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "UpdateOrder")
+            sqlparams(1) = New SqlParameter("@Order_ID", Order_ID)
+            sqlparams(2) = New SqlParameter("@Order_OrderStatus", Order_OrderStatus)
+            sqlparams(4) = New SqlParameter("@Order_ModifiedID", Order_ModifiedID)
+            sqlparams(5) = New SqlParameter("@Order_PoNo", Order_PoNo)
+            sqlparams(6) = New SqlParameter("@Order_PoDate", Order_PoDate)
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function UpdateAddress(ByVal Address_Cust_Name As String, ByVal Address_Cust_Mobile As String, ByVal Address_Cust_Email As String, ByVal Address_Country As String, ByVal Address_State As String, ByVal Address_City As String, ByVal Address_Pincode As String,
+                                         ByVal Address_Address As String, ByVal Address_CustId As Integer, ByVal Address_Type As String, ByVal Address_ModifiedID As Integer) As Integer
+        Dim sqlparams(11) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "UpdateAddress")
+            sqlparams(1) = New SqlParameter("@Address_Cust_Name", Address_Cust_Name)
+            sqlparams(2) = New SqlParameter("@Address_Cust_Mobile", Address_Cust_Mobile)
+            sqlparams(3) = New SqlParameter("@Address_Cust_Email", Address_Cust_Email)
+            sqlparams(4) = New SqlParameter("@Address_Country", Address_Country)
+            sqlparams(5) = New SqlParameter("@Address_State", Address_State)
+            sqlparams(6) = New SqlParameter("@Address_City", Address_City)
+            sqlparams(7) = New SqlParameter("@Address_Pincode", Address_Pincode)
+            sqlparams(8) = New SqlParameter("@Address_Address", Address_Address)
+            sqlparams(9) = New SqlParameter("@Address_CustId", Address_CustId)
+            sqlparams(10) = New SqlParameter("@Address_Type", Address_Type)
+            sqlparams(11) = New SqlParameter("@Address_ModifiedID", Address_ModifiedID)
+            Return DBBridge.ExecuteNonQuery("_spCustomerAddress", sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function Insert(ByVal _Order_Code As String, ByVal _Order_CustId As Integer, ByVal _Order_Amount As Integer, ByVal _Order_OrderStatus As String, ByVal _Order_ModeofPayment As String, ByVal _Order_TotalVat As String, ByVal _Order_Freight As String) As Integer
+        Dim sqlparams(8) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "Insert")
+            sqlparams(1) = New SqlParameter("@Order_Code", _Order_Code)
+            sqlparams(2) = New SqlParameter("@Order_CustId", _Order_CustId)
+            sqlparams(3) = New SqlParameter("@Order_Amount", _Order_Amount)
+            sqlparams(4) = New SqlParameter("@Order_OrderStatus", _Order_OrderStatus)
+            sqlparams(5) = New SqlParameter("@Order_ModeofPayment", _Order_ModeofPayment)
+            sqlparams(6) = New SqlParameter("@Order_TotalVat", _Order_TotalVat)
+            sqlparams(7) = New SqlParameter("@Order_Freight", _Order_Freight)
+            Return DBBridge.ExecuteScalar(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+	Public Shared Function InsertCRM(ByVal _Order_Code As String, ByVal _Order_CustId As Integer, ByVal _Order_Amount As Double, ByVal _Order_OrderStatus As String,
+				ByVal _Order_ModeofPayment As String, ByVal _Order_TotalVat As Double, ByVal _Order_Freight As String, ByVal _Order_CreatedID As Integer, ByVal Order_PoNo As String,
+				ByVal Order_PoDate As String, ByVal Order_CreatedDate As String, ByVal Order_TermsDelivery As String, ByVal Order_TermsPayment As String, ByVal Order_Dispach As String, ByVal Order_Billedfrom As Integer) As Integer
+		Dim sqlparams(15) As SqlParameter
+		Try
+			sqlparams(0) = New SqlParameter("@Mode", "CrmInsert")
+			sqlparams(1) = New SqlParameter("@Order_Code", _Order_Code)
+			sqlparams(2) = New SqlParameter("@Order_CustId", _Order_CustId)
+			sqlparams(3) = New SqlParameter("@Order_Amount", _Order_Amount)
+			sqlparams(4) = New SqlParameter("@Order_OrderStatus", _Order_OrderStatus)
+			sqlparams(5) = New SqlParameter("@Order_ModeofPayment", _Order_ModeofPayment)
+			sqlparams(6) = New SqlParameter("@Order_TotalVat", _Order_TotalVat)
+			If String.IsNullOrEmpty(_Order_Freight) Then
+				sqlparams(7) = New SqlParameter("@Order_Freight", "0")
+			Else
+				sqlparams(7) = New SqlParameter("@Order_Freight", _Order_Freight)
+			End If
+			sqlparams(8) = New SqlParameter("@Order_CreatedID", _Order_CreatedID)
+			sqlparams(9) = New SqlParameter("@Order_PoNo", Order_PoNo)
+			If Not String.IsNullOrEmpty(Order_PoDate) Then
+				sqlparams(10) = New SqlParameter("@Order_PoDate", Order_PoDate)
+			Else
+				sqlparams(10) = New SqlParameter("@Order_PoDate", DBNull.Value)
+			End If
+			If Not String.IsNullOrEmpty(Order_CreatedDate) Then
+				sqlparams(11) = New SqlParameter("@Order_CreatedDate", Order_CreatedDate)
+			Else
+				sqlparams(11) = New SqlParameter("@Order_CreatedDate", DBNull.Value)
+			End If
+			sqlparams(12) = New SqlParameter("@Order_TermsDelivery", Order_TermsDelivery)
+			sqlparams(13) = New SqlParameter("@Order_TermsPayment", Order_TermsPayment)
+			sqlparams(14) = New SqlParameter("@Order_Dispach", Order_Dispach)
+			sqlparams(15) = New SqlParameter("@Order_Billedfrom", Order_Billedfrom)
+			Return DBBridge.ExecuteScalar(_spname, sqlparams)
+		Catch ex As Exception
+			Throw ex
+		End Try
+	End Function
+    Public Shared Function InsertCRMF(ByVal _Order_Code As String, ByVal _Order_CustId As Integer, ByVal _Order_Amount As Double, ByVal _Order_OrderStatus As String,
+                ByVal _Order_ModeofPayment As String, ByVal _Order_TotalVat As Double, ByVal _Order_Freight As String, ByVal _Order_CreatedID As Integer, ByVal Order_PoNo As String,
+                ByVal Order_PoDate As String, ByVal Order_CreatedDate As String, ByVal Order_TermsDelivery As String, ByVal Order_TermsPayment As String,
+                ByVal Order_Dispach As String, ByVal Order_Billedfrom As Integer, ByVal Order_FreightTaxPer As Double, ByVal Order_PrintIn As String,
+				ByVal BankId As Integer, ByVal TcsAmount As Double) As Integer
+        '========== new parameter Order_PrintIn added by MUBYN
+        Dim sqlparams(19) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "CrmInsertf")
+            sqlparams(1) = New SqlParameter("@Order_Code", _Order_Code)
+            sqlparams(2) = New SqlParameter("@Order_CustId", _Order_CustId)
+            sqlparams(3) = New SqlParameter("@Order_Amount", _Order_Amount)
+            sqlparams(4) = New SqlParameter("@Order_OrderStatus", _Order_OrderStatus)
+            sqlparams(5) = New SqlParameter("@Order_ModeofPayment", _Order_ModeofPayment)
+            sqlparams(6) = New SqlParameter("@Order_TotalVat", _Order_TotalVat)
+            If String.IsNullOrEmpty(_Order_Freight) Then
+                sqlparams(7) = New SqlParameter("@Order_Freight", "0")
+            Else
+                sqlparams(7) = New SqlParameter("@Order_Freight", _Order_Freight)
+            End If
+            sqlparams(8) = New SqlParameter("@Order_CreatedID", _Order_CreatedID)
+            sqlparams(9) = New SqlParameter("@Order_PoNo", Order_PoNo)
+            If Not String.IsNullOrEmpty(Order_PoDate) Then
+                sqlparams(10) = New SqlParameter("@Order_PoDate", Order_PoDate)
+            Else
+                sqlparams(10) = New SqlParameter("@Order_PoDate", DBNull.Value)
+            End If
+            If Not String.IsNullOrEmpty(Order_CreatedDate) Then
+                sqlparams(11) = New SqlParameter("@Order_CreatedDate", Order_CreatedDate)
+            Else
+                sqlparams(11) = New SqlParameter("@Order_CreatedDate", DBNull.Value)
+            End If
+            sqlparams(12) = New SqlParameter("@Order_TermsDelivery", Order_TermsDelivery)
+            sqlparams(13) = New SqlParameter("@Order_TermsPayment", Order_TermsPayment)
+            sqlparams(14) = New SqlParameter("@Order_Dispach", Order_Dispach)
+            sqlparams(15) = New SqlParameter("@Order_Billedfrom", Order_Billedfrom)
+            sqlparams(16) = New SqlParameter("@Order_FreightTaxPer", Order_FreightTaxPer)
+            sqlparams(17) = New SqlParameter("@Order_PrintIn", Order_PrintIn)
+			sqlparams(18) = New SqlParameter("@BankId", BankId)
+            sqlparams(19) = New SqlParameter("@Tcs_Amount", TcsAmount)
+            Return DBBridge.ExecuteScalar(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    ''below created by faisal 
+    Public Shared Function Updateafterinsert(ByVal Order_ID As Integer, ByVal Order_TotalVat As Double, ByVal Order_Amount As Double) As Integer
+        Dim sqlparams(4) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "Updateafterinsert")
+            sqlparams(1) = New SqlParameter("@Order_ID", Order_ID)
+            sqlparams(2) = New SqlParameter("@Order_TotalVat", Order_TotalVat)
+            sqlparams(4) = New SqlParameter("@Order_Amount", Order_Amount)
+          
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+    Public Shared Function InsertCRMExport(ByVal _Order_Code As String, ByVal _Order_CustId As Integer, ByVal _Order_Amount As Double, ByVal _Order_OrderStatus As String,
+             ByVal _Order_ModeofPayment As String, ByVal _Order_TotalVat As Double, ByVal _Order_Freight As String, ByVal _Order_CreatedID As Integer, ByVal Order_PoNo As String,
+             ByVal Order_PoDate As String, ByVal Order_CreatedDate As String, ByVal Order_TermsDelivery As String, ByVal Order_TermsPayment As String, ByVal Order_Dispach As String,
+             ByVal Order_Billedfrom As Integer, ByVal Currency As String, ByVal CurrencyRate As Double,
+             ByVal ModeOfTransport As String, ByVal CountryOfOrigin As String, ByVal CountryOfFinalDestination As String, ByVal PortOfLoading As String,
+        ByVal PortOfDischarge As String, ByVal FinalDestination As String, ByVal Order_TrmsPyt_Card_doc As String, ByVal Order_Doc_Clearance As Double,
+        ByVal Order_OceanFreight As Double, ByVal Order_Insurance As Double, ByVal Order_WithFreight As Integer, ByVal Order_PrintIn As String) As Integer
+        '========== new parameter Order_PrintIn added by MUBYN
+        Dim sqlparams(32) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "CrmInsertExport")
+            sqlparams(1) = New SqlParameter("@Order_Code", _Order_Code)
+            sqlparams(2) = New SqlParameter("@Order_CustId", _Order_CustId)
+            sqlparams(3) = New SqlParameter("@Order_Amount", _Order_Amount)
+            sqlparams(4) = New SqlParameter("@Order_OrderStatus", _Order_OrderStatus)
+            sqlparams(5) = New SqlParameter("@Order_ModeofPayment", _Order_ModeofPayment)
+            sqlparams(6) = New SqlParameter("@Order_TotalVat", _Order_TotalVat)
+            If String.IsNullOrEmpty(_Order_Freight) Then
+                sqlparams(7) = New SqlParameter("@Order_Freight", "0")
+            Else
+                sqlparams(7) = New SqlParameter("@Order_Freight", _Order_Freight)
+            End If
+            sqlparams(8) = New SqlParameter("@Order_CreatedID", _Order_CreatedID)
+            sqlparams(9) = New SqlParameter("@Order_PoNo", Order_PoNo)
+            If Not String.IsNullOrEmpty(Order_PoDate) Then
+                sqlparams(10) = New SqlParameter("@Order_PoDate", Order_PoDate)
+            Else
+                sqlparams(10) = New SqlParameter("@Order_PoDate", DBNull.Value)
+            End If
+            If Not String.IsNullOrEmpty(Order_CreatedDate) Then
+                sqlparams(11) = New SqlParameter("@Order_CreatedDate", Order_CreatedDate)
+            Else
+                sqlparams(11) = New SqlParameter("@Order_CreatedDate", DBNull.Value)
+            End If
+            sqlparams(12) = New SqlParameter("@Order_TermsDelivery", Order_TermsDelivery)
+            sqlparams(13) = New SqlParameter("@Order_TermsPayment", Order_TermsPayment)
+            sqlparams(14) = New SqlParameter("@Order_Dispach", Order_Dispach)
+            sqlparams(15) = New SqlParameter("@Order_Billedfrom", Order_Billedfrom)
+            sqlparams(16) = New SqlParameter("@Order_Currency", Currency)
+            sqlparams(17) = New SqlParameter("@Order_CurrencyRate", CurrencyRate)
+            'sqlparams(18) = New SqlParameter("@Order_TermsOfPayment", TermsOfPayment)
+            sqlparams(19) = New SqlParameter("@Order_ModeOfTransport", ModeOfTransport)
+            sqlparams(20) = New SqlParameter("@Order_CountryOfOrigin", CountryOfOrigin)
+            sqlparams(21) = New SqlParameter("@Order_CountryOfFinalDestination", CountryOfFinalDestination)
+            sqlparams(22) = New SqlParameter("@Order_PortOfLoading", PortOfLoading)
+            sqlparams(23) = New SqlParameter("@Order_PortOfDischarge", PortOfDischarge)
+            sqlparams(24) = New SqlParameter("@Order_FinalDestination", FinalDestination)
+            sqlparams(25) = New SqlParameter("@Order_TrmsPyt_Card_doc", Order_TrmsPyt_Card_doc)
+            sqlparams(26) = New SqlParameter("@Order_Doc_Clearance", Order_Doc_Clearance)
+            sqlparams(27) = New SqlParameter("@Order_OceanFreight", Order_OceanFreight)
+            sqlparams(28) = New SqlParameter("@Order_Insurance", Order_Insurance)
+            sqlparams(29) = New SqlParameter("@Order_WithFreight", Order_WithFreight)
+            sqlparams(30) = New SqlParameter("@Order_PrintIn", Order_PrintIn)
+            Return DBBridge.ExecuteScalar(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+
+
+	Public Shared Function Main_Order_Details(ByVal _Order_ID As Integer, ByVal _OrDetail_ProductId As Integer, ByVal _OrDetail_Qty As Integer,
+                            ByVal _OrDetail_Rate As Double, ByVal _OrDetail_Amount As Double, ByVal _OrDetail_Vat As Double) As Integer
+        Dim sqlparams(7) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "Main_Order_Details")
+            sqlparams(1) = New SqlParameter("@Order_ID", _Order_ID)
+            sqlparams(2) = New SqlParameter("@OrDetail_ProductId", _OrDetail_ProductId)
+            sqlparams(3) = New SqlParameter("@OrDetail_Qty", _OrDetail_Qty)
+            sqlparams(4) = New SqlParameter("@OrDetail_Rate", _OrDetail_Rate)
+            sqlparams(5) = New SqlParameter("@OrDetail_Amount", _OrDetail_Amount)
+            sqlparams(6) = New SqlParameter("@OrDetail_Vat", _OrDetail_Vat)
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+
+    Public Shared Function Main_ExportOrder_Details(ByVal _Order_ID As Integer, ByVal _OrDetail_ProductId As Integer, ByVal _OrDetail_Qty As Integer,
+                            ByVal _OrDetail_Rate As Double, ByVal _OrDetail_Amount As Double, ByVal _OrDetail_Vat As Double, ByVal OrDetail_LotNo As String, ByVal OrDetail_MfgDate As String, ByVal OrDetail_ExpiryDate As String) As Integer
+        Dim sqlparams(10) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "Main_ExportOrder_Details")
+            sqlparams(1) = New SqlParameter("@Order_ID", _Order_ID)
+            sqlparams(2) = New SqlParameter("@OrDetail_ProductId", _OrDetail_ProductId)
+            sqlparams(3) = New SqlParameter("@OrDetail_Qty", _OrDetail_Qty)
+            sqlparams(4) = New SqlParameter("@OrDetail_Rate", _OrDetail_Rate)
+            sqlparams(5) = New SqlParameter("@OrDetail_Amount", _OrDetail_Amount)
+            sqlparams(6) = New SqlParameter("@OrDetail_Vat", _OrDetail_Vat)
+            sqlparams(7) = New SqlParameter("@OrDetail_LotNo", OrDetail_LotNo)
+            sqlparams(8) = New SqlParameter("@OrDetail_MfgDate", OrDetail_MfgDate)
+            sqlparams(9) = New SqlParameter("@OrDetail_ExpiryDate", OrDetail_ExpiryDate)
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+    Public Shared Function UpdateOrderAmount(ByVal Order_Amount As Double, ByVal Order_TotalVat As Double, ByVal Order_ID As Double) As Integer
+        Dim sqlparams(3) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "UpdateOrderAmount")
+            sqlparams(1) = New SqlParameter("@Order_Amount", Order_Amount)
+            sqlparams(2) = New SqlParameter("@Order_TotalVat", Order_TotalVat)
+            sqlparams(3) = New SqlParameter("@Order_ID", Order_ID)
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function MainOrder_ByID(ByVal _Order_CustId As Integer) As DataSet
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "MyOrder")
+            sqlparams(1) = New SqlParameter("@Order_CustId", _Order_CustId)
+
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function GetCustId(ByVal Order_ID As Integer) As Integer
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "GetCustId")
+            sqlparams(1) = New SqlParameter("@Order_ID", Order_ID)
+            Return DBBridge.ExecuteScalar(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function GetProductsId(ByVal Order_ID As Integer) As DataSet
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "GetProductsId")
+            sqlparams(1) = New SqlParameter("@Order_ID", Order_ID)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function ViewOrderByMemberID(ByVal _Order_CustId As Integer) As DataSet
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "ViewOrderByMemberID")
+            sqlparams(1) = New SqlParameter("@Order_CustId", _Order_CustId)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function ViewTopOrderByMemberID(ByVal _Order_CustId As Integer) As DataSet
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "ViewTopOrderByMemberID")
+            sqlparams(1) = New SqlParameter("@Order_CustId", _Order_CustId)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function ViewOrderByMemberID_status(ByVal _Order_CustId As Integer, ByVal _Mode As String) As DataSet
+        Dim sqlparams(2) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", _Mode)
+            sqlparams(1) = New SqlParameter("@Order_CustId", _Order_CustId)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function OrderViewed(ByVal Order_ID As Integer) As Integer
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "OrderViewed")
+            sqlparams(1) = New SqlParameter("@Order_ID", Order_ID)
+            Return DBBridge.ExecuteScalar(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function FillOrderDetail(ByVal Order_ID As Integer) As DataSet
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "FillOrderDetail")
+            sqlparams(1) = New SqlParameter("@Order_ID", Order_ID)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function UpdateSalesOrder(ByVal OrDetail_ID As Integer, ByVal OrDetail_Qty As Integer, ByVal OrDetail_Amount As Double, ByVal OrDetail_Vat As Double,
+                                             ByVal Order_ID As Integer, ByVal Order_Amount As Double, ByVal Order_TotalVat As Double, ByVal AudtTrail_LogId As Integer) As Integer
+        Dim sqlparams(8) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "UpdateSalesOrder")
+            sqlparams(1) = New SqlParameter("@OrDetail_ID", OrDetail_ID)
+            sqlparams(2) = New SqlParameter("@OrDetail_Qty", OrDetail_Qty)
+            sqlparams(3) = New SqlParameter("@OrDetail_Amount", OrDetail_Amount)
+            sqlparams(4) = New SqlParameter("@OrDetail_Vat", OrDetail_Vat)
+            sqlparams(5) = New SqlParameter("@Order_ID", Order_ID)
+            sqlparams(6) = New SqlParameter("@Order_Amount", Order_Amount)
+            sqlparams(7) = New SqlParameter("@Order_TotalVat", Order_TotalVat)
+            sqlparams(8) = New SqlParameter("@AudtTrail_LogId", AudtTrail_LogId)
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+	
+	Public Shared Function UpdateExpSalesOrder(ByVal OrDetail_ID As Integer,  ByVal AudtTrail_LogId As Integer, ByVal OrDetail_LotNo As String, ByVal OrDetail_MfgDate As String, ByVal OrDetail_ExpiryDate As String) As Integer
+        Dim sqlparams(6) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "UpdateExpSalesOrder")
+            sqlparams(1) = New SqlParameter("@OrDetail_ID", OrDetail_ID)
+           
+            sqlparams(2) = New SqlParameter("@AudtTrail_LogId", AudtTrail_LogId)
+            sqlparams(3) = New SqlParameter("@OrDetail_LotNo", OrDetail_LotNo)
+            sqlparams(4) = New SqlParameter("@OrDetail_MfgDate", OrDetail_MfgDate)
+            sqlparams(5) = New SqlParameter("@OrDetail_ExpiryDate", OrDetail_ExpiryDate)
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function UpdateCRMSalesOrder(ByVal Order_ID As Integer, ByVal Order_PoNo As String, ByVal Order_PoDate As String, ByVal Order_ModeofPayment As String,
+                                               ByVal Order_ModifiedID As Integer, ByVal Order_CreatedDate As String, ByVal Order_TermsDelivery As String,
+                                               ByVal Order_TermsPayment As String, ByVal Order_Dispach As String, ByVal _Order_Freight As String, ByVal Order_Billedfrom As Integer) As Integer
+        Dim sqlparams(11) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "UpdateCRMSalesOrder")
+            sqlparams(1) = New SqlParameter("@Order_ID", Order_ID)
+            sqlparams(2) = New SqlParameter("@Order_PoNo", Order_PoNo)
+            If Not String.IsNullOrEmpty(Order_PoDate) Then
+                sqlparams(3) = New SqlParameter("@Order_PoDate", Order_PoDate)
+            Else
+                sqlparams(3) = New SqlParameter("@Order_PoDate", DBNull.Value)
+            End If
+            sqlparams(4) = New SqlParameter("@Order_ModeofPayment", Order_ModeofPayment)
+            sqlparams(5) = New SqlParameter("@Order_ModifiedID", Order_ModifiedID)
+            If Not String.IsNullOrEmpty(Order_CreatedDate) Then
+                sqlparams(6) = New SqlParameter("@Order_CreatedDate", Order_CreatedDate)
+            Else
+                sqlparams(6) = New SqlParameter("@Order_CreatedDate", DBNull.Value)
+            End If
+            sqlparams(7) = New SqlParameter("@Order_TermsDelivery", Order_TermsDelivery)
+            sqlparams(8) = New SqlParameter("@Order_TermsPayment", Order_TermsPayment)
+            sqlparams(9) = New SqlParameter("@Order_Dispach", Order_Dispach)
+            If String.IsNullOrEmpty(_Order_Freight) Then
+                sqlparams(10) = New SqlParameter("@Order_Freight", "0")
+            Else
+                sqlparams(10) = New SqlParameter("@Order_Freight", _Order_Freight)
+            End If
+            sqlparams(11) = New SqlParameter("@Order_Billedfrom", Order_Billedfrom)
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function UpdateCRMSalesOrderF(ByVal Order_ID As Integer, ByVal Order_PoNo As String, ByVal Order_PoDate As String, ByVal Order_ModeofPayment As String,
+                                             ByVal Order_ModifiedID As Integer, ByVal Order_CreatedDate As String, ByVal Order_TermsDelivery As String,
+                                             ByVal Order_TermsPayment As String, ByVal Order_Dispach As String, ByVal _Order_Freight As String, ByVal Order_Billedfrom As Integer,
+                                             ByVal Freighttax As Double, ByVal _Order_Amount As Double, ByVal _Order_TotalVat As Double,
+                                             ByVal Order_PrintIn As String, ByVal BankId As Integer) As Integer
+        Dim sqlparams(16) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "UpdateCRMSalesOrderF")
+            sqlparams(1) = New SqlParameter("@Order_ID", Order_ID)
+            sqlparams(2) = New SqlParameter("@Order_PoNo", Order_PoNo)
+            If Not String.IsNullOrEmpty(Order_PoDate) Then
+                sqlparams(3) = New SqlParameter("@Order_PoDate", Order_PoDate)
+            Else
+                sqlparams(3) = New SqlParameter("@Order_PoDate", DBNull.Value)
+            End If
+            sqlparams(4) = New SqlParameter("@Order_ModeofPayment", Order_ModeofPayment)
+            sqlparams(5) = New SqlParameter("@Order_ModifiedID", Order_ModifiedID)
+            If Not String.IsNullOrEmpty(Order_CreatedDate) Then
+                sqlparams(6) = New SqlParameter("@Order_CreatedDate", Order_CreatedDate)
+            Else
+                sqlparams(6) = New SqlParameter("@Order_CreatedDate", DBNull.Value)
+            End If
+            sqlparams(7) = New SqlParameter("@Order_TermsDelivery", Order_TermsDelivery)
+            sqlparams(8) = New SqlParameter("@Order_TermsPayment", Order_TermsPayment)
+            sqlparams(9) = New SqlParameter("@Order_Dispach", Order_Dispach)
+            If String.IsNullOrEmpty(_Order_Freight) Then
+                sqlparams(10) = New SqlParameter("@Order_Freight", "0")
+            Else
+                sqlparams(10) = New SqlParameter("@Order_Freight", _Order_Freight)
+            End If
+            sqlparams(11) = New SqlParameter("@Order_Billedfrom", Order_Billedfrom)
+            sqlparams(12) = New SqlParameter("@Order_FreightTaxPer", Freighttax)
+            sqlparams(13) = New SqlParameter("@Order_Amount", _Order_Amount)
+            sqlparams(14) = New SqlParameter("@Order_TotalVat", _Order_TotalVat)
+            sqlparams(15) = New SqlParameter("@Order_PrintIn", Order_PrintIn)
+			sqlparams(16) = New SqlParameter("@BankId", BankId)
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+    ' ======= Modified by Mubyn Order_PrintIn parameter added 18-07-2018
+    Public Shared Function UpdateCRMSalesOrderExport(ByVal Order_ID As Integer, ByVal Order_PoNo As String, ByVal Order_PoDate As String, ByVal Order_ModeofPayment As String,
+                                               ByVal Order_ModifiedID As Integer, ByVal Order_CreatedDate As String, ByVal Order_TermsDelivery As String,
+                                               ByVal Order_TermsPayment As String, ByVal Order_Dispach As String, ByVal _Order_Freight As String, ByVal Order_Billedfrom As Integer,
+                                               ByVal Currency As String, ByVal CurrencyRate As Double, ByVal TermsOfPayment As String, ByVal ModeOfTransport As String,
+                                               ByVal CountryOfOrigin As String, ByVal CountryOfFinalDestination As String, ByVal PortOfLoading As String,
+                                               ByVal PortOfDischarge As String, ByVal FinalDestination As String, ByVal Order_TrmsPyt_Card_doc As String, ByVal Order_Doc_Clearance As Double,
+                                               ByVal Order_OceanFreight As Double, ByVal Order_Insurance As Double, ByVal Order_WithFreight As Integer,
+                                               ByVal Order_PrintIn As String) As Integer
+        Dim sqlparams(28) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "UpdateCRMSalesOrderExport")
+            sqlparams(1) = New SqlParameter("@Order_ID", Order_ID)
+            sqlparams(2) = New SqlParameter("@Order_PoNo", Order_PoNo)
+            If Not String.IsNullOrEmpty(Order_PoDate) Then
+                sqlparams(3) = New SqlParameter("@Order_PoDate", Order_PoDate)
+            Else
+                sqlparams(3) = New SqlParameter("@Order_PoDate", DBNull.Value)
+            End If
+            sqlparams(4) = New SqlParameter("@Order_ModeofPayment", Order_ModeofPayment)
+            sqlparams(5) = New SqlParameter("@Order_ModifiedID", Order_ModifiedID)
+            If Not String.IsNullOrEmpty(Order_CreatedDate) Then
+                sqlparams(6) = New SqlParameter("@Order_CreatedDate", Order_CreatedDate)
+            Else
+                sqlparams(6) = New SqlParameter("@Order_CreatedDate", DBNull.Value)
+            End If
+            sqlparams(7) = New SqlParameter("@Order_TermsDelivery", Order_TermsDelivery)
+            sqlparams(8) = New SqlParameter("@Order_TermsPayment", Order_TermsPayment)
+            sqlparams(9) = New SqlParameter("@Order_Dispach", Order_Dispach)
+            If String.IsNullOrEmpty(_Order_Freight) Then
+                sqlparams(10) = New SqlParameter("@Order_Freight", "0")
+            Else
+                sqlparams(10) = New SqlParameter("@Order_Freight", _Order_Freight)
+            End If
+            sqlparams(11) = New SqlParameter("@Order_Billedfrom", Order_Billedfrom)
+            sqlparams(12) = New SqlParameter("@Order_Currency", Currency)
+            sqlparams(13) = New SqlParameter("@Order_CurrencyRate", CurrencyRate)
+            sqlparams(14) = New SqlParameter("@Order_TermsOfPayment", TermsOfPayment)
+            sqlparams(15) = New SqlParameter("@Order_ModeOfTransport", ModeOfTransport)
+            sqlparams(16) = New SqlParameter("@Order_CountryOfOrigin", CountryOfOrigin)
+            sqlparams(17) = New SqlParameter("@Order_CountryOfFinalDestination", CountryOfFinalDestination)
+            sqlparams(18) = New SqlParameter("@Order_PortOfLoading", PortOfLoading)
+            sqlparams(19) = New SqlParameter("@Order_PortOfDischarge", PortOfDischarge)
+            sqlparams(20) = New SqlParameter("@Order_FinalDestination", FinalDestination)
+            sqlparams(21) = New SqlParameter("@Order_TrmsPyt_Card_doc", Order_TrmsPyt_Card_doc)
+            sqlparams(22) = New SqlParameter("@Order_Doc_Clearance", Order_Doc_Clearance)
+            sqlparams(23) = New SqlParameter("@Order_OceanFreight", Order_OceanFreight)
+            sqlparams(24) = New SqlParameter("@Order_Insurance", Order_Insurance)
+            sqlparams(25) = New SqlParameter("@Order_WithFreight", Order_WithFreight)
+            sqlparams(26) = New SqlParameter("@Order_PrintIn", Order_PrintIn)
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+
+    Public Shared Function DeleteOrderItem(ByVal OrDetail_ID As Integer, ByVal Order_ID As Integer, ByVal AudtTrail_LogId As Integer) As Integer
+        Dim sqlparams(3) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "DeleteOrderItem")
+            sqlparams(1) = New SqlParameter("@OrDetail_ID", OrDetail_ID)
+            sqlparams(2) = New SqlParameter("@Order_ID", Order_ID)
+            sqlparams(3) = New SqlParameter("@AudtTrail_LogId", AudtTrail_LogId)
+            Return DBBridge.ExecuteNonQuery(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function ChkInvoiceGenrated(ByVal Order_ID As Integer) As Integer
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "ChkInvoiceGenrated")
+            sqlparams(1) = New SqlParameter("@Order_ID", Order_ID)
+            Return DBBridge.ExecuteScalar(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function SortOrderCRM(ByVal UserID As Integer) As DataSet
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "ordersortCRM")
+            sqlparams(1) = New SqlParameter("@Order_ID", UserID)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function SortingSalesAchived(ByVal UserID As Integer) As DataSet
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "SortingSalesAchived")
+            sqlparams(1) = New SqlParameter("@Order_ID", UserID)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function SortingSalesAchivedLastMonth(ByVal UserID As Integer) As DataSet
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "SortingSalesAchivedLastMonth")
+            sqlparams(1) = New SqlParameter("@Order_ID", UserID)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+
+    Public Shared Function getOrderCode(ByVal ID As Integer) As DataSet
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "getOrderCode")
+            sqlparams(1) = New SqlParameter("@Order_ID", ID)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+    '---- Quotation_PrintIn column added by MUBYN 17-07-2018
+    Public Shared Function InsertQuotationOrderE(ByVal _Order_Code As String, ByVal _Order_CustId As Integer, ByVal _Order_Amount As Double, ByVal _Order_OrderStatus As String,
+               ByVal _Order_ModeofPayment As String, ByVal _Order_TotalVat As Double, ByVal _Order_Freight As String, ByVal _Order_CreatedID As Integer, ByVal Order_PoNo As String,
+               ByVal Order_PoDate As String, ByVal Order_CreatedDate As String, ByVal Order_TermsDelivery As String, ByVal Order_TermsPayment As String, ByVal Order_Dispach As String, ByVal Order_Billedfrom As Integer,
+               ByVal Order_isQuotaionId As Integer, ByVal Currency As String, ByVal CurrencyRate As Double,
+             ByVal ModeOfTransport As String, ByVal CountryOfOrigin As String, ByVal CountryOfFinalDestination As String, ByVal PortOfLoading As String,
+        ByVal PortOfDischarge As String, ByVal FinalDestination As String, ByVal Order_TrmsPyt_Card_doc As String, ByVal Order_Doc_Clearance As Double,
+                                                ByVal Order_OceanFreight As Double, ByVal Order_Insurance As Double, ByVal Order_WithFreight As String,
+                                                ByVal Order_PrintIn As String) As Integer
+        Dim sqlparams(32) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "CrmInsert")
+            sqlparams(1) = New SqlParameter("@Order_Code", _Order_Code)
+            sqlparams(2) = New SqlParameter("@Order_CustId", _Order_CustId)
+            sqlparams(3) = New SqlParameter("@Order_Amount", _Order_Amount)
+            sqlparams(4) = New SqlParameter("@Order_OrderStatus", _Order_OrderStatus)
+            sqlparams(5) = New SqlParameter("@Order_ModeofPayment", _Order_ModeofPayment)
+            sqlparams(6) = New SqlParameter("@Order_TotalVat", _Order_TotalVat)
+            If String.IsNullOrEmpty(_Order_Freight) Then
+                sqlparams(7) = New SqlParameter("@Order_Freight", "0")
+            Else
+                sqlparams(7) = New SqlParameter("@Order_Freight", _Order_Freight.Replace(",", ""))
+            End If
+            sqlparams(8) = New SqlParameter("@Order_CreatedID", _Order_CreatedID)
+            sqlparams(9) = New SqlParameter("@Order_PoNo", Order_PoNo)
+            If Not String.IsNullOrEmpty(Order_PoDate) Then
+                sqlparams(10) = New SqlParameter("@Order_PoDate", Order_PoDate)
+            Else
+                sqlparams(10) = New SqlParameter("@Order_PoDate", DBNull.Value)
+            End If
+            If Not String.IsNullOrEmpty(Order_CreatedDate) Then
+                sqlparams(11) = New SqlParameter("@Order_CreatedDate", Order_CreatedDate)
+            Else
+                sqlparams(11) = New SqlParameter("@Order_CreatedDate", DBNull.Value)
+            End If
+            sqlparams(12) = New SqlParameter("@Order_TermsDelivery", Order_TermsDelivery)
+            sqlparams(13) = New SqlParameter("@Order_TermsPayment", Order_TermsPayment)
+            sqlparams(14) = New SqlParameter("@Order_Dispach", Order_Dispach)
+            sqlparams(15) = New SqlParameter("@Order_Billedfrom", Order_Billedfrom)
+            If Not String.IsNullOrEmpty(Order_isQuotaionId) Then
+                sqlparams(16) = New SqlParameter("@Order_isQuotaionId", Order_isQuotaionId)
+            Else
+                sqlparams(16) = New SqlParameter("@Order_isQuotaionId", DBNull.Value)
+            End If
+
+            sqlparams(17) = New SqlParameter("@Order_CurrencyRate", CurrencyRate)
+            'sqlparams(18) = New SqlParameter("@Order_TermsOfPayment", TermsOfPayment)
+            sqlparams(19) = New SqlParameter("@Order_ModeOfTransport", ModeOfTransport)
+            sqlparams(20) = New SqlParameter("@Order_CountryOfOrigin", CountryOfOrigin)
+            sqlparams(21) = New SqlParameter("@Order_CountryOfFinalDestination", CountryOfFinalDestination)
+            sqlparams(22) = New SqlParameter("@Order_PortOfLoading", PortOfLoading)
+            sqlparams(23) = New SqlParameter("@Order_PortOfDischarge", PortOfDischarge)
+            sqlparams(24) = New SqlParameter("@Order_FinalDestination", FinalDestination)
+            sqlparams(25) = New SqlParameter("@Order_TrmsPyt_Card_doc", Order_TrmsPyt_Card_doc)
+            sqlparams(26) = New SqlParameter("@Order_Currency", Currency)
+            sqlparams(27) = New SqlParameter("@Order_Doc_Clearance", Order_Doc_Clearance)
+            sqlparams(28) = New SqlParameter("@Order_OceanFreight", Order_OceanFreight)
+            sqlparams(29) = New SqlParameter("@Order_Insurance", Order_Insurance)
+            sqlparams(30) = New SqlParameter("@Order_WithFreight", Order_WithFreight)
+            sqlparams(31) = New SqlParameter("@Order_PrintIn", Order_PrintIn)
+
+            Return DBBridge.ExecuteScalar(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+    '---- Quotation_PrintIn column added by MUBYN 17-07-2018
+    Public Shared Function InsertQuotationOrderD(ByVal _Order_Code As String, ByVal _Order_CustId As Integer, ByVal _Order_Amount As Double, ByVal _Order_OrderStatus As String,
+               ByVal _Order_ModeofPayment As String, ByVal _Order_TotalVat As Double, ByVal _Order_Freight As String, ByVal _Order_CreatedID As Integer, ByVal Order_PoNo As String,
+               ByVal Order_PoDate As String, ByVal Order_CreatedDate As String, ByVal Order_TermsDelivery As String, ByVal Order_TermsPayment As String, ByVal Order_Dispach As String, ByVal Order_Billedfrom As Integer,
+               ByVal Order_isQuotaionId As Integer, ByVal Currency As String, ByVal CurrencyRate As Double,
+             ByVal ModeOfTransport As String, ByVal CountryOfOrigin As String, ByVal CountryOfFinalDestination As String, ByVal PortOfLoading As String,
+        ByVal PortOfDischarge As String, ByVal FinalDestination As String, ByVal Order_TrmsPyt_Card_doc As String, ByVal Order_Doc_Clearance As Double,
+                                                ByVal Order_OceanFreight As Double, ByVal Order_Insurance As Double, ByVal Order_WithFreight As String, ByVal Order_FreightTaxPer As Double,
+                                                 ByVal Order_PrintIn As String) As Integer
+        Dim sqlparams(33) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "CrmInsertf")
+            sqlparams(1) = New SqlParameter("@Order_Code", _Order_Code)
+            sqlparams(2) = New SqlParameter("@Order_CustId", _Order_CustId)
+            sqlparams(3) = New SqlParameter("@Order_Amount", _Order_Amount)
+            sqlparams(4) = New SqlParameter("@Order_OrderStatus", _Order_OrderStatus)
+            sqlparams(5) = New SqlParameter("@Order_ModeofPayment", _Order_ModeofPayment)
+            sqlparams(6) = New SqlParameter("@Order_TotalVat", _Order_TotalVat)
+            If String.IsNullOrEmpty(_Order_Freight) Then
+                sqlparams(7) = New SqlParameter("@Order_Freight", "0")
+            Else
+                sqlparams(7) = New SqlParameter("@Order_Freight", _Order_Freight.Replace(",", ""))
+            End If
+            sqlparams(8) = New SqlParameter("@Order_CreatedID", _Order_CreatedID)
+            sqlparams(9) = New SqlParameter("@Order_PoNo", Order_PoNo)
+            If Not String.IsNullOrEmpty(Order_PoDate) Then
+                sqlparams(10) = New SqlParameter("@Order_PoDate", Order_PoDate)
+            Else
+                sqlparams(10) = New SqlParameter("@Order_PoDate", DBNull.Value)
+            End If
+            If Not String.IsNullOrEmpty(Order_CreatedDate) Then
+                sqlparams(11) = New SqlParameter("@Order_CreatedDate", Order_CreatedDate)
+            Else
+                sqlparams(11) = New SqlParameter("@Order_CreatedDate", DBNull.Value)
+            End If
+            sqlparams(12) = New SqlParameter("@Order_TermsDelivery", Order_TermsDelivery)
+            sqlparams(13) = New SqlParameter("@Order_TermsPayment", Order_TermsPayment)
+            sqlparams(14) = New SqlParameter("@Order_Dispach", Order_Dispach)
+            sqlparams(15) = New SqlParameter("@Order_Billedfrom", Order_Billedfrom)
+            If Not String.IsNullOrEmpty(Order_isQuotaionId) Then
+                sqlparams(16) = New SqlParameter("@Order_isQuotaionId", Order_isQuotaionId)
+            Else
+                sqlparams(16) = New SqlParameter("@Order_isQuotaionId", DBNull.Value)
+            End If
+
+            sqlparams(17) = New SqlParameter("@Order_CurrencyRate", CurrencyRate)
+            'sqlparams(18) = New SqlParameter("@Order_TermsOfPayment", TermsOfPayment)
+            sqlparams(19) = New SqlParameter("@Order_ModeOfTransport", ModeOfTransport)
+            sqlparams(20) = New SqlParameter("@Order_CountryOfOrigin", CountryOfOrigin)
+            sqlparams(21) = New SqlParameter("@Order_CountryOfFinalDestination", CountryOfFinalDestination)
+            sqlparams(22) = New SqlParameter("@Order_PortOfLoading", PortOfLoading)
+            sqlparams(23) = New SqlParameter("@Order_PortOfDischarge", PortOfDischarge)
+            sqlparams(24) = New SqlParameter("@Order_FinalDestination", FinalDestination)
+            sqlparams(25) = New SqlParameter("@Order_TrmsPyt_Card_doc", Order_TrmsPyt_Card_doc)
+            sqlparams(26) = New SqlParameter("@Order_Currency", Currency)
+            sqlparams(27) = New SqlParameter("@Order_Doc_Clearance", Order_Doc_Clearance)
+            sqlparams(28) = New SqlParameter("@Order_OceanFreight", Order_OceanFreight)
+            sqlparams(29) = New SqlParameter("@Order_Insurance", Order_Insurance)
+            sqlparams(30) = New SqlParameter("@Order_WithFreight", Order_WithFreight)
+            sqlparams(31) = New SqlParameter("@Order_FreightTaxPer", Order_FreightTaxPer)
+            sqlparams(32) = New SqlParameter("@Order_PrintIn", Order_PrintIn)
+            Return DBBridge.ExecuteScalar(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+    Public Shared Function InsertAddr(ByVal Mode As String, ByVal ID As Integer, ByVal Order_ID As Integer) As DataSet '-- by MUBYN
+        Dim sqlparams(3) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", Mode)
+            sqlparams(1) = New SqlParameter("@ID", ID)
+            sqlparams(2) = New SqlParameter("@Order_ID", Order_ID)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+    Public Shared Function InsertOrderAddr(ByVal Mode As String, ByVal ID As Integer, ByVal Order_ID As Integer, ByVal OrderAddr_CreatedId As Integer) As DataSet '-- by MUBYN 18-Jan-2020
+        Dim sqlparams(3) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", Mode)
+            sqlparams(1) = New SqlParameter("@ID", ID)
+            sqlparams(2) = New SqlParameter("@Order_ID", Order_ID)
+            sqlparams(3) = New SqlParameter("@OrderAddr_CreatedId", OrderAddr_CreatedId)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+	Public Shared Function CopyAddr(ByVal ID As Integer) As DataSet '-- by MUBYN
+        Dim sqlparams(1) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "CopyShipAddr")
+            sqlparams(1) = New SqlParameter("@Order_ID", ID)
+            Return DBBridge.ExecuteDataset(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+End Class

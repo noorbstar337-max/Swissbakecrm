@@ -1,0 +1,468 @@
+﻿<%@ Master Language="VB" CodeFile="MCRMMaster.master.vb" Inherits="MCRMMaster" %> 
+<!DOCTYPE html>
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if IE 9]>         <html class="no-js lt-ie10"> <![endif]-->
+<!--[if gt IE 9]><!-->
+<html class="no-js">
+<!--<![endif]-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+
+    <title>CRM</title>
+    <meta charset="utf-8">
+    <style>
+        .nav > li > a {
+        padding:10px 20.5px!important;}
+    </style>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1.0" />
+    <!-- Icons -->
+    <!-- The following icons can be replaced with your own, they are used by desktop and mobile browsers -->
+    <%-- <link rel="shortcut icon" href="img/favicon.ico">
+   <link rel="apple-touch-icon" href="img/icon57.png" sizes="57x57">
+    <link rel="apple-touch-icon" href="img/icon72.png" sizes="72x72">
+    <link rel="apple-touch-icon" href="img/icon76.png" sizes="76x76">
+    <link rel="apple-touch-icon" href="img/icon114.png" sizes="114x114">
+    <link rel="apple-touch-icon" href="img/icon120.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="img/icon144.png" sizes="144x144">
+    <link rel="apple-touch-icon" href="img/icon152.png" sizes="152x152">--%>
+
+    <!-- END Icons -->
+
+    <!-- Stylesheets -->
+    <!-- Bootstrap is included in its original form, unaltered -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <!-- Related styles of various icon packs and plugins -->
+    <link rel="stylesheet" href="css/plugins.css">
+
+    <!-- The main stylesheet of this template. All Bootstrap overwrites are defined in here -->
+    <link rel="stylesheet" href="css/main.css">
+    <link href="css/Responsive.css" rel="stylesheet" />
+    <!-- Include a specific file here from css/themes/ folder to alter the default theme of the template -->
+
+    <!-- The themes stylesheet of this template (for using specific theme color in individual elements - must included last) -->
+    <link rel="stylesheet" href="css/themes.css">
+    <!-- END Stylesheets -->
+
+    <!-- Modernizr (browser feature detection library) & Respond.js (Enable responsive CSS code on browsers that don't support it, eg IE8) -->
+    <script src="js/vendor/modernizr-2.7.1-respond-1.4.2.min.js"></script>
+    <style>
+        .sidebar-themes li a {
+            display: block;
+            width: 44px;
+            height: 43px;
+            border-radius: 27px;
+            border-width: 2px;
+            border-style: solid;
+        }
+
+        .profile_td {
+            float: left;
+            border: 0px solid;
+            width: 100%;
+        }
+
+        #GridView1 > tbody > tr > th {
+            display: none;
+        }
+    </style>
+    <style>
+        .nav.navbar-nav-custom > li > a {
+            min-width: 38px;
+            padding: 5px 6px;
+            line-height: 13px;
+            text-align: center;
+            color: #394263;
+            position: relative;
+        }
+
+        .nav.navbar-nav-custom > li > a > img {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #fff;
+    border-radius: 20px;
+    vertical-align: top;
+}
+        .nav.navbar-nav-custom > li {
+            min-height: 25px;
+            float: left;
+        }
+    </style>
+    <script type="text/javascript">
+        function ResetScrollPosition() {
+            setTimeout("window.scrollTo(200,200)", 0);
+        }
+
+    </script>
+    <script type="text/javascript">
+        function display_ct() {
+            var time = new Date()
+            var hr = time.getHours()
+            var min = time.getMinutes()
+            var sec = time.getSeconds()
+            var ampm = " PM "
+            if (hr < 12) {
+                ampm = " AM "
+            }
+            if (hr > 12) {
+                hr -= 12
+            }
+            if (hr < 10) {
+                hr = " " + hr
+            }
+            if (min < 10) {
+                min = "0" + min
+            }
+            if (sec < 10) {
+                sec = "0" + sec
+            }
+            var date = new Date()
+            var year = date.getYear()
+            if (year < 1000) {
+                year += 1900
+            }
+            var monthArray = new Array("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+            document.getElementById('ct').innerHTML = monthArray[date.getMonth()] + "  " + date.getDate() + ", " + year + "  " + hr + ":" + min + ":" + sec + ampm;
+
+            setTimeout("display_ct()", 1000)
+        }
+</script>
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body onload=display_ct();>
+    <form id="form1" runat="server">
+        <asp:ScriptManager ID="ScriptManager1" runat="server" ScriptMode="Release" LoadScriptsBeforeUI="false">
+        </asp:ScriptManager>
+       
+        <%-- <ajaxToolkit:ToolkitScriptManager ID="scriptManager"   LoadScriptsBeforeUI="false" runat="server" ScriptMode="Release" CombineScripts="true"  />--%>
+        <asp:HiddenField ID="HiddenField1" runat="server" />
+        <asp:HiddenField ID="hfimgpath" runat="server" />
+        <div id="page-wrapper">
+
+            <div class="preloader themed-background">
+                <h1 class="push-top-bottom text-light text-center"><strong>CRM</strong></h1>
+                <div class="inner">
+                    <h3 class="text-light visible-lt-ie9 visible-lt-ie10"><strong>Loading..</strong></h3>
+                    <div class="preloader-spinner hidden-lt-ie9 hidden-lt-ie10"></div>
+                </div>
+            </div>
+            <div id="page-container" class="sidebar-no-animations">
+                <!-- Alternative Sidebar -->
+                <div id="sidebar-alt">
+                    <!-- Wrapper for scrolling functionality -->
+
+                    <div class="sidebar-scroll">
+                        <!-- Sidebar Content -->
+                        
+                        <div class="sidebar-content">
+                            <a class="sidebar-title">
+                                <i class="gi gi-alarm fa-2x pull-right"></i><strong>Reminder</strong> (<asp:Literal ID="ltremindercount" Text="0" runat="server"></asp:Literal>)
+                            </a>
+                            <div class="sidebar-section" style="overflow: auto">
+                                <asp:Repeater ID="rpreminder" runat="server">
+                                    <ItemTemplate>
+                                        <div class="alert alert-alt">
+                                            <%#(DynamicparcelDisplayFunctions.TruncateDescription(Eval("Name"), 30))%><small class="pull-right"><%#((Eval("Rminderdate")))%></small><br>
+                                            <asp:HyperLink ID="hyactivity" runat="server"><strong><%#((Eval("Activity_Subject")))%></strong></asp:HyperLink>
+                                            <asp:LinkButton ID="Hyclose" runat="server" CommandName="dellink" data-toggle="tooltip" title="Close" ForeColor="Red"><strong><i class="fa fa-times"></i></asp:LinkButton>
+                                            <asp:HiddenField ID="hfactivitytype" runat="server" Value='<%#((Eval("Activity_Type")))%>' />
+                                            <asp:HiddenField ID="ActivityID" runat="server" Value='<%#((Eval("Activity_Id")))%>' />
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:Repeater>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              
+                <div id="sidebar">
+                    <div class="sidebar-scroll">
+                        <div class="sidebar-content">
+                            <a href="index1.aspx" class="sidebar-brand">
+                                <strong>
+                                    <asp:Label ID="lblcompany" runat="server"></asp:Label></strong>
+                            </a>
+                      <!-- User Info -->
+                                 <div id="sidebarUser" runat ="server"  class="sidebar-section sidebar-user clearfix">
+                                <div class="sidebar-user-avatar">
+                                    <a href="index1.aspx">
+                                        <asp:Image ID="imgprofileresponsive" runat="server" />
+                                    </a>
+                                </div>
+                                <div class="sidebar-user-name">
+                                    <asp:Label ID="Label1" runat="server" Text="Admin"></asp:Label></div>
+                                <div class="sidebar-user-links">
+                                    <a href="Logout.aspx" data-toggle="tooltip" data-placement="bottom" title="Logout"><i class="gi gi-exit"></i></a>
+                                </div>
+                            </div>
+                                 <div id="sidebarUser1" runat ="server"  class="sidebar-section sidebar-user clearfix">
+                                <div class="sidebar-user-avatar">
+                                    <a href="index1.aspx">
+                                        <asp:Image ID="imgprofileresponsive1" runat="server" />
+                                    </a>
+                                </div>
+                                <div class="sidebar-user-name">
+                                    <asp:Label ID="Label2" runat="server" Text="Admin"></asp:Label></div>
+                                <div class="sidebar-user-links">
+                                    <a href="#modal-userProfile-settings" data-toggle="modal" data-placement="bottom" title="Profile"><i class="gi gi-user"></i></a>
+                                    <!-- Opens the user settings modal that can be found at the bottom of each page (page_footer.html in PHP version) -->
+                                    <a href="#modal-user-settings" data-toggle="modal" class="enable-tooltip" data-placement="bottom" title="Settings"><i class="gi gi-cogwheel"></i></a>
+                                    <a href="Logout.aspx" data-toggle="tooltip" data-placement="bottom" title="Logout"><i class="gi gi-exit"></i></a>
+                                </div>
+                            </div>
+                            <!-- Change Color Theme functionality can be found in js/app.js - templateOptions() -->
+                            <a id="themepath" runat="server"></a>
+                            <!-- END Theme Colors -->
+                            <!-- Sidebar Navigation -->
+                            <ul id ="sidebarResponsive" runat ="server" class="sidebar-nav">
+                                 <li>
+                                     <a href="<%= "index1.aspx"%>" ><i class="fa fa-reorder fa-fw sidebar-nav-icon "></i>Home </a>
+                                </li>
+                                 
+                                            <li>
+                                                <a href="<%= "MCRMAddLead.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">
+                                                    <i class="fa fa-reorder fa-fw sidebar-nav-icon "></i>Add Lead</a>
+                                               
+                                            </li>                                         
+                                       
+                              
+                                            <li>
+                                                <a href="<%= "MCRMAddProspect.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">
+                                                    <i class="fa fa-reorder fa-fw sidebar-nav-icon "></i>Add Prospect</a>
+   <%--                                               <a href="<%= "MCRMAddProspect.aspx?returnurl=" + HttpUtility.UrlEncode(Security.Encrypt(Request.Url.AbsoluteUri.ToString)) + "&ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">
+                                                    <i class="fa fa-reorder fa-fw sidebar-nav-icon "></i>Add Prospect</a>--%>
+                                            </li>                                         
+                                       
+                             
+                                            <li>
+                                                <a href="<%= "MCRMAddAccount.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">
+                                                    <i class="fa fa-reorder fa-fw sidebar-nav-icon "></i>Add Account</a>
+                                            </li>                                         
+                                       
+                               
+                                            <li>
+                                                <a href="#" class="sidebar-nav-menu"><i class="fa fa-angle-left sidebar-nav-indicator"></i><i class="fa fa-reorder fa-fw sidebar-nav-icon "></i>Activity</a>
+                                                <ul>
+                                                     <li>
+                                                         <a href="<%= "dsr.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">
+                                                             Add DSR</a>
+                                                     </li>
+                                                    <li >
+                                                        <a href="<%= "Reminder.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">
+                                                            Add Reminder</a>
+                                                     </li>
+                                                </ul>
+                                            </li>
+                                 
+                                            <li>
+                                                <a href="<%= "ModifySampleRequest.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">
+                                                    <i class="fa fa-reorder fa-fw sidebar-nav-icon "></i>Add Sample Request</a>
+                                               
+                                            </li>   
+
+                                                
+
+                                            <li>
+                                                <a href="<%= "Support_Ticket.aspx"%>">
+                                                    <i class="fa fa-reorder fa-fw sidebar-nav-icon "></i>Add Complaint</a>
+                                               
+                                            </li>                                         
+                                       
+                       
+                            </ul>
+
+                        </div>
+                    </div>
+                </div>
+                <div id="main-container">
+                    <header class="navbar navbar-default">
+                        <div class="navbar-header" style="position: absolute; z-index: 100000;">
+                            <ul class="nav navbar-nav-custom">
+                                <li>
+                                    <a href="javascript:void(0)" onclick="App.sidebar('toggle-sidebar');" id="short_menu">
+                                        <i class="fa fa-bars fa-fw"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-xs-12">
+
+                            <div class="col-xs-3" style="padding: 0px;">
+                                <a style="text-decoration: none;">
+                                    <h3 style="margin-bottom: 20px;">
+                                        <asp:Label ID="lblcompanyname" runat="server" Font-Bold="true"></asp:Label>
+                                    </h3>
+                                </a>
+                            </div>
+                             <div class="col-xs-3" style="padding: 0px;">
+                            <ul class="nav navbar-nav-custom pull-right">
+                                   
+                                </ul>
+                                 </div>
+                            <div class="col-xs-6" style="padding: 0px; float: right; padding-top: 6px;">
+                             
+                                <ul class="nav navbar-nav-custom pull-right">
+                                    <li>
+                                          <div id="ct" class="label label-danger" style="margin-top: 17px;font-size: 14px;"></div>
+                                    </li>
+                              
+                                    <li class="dropdown">
+                                        <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">
+                                            <asp:Image ID="imgprofile" runat="server" />
+                                            <i class="fa fa-angle-down"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-custom dropdown-menu-right">
+                                            <li>
+                                                <a href="Logout.aspx"><i class="fa fa-ban fa-fw pull-right"></i>Logout</a>
+                                            </li>
+
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+                        <div class="col-xs-12" id="large_menu">
+
+                            <div id="horizontal_menu_collapse" runat ="server" class="collapse navbar-collapse">
+                                <ul class="nav navbar-nav">
+                                     <li class="dropdown">
+                                        <a href="<%= "index1.aspx"%>" >Home </a>
+                                        
+                                    </li>
+                                    <li class="dropdown">
+                                        <a class="dropdown-toggle" data-toggle="dropdown">Leads <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                             <li><a href="<%= "MCRMAddLead.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>"><i class="fa fa-plus fa-fw pull-right"></i>Add Lead</a></li>
+                                        </ul>
+                                    </li>
+                                    <li class="dropdown">
+                                        <a class="dropdown-toggle" data-toggle="dropdown">Prospects <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a href="<%= "MCRMAddProspect.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">Add Prospect</a>                                            
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="dropdown">
+                                        <a  class="dropdown-toggle" data-toggle="dropdown">Accounts <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a href="<%= "MCRMAddAccount.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">Add Account</a>                                            
+                                            </li>
+                                        </ul>
+                                    </li>
+
+
+                                        <li class="dropdown">
+                                        <a class="dropdown-toggle" data-toggle="dropdown">Activity <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a href="<%= "dsr.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>"><i class="fa fa-plus fa-fw pull-right"></i>Add DSR</a>
+                                            </li>
+                                            <li>
+                                                <a href="<%= "Reminder.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">Add Reminder</a>                  
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li class="dropdown">
+                                        <a  class="dropdown-toggle" data-toggle="dropdown">Sample Request <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a href="<%= "ModifySampleRequest.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(0))%>">Add Sample Request</a>                  
+                                            </li>
+                                        </ul>
+                                    </li>
+                                     <li class="dropdown">
+                                        <a  class="dropdown-toggle" data-toggle="dropdown">Complaint <i class="fa fa-angle-down"></i></a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a href="<%= "Support_Ticket.aspx"%>">Add Complaint</a>                  
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- END Horizontal Menu + Search -->
+                        </div>
+
+                        <!-- END Navbar Header -->
+
+
+
+                    </header>
+                    <!-- END Header -->
+                    <asp:ContentPlaceHolder ID="ContentPlaceHolder2" runat="server">
+                    </asp:ContentPlaceHolder>
+                    <div id="page-content" style="min-height: 600px!important;">
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                        </asp:ContentPlaceHolder>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Footer -->
+        <footer class="clearfix">
+            <div class="col-xs-12" style="background: #3b434c; padding: 0px; color: #a2abb7;" id="footer_z">
+                <div class="container" style="padding: 15px;">
+                    <div class="pull-right">
+                        Managed by &#64; <a href="http://www.acaira.com/" target="_blank">Acaira Technologies</a>
+                    </div>
+                    <div class="pull-left">
+                        <span id="year-copy"></span>&nbsp;&copy;&nbsp;<a href="index1.aspx" target="_blank">CRM</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- END Footer -->
+        <!-- Scroll to top link, initialized in js/app.js - scrollToTop() -->
+        <a href="#" id="to-top"><i class="fa fa-angle-double-up"></i></a>
+
+        <!-- User Settings, modal which opens from Settings link (found in top right user menu) and the Cog link (found in sidebar user info) -->
+        <div id="modal-user-settings" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header text-center">
+                        <h2 class="modal-title"><i class="fa fa-pencil"></i>Settings</h2>
+                    </div>
+                    <!-- END Modal Header -->
+
+                </div>
+            </div>
+        </div>
+        <!-- END User Settings -->
+
+        <!-- Include Jquery library from Google's CDN but if something goes wrong get Jquery from local file (Remove 'http:' if you have SSL) -->
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script>!window.jQuery && document.write(decodeURI('%3Cscript src="js/vendor/jquery-1.11.1.min.js"%3E%3C/script%3E'));</script>
+          <script src="js/pages/index.js"></script>
+
+        <!-- Bootstrap.js, Jquery plugins and Custom JS code -->
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/plugins.js"></script>
+        <script src="js/app.js"></script>
+        <script src="js/pages/readyFiles.js"></script>
+        <script>$(function () { ReadyFiles.init(); });</script>
+        <script type="text/javascript">
+            $(function Mandardecimal() {
+              
+                $('.decimal').keyup(function () {
+                    var val = $(this).val();
+                    if (isNaN(val)) {
+                        val = val.replace(/[^0-9\.]/g, '');
+                        if (val.split('.').length > 2)
+                            val = val.replace(/\.+$/, "");
+                    }
+                    $(this).val(val);
+                });
+            });
+        </script>
+        <script src="js/pages/index.js"></script>
+        <script>$(function () { Index.init(); });</script>
+   
+    </form>
+</body>
+</html>
+

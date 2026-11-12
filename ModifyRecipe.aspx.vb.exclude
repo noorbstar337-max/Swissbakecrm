@@ -1,0 +1,1596 @@
+﻿Imports DynamicparcelEnumerations
+Imports System.Data
+Imports System.Data.SqlClient
+Imports System.Net
+Partial Class ModifyRecipe
+    Inherits _PageBaseClass
+    'Inherits System.Web.UI.Page
+    Dim Flag As Integer
+    Dim version As Double = 0.0
+    Dim MainID As Integer
+    Dim Fid As Integer
+    Dim M As Integer
+
+    Protected Sub Page_Init(sender As Object, e As EventArgs) Handles Me.Init
+        Try
+            If Session("LMSUserId") = Nothing Then
+
+                TryCast(Me.Master, LMSMasterPage).MaintainSession()
+                If (Request.QueryString("Id") = Nothing) Then
+                    Response.Redirect("LMSDashboard.aspx")
+                End If
+                If Request.QueryString("chk") = "v" Then
+                    DisableViewMode()
+                Else
+
+                End If
+                LMSBLL.CheckLMSPrivilegeForModify(Session("LMSUserRoleID"), "Recipe.aspx")
+            Else
+                If (Request.QueryString("Id") = Nothing) Then
+                    Response.Redirect("LMSDashboard.aspx")
+                End If
+                If Request.QueryString("chk") = "v" Then
+                    DisableViewMode()
+                Else
+
+                End If
+                LMSBLL.CheckLMSPrivilegeForModify(Session("LMSUserRoleID"), "Recipe.aspx")
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "');window.location='LMSDashboard.aspx';", True)
+        End Try
+    End Sub
+
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        Try
+
+            If Not IsPostBack Then
+                Dim dt As DataSet = LMSPrivilegeBLL.CheckLMSPrivilege(Session("LMSUserRoleID"), "Recipe.aspx")
+                If dt.Tables(0).Rows.Count > 0 Then
+                    If Request.QueryString("chk") = "e" Then
+                        If dt.Tables(0).Rows(0)("Prvg_RUpdate") = True Then
+                        Else
+                            Response.Redirect("LMSDashboard.aspx")
+                        End If
+                    Else
+                        If dt.Tables(0).Rows(0)("Prvg_Rview") = True Then
+                        Else
+                            Response.Redirect("LMSDashboard.aspx")
+                        End If
+                        If dt.Tables(0).Rows(0)("Prvg_RAdd") = True Then
+                        Else
+                            Response.Redirect("LMSDashboard.aspx")
+                        End If
+                    End If
+                Else
+                    Response.Redirect("LMSDashboard.aspx")
+                End If
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                If Request.QueryString("Fid") <> Nothing Then
+                    Fid = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Fid")))
+                End If
+                LMSassigncontrol.Uhftype.Value = "Recipe"
+                LMSassigncontrol.Uhftypeid.Value = MainID
+                liRecipe.Attributes("class") = "active"
+                'lnkFormulation.NavigateUrl = "ModifyFormulation.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&returnurl=y"
+                'lnkRecipe.NavigateUrl = "ModifyRecipe.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&returnurl=y"
+                'lnkTrial.NavigateUrl = "ModifyTrial.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&returnurl=y"
+
+                If MainID = "0" Then
+                    btnprint.Visible = False
+                    btnprintblank.Visible = False
+                    modifyspan.Visible = False
+                    btnRecipeSaveApprove.Visible = False
+                    btnRecipeDisApprove.Visible = False
+                    btnRecipeSaveNext.Visible = False
+                    If Fid = "0" Then
+                        divRecipeHistory.Visible = False
+                        divFormulationType.Visible = False
+                        ddlFormulationNo.Visible = True
+                        FillddlProductRecipe()
+                        FillRecipeNo()
+                        AddRecipeFirstRow()
+                        AddProcedureFirstRow()
+                    Else
+                        ViewState("Formulation_Id") = Fid
+                        divFormulationType.Visible = False
+                        divFormulationNo.Visible = False
+                        divDDLProduct.Visible = False
+                        divTxtProduct.Visible = False
+                        divRecipeHistory.Visible = False
+                        FillddlProductRecipe()
+                        FillRecipeNo()
+                        AddRecipeFirstRow()
+                        AddProcedureFirstRow()
+                        'btnRecipeSaveApprove.Visible = True
+                        'btnRecipeDisApprove.Visible = True
+                        'btnRecipeSaveNext.Visible = True
+                        btnRecipeSaveNew.Visible = True
+                    End If
+                Else
+                    btnprint.Visible = True
+                    btnprintblank.Visible = True
+                    If Fid = "0" Then
+                        divRecipeHistory.Visible = False
+                        divFormulationType.Visible = False
+                        divFormulationNo.Visible = False
+                        divDDLProduct.Visible = False
+                        divTxtProduct.Visible = False
+                        FillddlProductRecipe()
+                        AddRecipeFirstRow()
+                        AddProcedureFirstRow()
+                        DisableFormulation()
+                        FillDetailRecipe()
+                        gvIngredient.HeaderRow.Visible = False
+                        ' FillRecipeHistory()
+                    Else
+                        If Request.QueryString("M") <> Nothing Then
+                            M = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("M")))
+                        End If
+                        If M = 0 Then
+                            divRecipeHistory.Visible = False
+                            divFormulationType.Visible = False
+                            divFormulationNo.Visible = False
+                            divDDLProduct.Visible = False
+                            divTxtProduct.Visible = False
+                            FillddlProductRecipe()
+                            AddRecipeFirstRow()
+                            AddProcedureFirstRow()
+                            DisableFormulation()
+                            FillDetailRecipe()
+                            gvIngredient.HeaderRow.Visible = False
+                        Else
+                            FillPopUp()
+                            mpe.Show()
+                        End If
+                    End If
+                    If Request.QueryString("chk") = "v" Then
+                        DisableViewMode()
+                    End If
+
+                End If
+                ' GetRecipeDynamic()
+                'FillRecipe()
+            End If
+            'gvIngredient.HeaderRow.Visible = False
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+#Region "Recipe"
+    Public Sub FillddlProductRecipe()
+        Try
+            Dim ds As DataSet
+            ds = LMSBLL.DropdownWithUserId("FillProductByID", Session("LMSUserId"), Session("LMSUserRoleID"))
+            ddlProduct.DataSource = ds.Tables(0)
+            ddlProduct.DataTextField = "Product_Name"
+            ddlProduct.DataValueField = "Product_Id"
+
+            ddlProduct.DataBind()
+            ddlProduct.Items.Insert(0, New ListItem("Select Product", "0"))
+            'ddlProduct.Items.Insert(0, "Select Product")
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub ddlProduct_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddlProduct.SelectedIndexChanged
+        Try
+            If ddlProduct.SelectedValue = "0" Then
+                ddlFormulationNo.SelectedValue = 0
+                ddlFormulationNo.Enabled = False
+            Else
+                ddlFormulationNo.Enabled = True
+                FillFormulationNoInRecipe()
+            End If
+            ddlMixer.SelectedValue = 0
+            ddlBlade.SelectedValue = 0
+            ddlMould.SelectedValue = 0
+            ddlOven.SelectedValue = 0
+            AddRecipeFirstRow()
+            AddProcedureFirstRow()
+            txtRemarkIngre.Text = ""
+            txtRemarkProc.Text = ""
+            divRecipeHistory.Visible = False
+            btnRecipeSaveApprove.Visible = False
+            btnRecipeDisApprove.Visible = False
+            btnRecipeSaveNext.Visible = False
+            btnRecipeSaveNew.Visible = False
+            lblFormNoTab.Text = ""
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Private Sub FillFormulationNoInRecipe()
+        Try
+            Dim ds As DataSet
+            Dim value As String() = ddlProduct.SelectedValue.Split("^")
+
+            If value(1) = 0 Then
+                ds = LMSBLL.DropdownByName("FillFormulationNoByName", value(0))
+            Else
+                ds = LMSBLL.DropdownById("FillFormulationNo", value(1))
+            End If
+            ddlFormulationNo.DataSource = ds.Tables(0)
+            ddlFormulationNo.DataTextField = "Formulation_No"
+            ddlFormulationNo.DataValueField = "Formulation_Id"
+            ddlFormulationNo.DataBind()
+            ddlFormulationNo.Items.Insert(0, New ListItem("Select Formulation No", "0"))
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Private Sub FillRecipeNo()
+        Try
+            Dim RecipeNo As String = LMSBLL.RecipeNo()
+            lblRecipeNo.Text = RecipeNo
+            LMSassigncontrol.UhfTypeCode.Value = RecipeNo
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub CopyDetailRecipe()
+        Try
+            'MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            'If Request.QueryString("Fid") <> Nothing Then
+            '    Fid = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Fid")))
+            'End If
+            Dim dt As DataSet
+            'If MainID = 0 Then
+            dt = LMSBLL.FillGridByID(ViewState("RecipeIDForFill"), "DispRecipeIngredients")
+            ' Else
+            'btnRecipeSaveApprove.Visible = True
+            'btnRecipeDisApprove.Visible = True
+            'btnRecipeSaveNext.Visible = True
+            'btnRecipeSave.Visible = True
+            'dt = LMSBLL.FillGridByID(MainID, "DispRecipeIngredients")
+            'End If
+            Dim dtUser As New DataTable
+            dtUser = dt.Tables(0)
+            Dim drLogin As DataRow
+            If dtUser.Rows.Count > 0 Then
+
+                drLogin = dtUser.Rows(0)
+                'If DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Approved")) = "Approved" Then
+                '    lblapproved.Text = "Approved"
+                '    btnRecipeSaveApprove.Visible = False
+                '    btnRecipeDisApprove.Visible = False
+                'ElseIf DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Approved")) = "Pending" Then
+                '    lblapproved.Text = "Pending"
+                '    btnRecipeSaveApprove.Visible = True
+                '    btnRecipeDisApprove.Visible = True
+                'Else
+                '    lblapproved.Text = "Rejected"
+                '    btnRecipeSaveApprove.Visible = False
+                '    btnRecipeDisApprove.Visible = False
+                'End If
+                'lblmodifiedname.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("U_FirstName"))
+                'lblmodifieddate.Text = DynamicparcelDataManipulation.AlphaDateFormat(DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_ModifiedDate")).ToString())
+                ddlFormulationNo.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_FormulationId"))
+                hfFRNo.Value = ddlFormulationNo.SelectedItem.Text
+                'ViewState("hfFRNo") = ddlFormulationNo.SelectedItem.Text
+                'hfFRNo.Value = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_No"))
+                ViewState("Formulation_Id") = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_FormulationId"))
+                Dim ProdID As Integer = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_ProductID"))
+                Dim FType As String = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_Type"))
+                If FType = "Product" And ProdID = 0 Then
+                    ddlFormulationType.SelectedValue = 1
+                ElseIf FType = "Competitor" And ProdID = 0 Then
+                    ddlFormulationType.SelectedValue = 2
+                ElseIf FType = "Product" And ProdID <> 0 Then
+                    ddlFormulationType.SelectedValue = 0
+                End If
+
+                'lblRecipeNo.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_No"))
+                ddlMixer.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Mixer"))
+                ddlBlade.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Blade"))
+                ddlMould.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Mould"))
+                ddlOven.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Oven"))
+                txtRemarkIngre.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("RecipeIngredient_Remarks"))
+            Else
+                AddRecipeFirstRow()
+            End If
+
+            gvIngredient.DataSource = dt.Tables(1)
+            Session("IngredientViewMode") = dt.Tables(1)
+            ViewState("gvIngredientItems") = dt.Tables(1)
+            Dim dtIng As New DataTable
+            dtIng = dt.Tables(2)
+            If dtIng.Rows.Count > 0 Then
+                gvIngredient.DataBind()
+                SetRecipePreviousData()
+            Else
+                AddRecipeFirstRow()
+            End If
+
+            gvProcedure.DataSource = dt.Tables(2)
+            Session("ProcedureViewMode") = dt.Tables(2)
+            ViewState("gvProcedureItems") = dt.Tables(2)
+            gvProcedure.DataBind()
+            SetProcedurePreviousData()
+
+            Dim dtProc As New DataTable
+            dtProc = dt.Tables(2)
+            Dim drProc As DataRow
+            If dtProc.Rows.Count > 0 Then
+                drProc = dtProc.Rows(0)
+                txtRemarkProc.Text = DynamicparcelDataManipulation.FixNullFromDB(drProc("RecipeProcedure_Remarks"))
+            Else
+                AddProcedureFirstRow()
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+    Public Sub FillDetailRecipe()
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            If Request.QueryString("Fid") <> Nothing Then
+                Fid = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Fid")))
+            End If
+            Dim dt As DataSet
+            If MainID = 0 Then
+                'If Fid = 0 Then
+                dt = LMSBLL.FillGridByID(ViewState("RecipeIDForFill"), "DispRecipeIngredients")
+                'Else
+                '    dt = LMSBLL.FillGridByID(Fid, "DispRecipeIngredients")
+                'End If
+
+            Else
+                If Session("LMSUserId") = 1 Then
+                    btnRecipeSaveApprove.Visible = True
+                    btnRecipeDisApprove.Visible = True
+                Else
+                    btnRecipeSaveApprove.Visible = False
+                    btnRecipeDisApprove.Visible = False
+                End If
+                btnRecipeSaveNext.Visible = True
+                btnRecipeSaveNew.Visible = True
+                dt = LMSBLL.FillGridByID(MainID, "DispRecipeIngredients")
+            End If
+            Dim dtUser As New DataTable
+            dtUser = dt.Tables(0)
+            Dim drLogin As DataRow
+            If dtUser.Rows.Count > 0 Then
+                drLogin = dtUser.Rows(0)
+                If DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Approved")) = "Approved" Then
+                    lblapproved.Text = "Approved"
+                    btnRecipeSaveApprove.Visible = False
+                    btnRecipeDisApprove.Visible = False
+                ElseIf DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Approved")) = "Pending" Then
+                    lblapproved.Text = "Pending"
+                    If Session("LMSUserId") = 1 Then
+                        btnRecipeSaveApprove.Visible = True
+                        btnRecipeDisApprove.Visible = True
+                    Else
+                        btnRecipeSaveApprove.Visible = False
+                        btnRecipeDisApprove.Visible = False
+                    End If
+                Else
+                    lblapproved.Text = "Rejected"
+                    btnRecipeSaveApprove.Visible = False
+                    btnRecipeDisApprove.Visible = False
+                End If
+                'lblFormulationNo.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_No"))
+                lblType.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_ProdCategory"))
+                lblmodifiedname.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("U_FirstName"))
+                lblmodifieddate.Text = DynamicparcelDataManipulation.AlphaDateFormat(DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_ModifiedDate")).ToString())
+                ddlFormulationNo.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_FormulationId"))
+                If ddlFormulationNo.SelectedValue <> "" Then
+                    hfFRNo.Value = ddlFormulationNo.SelectedItem.Text
+                    ' ViewState("hfFRNo") = ddlFormulationNo.SelectedItem.Text
+                Else
+                    hfFRNo.Value = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_No"))
+                    ' ViewState("hfFRNo") = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_No"))
+                End If
+                LMSassigncontrol.UhfFormulationCode.Value = hfFRNo.Value
+                'hfFRNo.Value = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_No"))
+                ViewState("Formulation_Id") = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_FormulationId"))
+                Dim ProdID As Integer = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_ProductID"))
+                Dim FType As String = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_Type"))
+                If FType = "Product" And ProdID = 0 Then
+                    ddlFormulationType.SelectedValue = 1
+                ElseIf FType = "Competitor" And ProdID = 0 Then
+                    ddlFormulationType.SelectedValue = 2
+                ElseIf FType = "Product" And ProdID <> 0 Then
+                    ddlFormulationType.SelectedValue = 0
+                End If
+                'If ProdID = 0 Then
+                '    divDDLProduct.Visible = False
+                '    divTxtProduct.Visible = True
+                '    txtProduct.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_ProdName"))
+                'Else
+                '    divDDLProduct.Visible = True
+                '    divTxtProduct.Visible = False
+                '    ddlProduct.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_ProductID"))
+                'End If
+                'txtRemarkProc.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("RecipeIngredient_Remarks"))
+                lblRecipeNo.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_No"))
+                LMSassigncontrol.UhfTypeCode.Value = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_No"))
+                ddlMixer.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Mixer"))
+                ddlBlade.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Blade"))
+                ddlMould.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Mould"))
+                ddlOven.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Recipe_Oven"))
+                txtRemarkIngre.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("RecipeIngredient_Remarks"))
+            Else
+                AddRecipeFirstRow()
+            End If
+
+            gvIngredient.DataSource = dt.Tables(1)
+            Session("IngredientViewMode") = dt.Tables(1)
+            ViewState("gvIngredientItems") = dt.Tables(1)
+            Dim dtIng As New DataTable
+            dtIng = dt.Tables(2)
+            ' Dim drIng As DataRow
+            If dtIng.Rows.Count > 0 Then
+                'drIng = dtIng.Rows(0)
+                gvIngredient.DataBind()
+                SetRecipePreviousData()
+            Else
+                AddRecipeFirstRow()
+            End If
+
+            gvProcedure.DataSource = dt.Tables(2)
+            Session("ProcedureViewMode") = dt.Tables(2)
+            ViewState("gvProcedureItems") = dt.Tables(2)
+            gvProcedure.DataBind()
+            SetProcedurePreviousData()
+
+            Dim dtProc As New DataTable
+            dtProc = dt.Tables(2)
+            Dim drProc As DataRow
+            If dtProc.Rows.Count > 0 Then
+                drProc = dtProc.Rows(0)
+                txtRemarkProc.Text = DynamicparcelDataManipulation.FixNullFromDB(drProc("RecipeProcedure_Remarks"))
+            Else
+                AddProcedureFirstRow()
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+#Region "Ingredients"
+    Protected Sub gvIngredient_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvIngredient.RowCommand
+        Try
+            Flag = 0
+            If e.CommandName = "AddRecipeNewRow" Then
+                AddRecipeNewRow()
+            ElseIf e.CommandName = "deleteRecipeLink" Then
+                SetRecipePreviousData()
+                If ViewState("gvIngredientItems") IsNot Nothing Then
+                    Dim dt As DataTable = DirectCast(ViewState("gvIngredientItems"), DataTable)
+                    Dim drCurrentRow As DataRow = Nothing
+                    Dim rowIndex As Integer = Convert.ToInt32(e.CommandArgument)
+                    If dt.Rows.Count > 0 Then
+                        dt.Rows.Remove(dt.Rows(rowIndex))
+                        drCurrentRow = dt.NewRow()
+
+                        ViewState("gvIngredientItems") = dt
+                        Flag = rowIndex
+
+                        gvIngredient.DataSource = dt
+                        gvIngredient.DataBind()
+
+                        If gvIngredient.Rows.Count <= 1 Then
+                            Dim lnkdelete As LinkButton = DirectCast(gvIngredient.Rows(0).FindControl("lnkdelete"), LinkButton)
+                            lnkdelete.Visible = False
+                        Else
+                            For i As Integer = 0 To gvIngredient.Rows.Count - 1
+                                Dim lnkdelete As LinkButton = DirectCast(gvIngredient.Rows(i).FindControl("lnkdelete"), LinkButton)
+                                lnkdelete.Visible = True
+                            Next
+                        End If
+                        For i As Integer = 0 To gvIngredient.Rows.Count - 2
+                            gvIngredient.Rows(i).Cells(0).Text = Convert.ToString(i + 1)
+                        Next
+                      
+                    End If
+                    SetRecipePreviousData()
+                End If
+            End If
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+
+        End Try
+    End Sub
+    Private Sub AddRecipeFirstRow()
+        Try
+            Dim dt As New DataTable()
+            Dim dr As DataRow = Nothing
+            dt.Columns.Add(New DataColumn("RowNumber", GetType(String)))
+            'dt.Columns.Add(New DataColumn("Rm_Index", GetType(String)))
+            'dt.Columns.Add(New DataColumn("FRNo", GetType(String)))
+            dt.Columns.Add(New DataColumn("RecipeIngredient_Name", GetType(String)))
+            dt.Columns.Add(New DataColumn("RecipeIngredient_Value", GetType(String)))
+            dt.Columns.Add(New DataColumn("RecipeIngredient_Percent", GetType(String)))
+           
+            dr = dt.NewRow()
+            dr("RowNumber") = 1
+            strrowcount.Value = dr("RowNumber")
+            'dr("Rm_Index") = 1
+            dr("RecipeIngredient_Name") = String.Empty
+            dr("RecipeIngredient_Value") = String.Empty
+            dr("RecipeIngredient_Percent") = String.Empty
+            
+            dt.Rows.Add(dr)
+            ViewState("gvIngredientItems") = dt
+
+            gvIngredient.DataSource = dt
+            gvIngredient.DataBind()
+            'Dim lblFRNo As Label = DirectCast(gvIngredient.HeaderRow.FindControl("lblFRNo"), Label)
+            'lblFRNo.Text = "FRNo"
+            'Dim lblFormNo As Label = DirectCast(gvIngredient.Rows(0).Cells(0).FindControl("lblFormNo"), Label)
+            SetRecipePreviousData()
+
+            Dim lnkdelete As LinkButton = DirectCast(gvIngredient.Rows(0).FindControl("lnkdelete"), LinkButton)
+            lnkdelete.Visible = False
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Private Sub AddRecipeNewRow()
+        Try
+
+            Dim rowIndex As Integer = 0
+            If ViewState("gvIngredientItems") IsNot Nothing Then
+                Dim dtCurrentTable As DataTable = DirectCast(ViewState("gvIngredientItems"), DataTable)
+                Dim drCurrentRow As DataRow = Nothing
+                If dtCurrentTable.Rows.Count > 0 Then
+                    For i As Integer = 1 To dtCurrentTable.Rows.Count
+                        'Dim ltIndex As Literal = DirectCast(gvIngredient.Rows(rowIndex).Cells(0).FindControl("ltIndex"), Literal)
+                        'Dim lblFRNo As Label = DirectCast(gvIngredient.Rows(rowIndex).Cells(0).FindControl("lblFRNo"), Label)
+                        Dim txtIName As TextBox = DirectCast(gvIngredient.Rows(rowIndex).Cells(0).FindControl("txtIName"), TextBox)
+                        Dim txtIValue As TextBox = DirectCast(gvIngredient.Rows(rowIndex).Cells(0).FindControl("txtIValue"), TextBox)
+                        Dim txtIPercent As TextBox = DirectCast(gvIngredient.Rows(rowIndex).Cells(0).FindControl("txtIPercent"), TextBox)
+
+                        drCurrentRow = dtCurrentTable.NewRow()
+                        drCurrentRow("RowNumber") = i + 1
+                        strrowcount.Value = drCurrentRow("RowNumber")
+                        '  drCurrentRow("RecipeIngredient_Percent") = 1
+                        'drCurrentRow("RecipeIngredient_Name") = 0
+                        'drCurrentRow("RecipeIngredient_Value") = (txtQuantity.Text - ViewState("Qtotal")) / txtQuantity.Text * 100
+                        'dtCurrentTable.Rows(i - 1)("RecipeIngredient_Name") = txtIName.Text
+                        dtCurrentTable.Rows(i - 1)("RecipeIngredient_Name") = txtIName.Text
+                        dtCurrentTable.Rows(i - 1)("RecipeIngredient_Value") = txtIValue.Text
+                        dtCurrentTable.Rows(i - 1)("RecipeIngredient_Percent") = txtIPercent.Text
+
+                        'lblFRNo.Text = "FRNo"
+                        rowIndex += 1
+                    Next
+                    dtCurrentTable.Rows.Add(drCurrentRow)
+                    ViewState("gvIngredientItems") = dtCurrentTable
+                    gvIngredient.DataSource = dtCurrentTable
+                    gvIngredient.DataBind()
+                End If
+            End If
+            SetRecipePreviousData()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+
+        End Try
+    End Sub
+    Private Sub SetRecipePreviousData()
+        Try
+            Dim rowIndex As Integer = 0
+            If ViewState("gvIngredientItems") IsNot Nothing Then
+                Dim dt As DataTable = DirectCast(ViewState("gvIngredientItems"), DataTable)
+                If dt.Rows.Count > 0 Then
+                    For i As Integer = 0 To dt.Rows.Count - 1
+                        Dim txtIName As TextBox = DirectCast(gvIngredient.Rows(rowIndex).Cells(1).FindControl("txtIName"), TextBox)
+                        Dim txtIValue As TextBox = DirectCast(gvIngredient.Rows(rowIndex).Cells(2).FindControl("txtIValue"), TextBox)
+                        Dim txtIPercent As TextBox = DirectCast(gvIngredient.Rows(rowIndex).Cells(3).FindControl("txtIPercent"), TextBox)
+
+
+                        gvIngredient.Rows(i).Cells(0).Text = Convert.ToString(i + 1)
+
+                        dt.Rows(i)("RecipeIngredient_Name") = txtIName.Text
+                        dt.Rows(i)("RecipeIngredient_Value") = txtIValue.Text
+                        dt.Rows(i)("RecipeIngredient_Percent") = txtIPercent.Text
+                        rowIndex += 1
+
+                        txtIName.Text = dt.Rows(i)("RecipeIngredient_Name").ToString
+                        txtIValue.Text = dt.Rows(i)("RecipeIngredient_Value").ToString
+                        txtIPercent.Text = dt.Rows(i)("RecipeIngredient_Percent").ToString
+
+                        If i < dt.Rows.Count - 1 Then
+                            txtIName.Enabled = False
+                        End If
+
+                    Next
+                    ViewState("gvIngredientItems") = dt
+                    gvIngredient.DataSource = dt
+                    gvIngredient.DataBind()
+                    'Dim lblFRNo As Label = DirectCast(gvIngredient.HeaderRow.FindControl("lblFRNo"), Label)
+                    'lblFRNo.Text = hfFRNo.Value
+                    'Dim lblFormNo As Label = DirectCast(gvIngredient.Rows(0).Cells(0).FindControl("lblFormNo"), Label)
+                    'lblFormNo.Text = hfFRNo.Value
+                    'If ddlFormulationNo.DataSource IsNot Nothing Then
+
+                    '    If ddlFormulationNo.SelectedValue IsNot "" Or ddlFormulationNo.SelectedValue IsNot "0" Then
+                    '        hfFRNo.Value = ddlFormulationNo.SelectedItem.Text
+                    '    End If
+                    'End If
+                    'lblFormNoTab.Text = hfFRNo.Value
+                    'lblFormNoTab.Text = ViewState("hfFRNo")
+                    Dim lnkdelete As LinkButton = DirectCast(gvIngredient.Rows(0).FindControl("lnkdelete"), LinkButton)
+                    If gvIngredient.Rows.Count <= 1 Then
+                        lnkdelete.Visible = False
+                    Else
+                        For i As Integer = 0 To gvIngredient.Rows.Count - 1
+                            lnkdelete.Visible = True
+                        Next
+                    End If
+                End If
+            End If
+            gvIngredient.HeaderRow.Visible = False
+            lblFormNoTab.Visible = True
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+#End Region
+#Region "Procedure"
+    Protected Sub gvProcedure_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvProcedure.RowCommand
+        Try
+            Flag = 0
+            If e.CommandName = "AddProcedureNewRow" Then
+                AddProcedureNewRow()
+            ElseIf e.CommandName = "deleteProcedureLink" Then
+                SetProcedurePreviousData()
+                If ViewState("gvProcedureItems") IsNot Nothing Then
+                    Dim dt As DataTable = DirectCast(ViewState("gvProcedureItems"), DataTable)
+                    Dim drCurrentRow As DataRow = Nothing
+                    Dim rowIndex As Integer = Convert.ToInt32(e.CommandArgument)
+                    If dt.Rows.Count > 0 Then
+                        dt.Rows.Remove(dt.Rows(rowIndex))
+                        drCurrentRow = dt.NewRow()
+
+                        ViewState("gvProcedureItems") = dt
+                        Flag = rowIndex
+
+                        gvProcedure.DataSource = dt
+                        gvProcedure.DataBind()
+
+                        If gvProcedure.Rows.Count <= 1 Then
+                            Dim lnkdelete As LinkButton = DirectCast(gvProcedure.Rows(0).FindControl("lnkdelete"), LinkButton)
+                            lnkdelete.Visible = False
+                        Else
+                            For i As Integer = 0 To gvProcedure.Rows.Count - 1
+                                Dim lnkdelete As LinkButton = DirectCast(gvProcedure.Rows(i).FindControl("lnkdelete"), LinkButton)
+                                lnkdelete.Visible = True
+                            Next
+                        End If
+                        For i As Integer = 0 To gvProcedure.Rows.Count - 2
+                            gvProcedure.Rows(i).Cells(0).Text = Convert.ToString(i + 1)
+                        Next
+
+
+                    End If
+                    'SetProcedurePreviousData()
+                End If
+            End If
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Private Sub AddProcedureFirstRow()
+        Try
+            Dim dt As New DataTable()
+            Dim dr As DataRow = Nothing
+            dt.Columns.Add(New DataColumn("RowNumber", GetType(String)))
+            'dt.Columns.Add(New DataColumn("Rm_Index", GetType(String)))
+            dt.Columns.Add(New DataColumn("RecipeProcedure_Step", GetType(String)))
+            dt.Columns.Add(New DataColumn("RecipeProcedure_Term", GetType(String)))
+            dt.Columns.Add(New DataColumn("RecipeProcedure_Time", GetType(String)))
+
+
+            dr = dt.NewRow()
+            dr("RowNumber") = 1
+            strrowcount.Value = dr("RowNumber")
+            'dr("Rm_Index") = 1
+            dr("RecipeProcedure_Step") = String.Empty
+            dr("RecipeProcedure_Term") = String.Empty
+            dr("RecipeProcedure_Time") = String.Empty
+
+            dt.Rows.Add(dr)
+            ViewState("gvProcedureItems") = dt
+
+            gvProcedure.DataSource = dt
+            gvProcedure.DataBind()
+
+            SetProcedurePreviousData()
+
+            Dim lnkdelete As LinkButton = DirectCast(gvProcedure.Rows(0).FindControl("lnkdelete"), LinkButton)
+            lnkdelete.Visible = False
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Private Sub AddProcedureNewRow()
+        Try
+            Dim rowIndex As Integer = 0
+            If ViewState("gvProcedureItems") IsNot Nothing Then
+                Dim dtCurrentTable As DataTable = DirectCast(ViewState("gvProcedureItems"), DataTable)
+                Dim drCurrentRow As DataRow = Nothing
+                If dtCurrentTable.Rows.Count > 0 Then
+                    For i As Integer = 1 To dtCurrentTable.Rows.Count
+                        Dim txtProcStep As TextBox = DirectCast(gvProcedure.Rows(rowIndex).Cells(0).FindControl("txtProcStep"), TextBox)
+                        Dim txtProcTerm As TextBox = DirectCast(gvProcedure.Rows(rowIndex).Cells(0).FindControl("txtProcTerm"), TextBox)
+                        Dim txtProcTime As TextBox = DirectCast(gvProcedure.Rows(rowIndex).Cells(0).FindControl("txtProcTime"), TextBox)
+
+                        drCurrentRow = dtCurrentTable.NewRow()
+                        drCurrentRow("RowNumber") = i + 1
+                        strrowcount.Value = drCurrentRow("RowNumber")
+                        '   drCurrentRow("RecipeProcedure_Time") = "00:00"
+
+                        dtCurrentTable.Rows(i - 1)("RecipeProcedure_Step") = txtProcStep.Text
+                        dtCurrentTable.Rows(i - 1)("RecipeProcedure_Term") = txtProcTerm.Text
+                        dtCurrentTable.Rows(i - 1)("RecipeProcedure_Time") = txtProcTime.Text
+                        rowIndex += 1
+                    Next
+                    dtCurrentTable.Rows.Add(drCurrentRow)
+                    ViewState("gvProcedureItems") = dtCurrentTable
+                    gvProcedure.DataSource = dtCurrentTable
+                    gvProcedure.DataBind()
+                End If
+            End If
+            SetProcedurePreviousData()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Private Sub SetProcedurePreviousData()
+        Try
+            Dim rowIndex As Integer = 0
+            If ViewState("gvProcedureItems") IsNot Nothing Then
+                Dim dt As DataTable = DirectCast(ViewState("gvProcedureItems"), DataTable)
+                If dt.Rows.Count > 0 Then
+                    For i As Integer = 0 To dt.Rows.Count - 1
+                        Dim txtProcStep As TextBox = DirectCast(gvProcedure.Rows(rowIndex).Cells(1).FindControl("txtProcStep"), TextBox)
+                        Dim txtProcTerm As TextBox = DirectCast(gvProcedure.Rows(rowIndex).Cells(2).FindControl("txtProcTerm"), TextBox)
+                        Dim txtProcTime As TextBox = DirectCast(gvProcedure.Rows(rowIndex).Cells(3).FindControl("txtProcTime"), TextBox)
+
+                        gvProcedure.Rows(i).Cells(0).Text = Convert.ToString(i + 1)
+
+                        dt.Rows(i)("RecipeProcedure_Step") = txtProcStep.Text
+                        dt.Rows(i)("RecipeProcedure_Term") = txtProcTerm.Text
+                        dt.Rows(i)("RecipeProcedure_Time") = txtProcTime.Text
+                        rowIndex += 1
+
+                        txtProcStep.Text = dt.Rows(i)("RecipeProcedure_Step").ToString
+                        txtProcTerm.Text = dt.Rows(i)("RecipeProcedure_Term").ToString
+                        txtProcTime.Text = dt.Rows(i)("RecipeProcedure_Time").ToString
+
+                        If i < dt.Rows.Count - 1 Then
+                            txtProcStep.Enabled = False
+                        End If
+
+                    Next
+                    ViewState("gvProcedureItems") = dt
+                    gvProcedure.DataSource = dt
+                    gvProcedure.DataBind()
+                    Dim lnkdelete As LinkButton = DirectCast(gvProcedure.Rows(0).FindControl("lnkdelete"), LinkButton)
+                    If gvProcedure.Rows.Count <= 1 Then
+                        lnkdelete.Visible = False
+                    Else
+                        For i As Integer = 0 To gvProcedure.Rows.Count - 1
+                            lnkdelete.Visible = True
+                        Next
+                    End If
+                End If
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub DisableFormulation()
+        Try
+            ddlFormulationType.Enabled = False
+            ddlProduct.Enabled = False
+            txtProduct.Enabled = False
+            'ddlMixTypeRecipe.Enabled = False
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub DisableViewMode()
+        Try
+            DisableFormulation()
+            ddlFormulationNo.Enabled = False
+            ddlMixer.Enabled = False
+            ddlBlade.Enabled = False
+            ddlMould.Enabled = False
+            ddlOven.Enabled = False
+            gvIngredient.Enabled = False
+            txtRemarkIngre.Enabled = False
+            gvProcedure.Enabled = False
+            txtRemarkProc.Enabled = False
+            btnRecipeSaveApprove.Visible = False
+            btnRecipeDisApprove.Visible = False
+            btnRecipeSaveNext.Visible = False
+            btnRecipeSaveNew.Visible = False
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+#End Region
+    'Private Sub InsertRecipe()
+    '    Try
+    '        MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+    '        If Request.QueryString("Fid") <> Nothing Then
+    '            Fid = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Fid")))
+    '        Else
+    '            If ddlFormulationNo.SelectedValue <> "" Then
+    '                Fid = ddlFormulationNo.SelectedValue
+    '            End If
+    '        End If
+    '        If MainID = 0 Then
+    '            If Fid = 0 Then
+    '                Dim IngredientCheck As Boolean = AreTablesSameIngredient()
+    '                Dim ProcedureCheck As Boolean = AreTablesSameProcedure()
+    '                If IngredientCheck = False Or ProcedureCheck = False Then
+
+    '                    ViewState("Recipe_Id") = LMSBLL.InsertRecipe(lblRecipeNo.Text, ViewState("Formulation_Id"), ddlMixer.SelectedValue, ddlBlade.SelectedValue, ddlMould.SelectedValue, ddlOven.SelectedValue, "", Session("LMSUserId"))
+    '                   
+    '                End If
+    '            Else
+    '                ViewState("Recipe_Id") = LMSBLL.InsertRecipe(lblRecipeNo.Text, ViewState("Formulation_Id"), ddlMixer.SelectedValue, ddlBlade.SelectedValue, ddlMould.SelectedValue, ddlOven.SelectedValue, "", Session("LMSUserId"))
+    '               
+    '            End If
+
+    '        Else
+    '            ViewState("Recipe_Id") = MainID
+    '            Dim IngredientCheck As Boolean = AreTablesSameIngredient()
+    '            Dim ProcedureCheck As Boolean = AreTablesSameProcedure()
+    '            'If IngredientCheck = False Or ProcedureCheck = False Then
+    '            'Dim a As Boolean = True
+    '            If IngredientCheck = False Or ProcedureCheck = False Then
+
+    '            End If
+    '        End If
+    '        FillRecipeNo()
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+    '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '    End Try
+    'End Sub
+    'Private Sub InsertRecipe()
+    '    Try
+    '        MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+    '        If Request.QueryString("Fid") <> Nothing Then
+    '            Fid = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Fid")))
+    '        Else
+    '            If ddlFormulationNo.SelectedValue <> "" Then
+    '                Fid = ddlFormulationNo.SelectedValue
+    '            End If
+    '        End If
+    '        If MainID = 0 Then
+    '            If Fid = 0 Then
+    '                Dim IngredientCheck As Boolean = AreTablesSameIngredient()
+    '                Dim ProcedureCheck As Boolean = AreTablesSameProcedure()
+    '                If IngredientCheck = False Or ProcedureCheck = False Then
+
+    '                    ViewState("Recipe_Id") = LMSBLL.InsertRecipe(lblRecipeNo.Text, ViewState("Formulation_Id"), ddlMixer.SelectedValue, ddlBlade.SelectedValue, ddlMould.SelectedValue, ddlOven.SelectedValue, "", Session("LMSUserId"))
+    '                    For i As Integer = 0 To gvIngredient.Rows.Count - 1
+    '                        Dim txtIName As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIName"), TextBox)
+    '                        Dim txtIValue As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIValue"), TextBox)
+    '                        Dim txtIPercent As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIPercent"), TextBox)
+
+    '                        LMSBLL.InsertRecipeIngredient(ViewState("Recipe_Id"), txtIName.Text, txtIValue.Text, txtIPercent.Text, txtRemarkIngre.Text, Session("LMSUserId"))
+    '                    Next
+    '                    For i As Integer = 0 To gvProcedure.Rows.Count - 1
+    '                        Dim txtProcStep As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcStep"), TextBox)
+    '                        Dim txtProcTerm As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcTerm"), TextBox)
+    '                        Dim txtProcTime As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcTime"), TextBox)
+
+    '                        LMSBLL.InsertRecipeProcedure(ViewState("Recipe_Id"), txtProcStep.Text, txtProcTerm.Text, txtProcTime.Text, txtRemarkProc.Text, Session("LMSUserId"))
+    '                    Next
+    '                    LMSassigncontrol.AddLMSAssignTo(ViewState("Recipe_Id"))
+    '                End If
+    '            Else
+    '                ViewState("Recipe_Id") = LMSBLL.InsertRecipe(lblRecipeNo.Text, ViewState("Formulation_Id"), ddlMixer.SelectedValue, ddlBlade.SelectedValue, ddlMould.SelectedValue, ddlOven.SelectedValue, "", Session("LMSUserId"))
+    '                For i As Integer = 0 To gvIngredient.Rows.Count - 1
+    '                    Dim txtIName As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIName"), TextBox)
+    '                    Dim txtIValue As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIValue"), TextBox)
+    '                    Dim txtIPercent As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIPercent"), TextBox)
+
+    '                    LMSBLL.InsertRecipeIngredient(ViewState("Recipe_Id"), txtIName.Text, txtIValue.Text, txtIPercent.Text, txtRemarkIngre.Text, Session("LMSUserId"))
+    '                Next
+    '                For i As Integer = 0 To gvProcedure.Rows.Count - 1
+    '                    Dim txtProcStep As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcStep"), TextBox)
+    '                    Dim txtProcTerm As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcTerm"), TextBox)
+    '                    Dim txtProcTime As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcTime"), TextBox)
+
+    '                    LMSBLL.InsertRecipeProcedure(ViewState("Recipe_Id"), txtProcStep.Text, txtProcTerm.Text, txtProcTime.Text, txtRemarkProc.Text, Session("LMSUserId"))
+    '                Next
+    '                LMSassigncontrol.AddLMSAssignTo(ViewState("Recipe_Id"))
+    '            End If
+
+    '        Else
+    '            ViewState("Recipe_Id") = MainID
+    '            Dim IngredientCheck As Boolean = AreTablesSameIngredient()
+    '            Dim ProcedureCheck As Boolean = AreTablesSameProcedure()
+    '            'If IngredientCheck = False Or ProcedureCheck = False Then
+    '            'Dim a As Boolean = True
+    '            If IngredientCheck = False Or ProcedureCheck = False Then
+    '                    ViewState("Recipe_Id") = LMSBLL.InsertRecipe(lblRecipeNo.Text, ViewState("Formulation_Id"), ddlMixer.SelectedValue, ddlBlade.SelectedValue, ddlMould.SelectedValue, ddlOven.SelectedValue, "", Session("LMSUserId"))
+    '                    For i As Integer = 0 To gvIngredient.Rows.Count - 1
+    '                        Dim txtIName As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIName"), TextBox)
+    '                        Dim txtIValue As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIValue"), TextBox)
+    '                        Dim txtIPercent As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIPercent"), TextBox)
+
+    '                        LMSBLL.InsertRecipeIngredient(ViewState("Recipe_Id"), txtIName.Text, txtIValue.Text, txtIPercent.Text, txtRemarkIngre.Text, Session("LMSUserId"))
+    '                    Next
+    '                    For i As Integer = 0 To gvProcedure.Rows.Count - 1
+    '                        Dim txtProcStep As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcStep"), TextBox)
+    '                        Dim txtProcTerm As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcTerm"), TextBox)
+    '                        Dim txtProcTime As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcTime"), TextBox)
+
+    '                        LMSBLL.InsertRecipeProcedure(ViewState("Recipe_Id"), txtProcStep.Text, txtProcTerm.Text, txtProcTime.Text, txtRemarkProc.Text, Session("LMSUserId"))
+    '                    Next
+    '                    LMSassigncontrol.AddLMSAssignTo(ViewState("Recipe_Id"))
+    '            End If
+    '        End If
+    '        FillRecipeNo()
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+    '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '    End Try
+    'End Sub
+
+    Private Sub InsertRecipe()
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            If Request.QueryString("Fid") <> Nothing Then
+                Fid = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Fid")))
+            Else
+                If ddlFormulationNo.SelectedValue <> "" Then
+                    Fid = ddlFormulationNo.SelectedValue
+                End If
+            End If
+            If MainID = 0 Then
+                Dim IngredientCheck As Boolean = AreTablesSameIngredient()
+                Dim ProcedureCheck As Boolean = AreTablesSameProcedure()
+                'ViewState("Recipe_Id") = MainID
+                If Fid = 0 Then
+                    If IngredientCheck = False Or ProcedureCheck = False Then
+                        Update()
+                    End If
+                Else
+                    If IngredientCheck = False Or ProcedureCheck = False Then
+                        Update()
+                    Else
+                        If ddlFormulationNo.SelectedValue <> "" Then
+                            Insert()
+
+                        End If
+                    End If
+
+                End If
+
+            Else
+                ViewState("Recipe_Id") = MainID
+                Dim IngredientCheck As Boolean = AreTablesSameIngredient()
+                Dim ProcedureCheck As Boolean = AreTablesSameProcedure()
+                LMSBLL.UpdateRecipe(ViewState("Recipe_Id"), ddlMixer.SelectedValue, ddlBlade.SelectedValue, ddlMould.SelectedValue, ddlOven.SelectedValue, "", Session("LMSUserId"))
+
+                If IngredientCheck = False Or ProcedureCheck = False Then
+                    Update()
+                End If
+            End If
+            'FillRecipeNo()
+            'LMSassigncontrol.AddLMSAssignTo(ViewState("Recipe_Id"))
+            LMSassigncontrol.AddLMSAssignTo(ViewState("Recipe_Id"))
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Private Sub Insert()
+        Try
+            Dim Recipe_Id As Integer = LMSBLL.InsertRecipe(lblRecipeNo.Text, ViewState("Formulation_Id"), ddlMixer.SelectedValue, ddlBlade.SelectedValue, ddlMould.SelectedValue, ddlOven.SelectedValue, "", Session("LMSUserId"))
+            ViewState("Recipe_Id") = Recipe_Id
+            For i As Integer = 0 To gvIngredient.Rows.Count - 1
+                Dim txtIName As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIName"), TextBox)
+                Dim txtIValue As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIValue"), TextBox)
+                Dim txtIPercent As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIPercent"), TextBox)
+
+                LMSBLL.InsertRecipeIngredient(ViewState("Recipe_Id"), txtIName.Text, txtIValue.Text, txtIPercent.Text, txtRemarkIngre.Text, Session("LMSUserId"))
+            Next
+            For i As Integer = 0 To gvProcedure.Rows.Count - 1
+                Dim txtProcStep As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcStep"), TextBox)
+                Dim txtProcTerm As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcTerm"), TextBox)
+                Dim txtProcTime As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcTime"), TextBox)
+
+                LMSBLL.InsertRecipeProcedure(ViewState("Recipe_Id"), txtProcStep.Text, txtProcTerm.Text, txtProcTime.Text, txtRemarkProc.Text, Session("LMSUserId"))
+            Next
+            Dim Recipe_No As String = LMSBLL.RecipeNoForInsert(Recipe_Id)
+            LMSassigncontrol.UhfTypeCode.Value = Recipe_No
+            Session("FirstAssignto") = Nothing
+            'LMSassigncontrol.AddLMSAssignTo(ViewState("Recipe_Id"))
+            LMSassigncontrol.AddLMSAssignTo(ViewState("Recipe_Id"))
+        Catch ex As Exception
+
+        End Try
+    End Sub
+    Private Sub Update()
+        Try
+            LMSBLL.DeleteRecipeChild(ViewState("Recipe_Id"))
+            For i As Integer = 0 To gvIngredient.Rows.Count - 1
+                Dim txtIName As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIName"), TextBox)
+                Dim txtIValue As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIValue"), TextBox)
+                Dim txtIPercent As TextBox = DirectCast(gvIngredient.Rows(i).FindControl("txtIPercent"), TextBox)
+
+                LMSBLL.InsertRecipeIngredient(ViewState("Recipe_Id"), txtIName.Text, txtIValue.Text, txtIPercent.Text, txtRemarkIngre.Text, Session("LMSUserId"))
+            Next
+            For i As Integer = 0 To gvProcedure.Rows.Count - 1
+                Dim txtProcStep As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcStep"), TextBox)
+                Dim txtProcTerm As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcTerm"), TextBox)
+                Dim txtProcTime As TextBox = DirectCast(gvProcedure.Rows(i).FindControl("txtProcTime"), TextBox)
+
+                LMSBLL.InsertRecipeProcedure(ViewState("Recipe_Id"), txtProcStep.Text, txtProcTerm.Text, txtProcTime.Text, txtRemarkProc.Text, Session("LMSUserId"))
+            Next
+            'LMSassigncontrol.AddLMSAssignTo(ViewState("Recipe_Id"))
+        Catch ex As Exception
+
+        End Try
+    End Sub
+    'Protected Sub btnRecipePrevious_Click(sender As Object, e As EventArgs) Handles btnRecipePrevious.Click
+    '    Try
+    '        Response.Redirect("Recipe.aspx")
+    '    Catch ex As Exception
+    '        Dim error1 As String = ex.Message.Replace(Chr(34), "")
+    '        error1 = error1.Replace(Chr(39), "")
+    '        ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+    '        ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+    '    End Try
+    'End Sub
+    Protected Sub btnRecipeSaveApprove_Click(sender As Object, e As EventArgs) Handles btnRecipeSaveApprove.Click
+        Try
+            InsertRecipe()
+            UpdateRecipeApprove()
+            Response.Redirect("Recipe.aspx")
+            btnRecipeSaveApprove.Visible = False
+            btnRecipeDisApprove.Visible = False
+            'btnRecipeSaveNext.Visible = False
+            'btnRecipeSave.Visible = False
+            lblapproved.Text = "Approved"
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub btnRecipeDisApprove_Click(sender As Object, e As EventArgs) Handles btnRecipeDisApprove.Click
+        Try
+            InsertRecipe()
+            UpdateRecipeReject()
+            Response.Redirect("Recipe.aspx")
+            btnRecipeSaveApprove.Visible = False
+            btnRecipeDisApprove.Visible = False
+            'btnRecipeSaveNext.Visible = False
+            'btnRecipeSave.Visible = False
+            lblapproved.Text = "Rejected"
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub btnRecipeSaveNext_Click(sender As Object, e As EventArgs) Handles btnRecipeSaveNext.Click
+        Try
+            InsertRecipe()
+            'Response.Redirect("ModifyTrial.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&Rid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Recipe_Id"))))
+            If MainID = 0 Then
+                Response.Redirect("ModifyTrial.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&Rid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Recipe_Id"))))
+            Else
+                Dim dt As DataSet = LMSBLL.FillGridByID(ViewState("Recipe_Id"), "CountTrial")
+                If dt.Tables(0).Rows.Count <> 0 Then
+                    If dt.Tables(0).Rows.Count > 1 Then
+                        Response.Redirect("ModifyTrial.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(dt.Tables(0).Rows(0)(0))) + "&Rid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Recipe_Id"))) + "&M=" + HttpUtility.UrlEncode(Security.Encrypt(1)))
+                    Else
+                        If dt.Tables(0).Rows.Count = Nothing Then
+                            Response.Redirect("ModifyTrial.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(0)) + "&Rid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Recipe_Id"))) + "&M=" + HttpUtility.UrlEncode(Security.Encrypt(0)))
+                        Else
+                            Response.Redirect("ModifyTrial.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(dt.Tables(0).Rows(0)(0))) + "&Rid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Recipe_Id"))) + "&M=" + HttpUtility.UrlEncode(Security.Encrypt(0)))
+                        End If
+                    End If
+                Else
+                    Response.Redirect("ModifyTrial.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(0)) + "&Rid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Recipe_Id"))))
+                End If
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub btnRecipeSaveNew_Click(sender As Object, e As EventArgs) Handles btnRecipeSaveNew.Click
+        Try
+            Insert()
+            Response.Redirect("Recipe.aspx")
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub btnRecipeCancel_Click(sender As Object, e As EventArgs) Handles btnRecipeCancel.Click
+        Try
+            Response.Redirect("Recipe.aspx")
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Private Sub UpdateRecipeApprove()
+        Try
+            If ddlFormulationType.SelectedValue = 0 Then
+                LMSBLL.UpdateApprove("UpdateRecipeApprove", ViewState("Recipe_Id"), Session("LMSUserId"))
+            Else
+                LMSBLL.UpdateApprove("UpdateRecipeApprove", ViewState("Recipe_Id"), Session("LMSUserId"))
+            End If
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('Recipe has been approved')", True)
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            Throw ex
+        End Try
+    End Sub
+    Private Sub UpdateRecipeReject()
+        Try
+            LMSBLL.UpdateApprove("UpdateRecipeDisApprove", ViewState("Recipe_Id"), Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('Recipe has been rejected')", True)
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            Throw ex
+        End Try
+    End Sub
+    Public Function AreTablesSameIngredient() As Boolean
+        Dim tbl1 As DataTable = Session("IngredientViewMode")
+        If tbl1 IsNot Nothing Then
+
+            Dim tbl2 As DataTable
+            '----starts
+            Dim dtN As New DataTable()
+            '   For i As Integer = 0 To grditemproduct.Columns.Count - 1
+            'dtN.Columns.Add("column" + i.ToString())
+            'Dim count As Integer = 82
+            dtN.Columns.Add("ltRowNumberIng", GetType(String))
+            dtN.Columns.Add("txtIName", GetType(String))
+            dtN.Columns.Add("txtIValue", GetType(String))
+            dtN.Columns.Add("txtIPercent", GetType(String))
+
+            For Each row In gvIngredient.Rows
+                Dim ltRowNumberIng As Literal = DirectCast(row.FindControl("ltRowNumberIng"), Literal)
+                Dim txtIName As TextBox = DirectCast(row.FindControl("txtIName"), TextBox)
+                Dim txtIValue As TextBox = DirectCast(row.FindControl("txtIValue"), TextBox)
+                Dim txtIPercent As TextBox = DirectCast(row.FindControl("txtIPercent"), TextBox)
+
+                dtN.Rows.Add(ltRowNumberIng.Text, txtIName.Text, txtIValue.Text, txtIPercent.Text)
+            Next
+            tbl2 = dtN
+            If tbl1.Rows.Count <> tbl2.Rows.Count Then
+                Return False
+            End If
+
+            For i As Integer = 0 To tbl1.Rows.Count - 1
+                If Not Equals(tbl1.Rows(i)(3).ToString(), tbl2.Rows(i)(1).ToString()) Then
+                    'If Not Equals(tbl1.Rows(i)(10).ToString(), tbl2.Rows(i)(1).ToString()) Then
+                    Return False
+                End If
+                If Not Equals(tbl1.Rows(i)(4).ToString(), tbl2.Rows(i)(2).ToString()) Then
+                    'If Not Equals(tbl1.Rows(i)(11).ToString(), tbl2.Rows(i)(2).ToString()) Then
+                    Return False
+                End If
+                If Not Equals(tbl1.Rows(i)(5).ToString(), tbl2.Rows(i)(3).ToString()) Then
+                    'If Not Equals(tbl1.Rows(i)(12).ToString(), tbl2.Rows(i)(5).ToString()) Then
+                    Return False
+                End If
+
+            Next
+
+        End If
+        Return True
+    End Function
+
+    Public Function AreTablesSameProcedure() As Boolean
+        Dim tbl1 As DataTable = Session("ProcedureViewMode")
+        If tbl1 IsNot Nothing Then
+            Dim tbl2 As DataTable
+
+            Dim dtN As New DataTable()
+
+            dtN.Columns.Add("RowNumber", GetType(String))
+            dtN.Columns.Add("txtProcStep", GetType(String))
+            dtN.Columns.Add("txtProcTerm", GetType(String))
+            dtN.Columns.Add("txtProcTime", GetType(String))
+
+            For Each row In gvProcedure.Rows
+                Dim ltRowNumberProc As Literal = DirectCast(row.FindControl("ltRowNumberProc"), Literal)
+                Dim txtProcStep As TextBox = DirectCast(row.FindControl("txtProcStep"), TextBox)
+                Dim txtProcTerm As TextBox = DirectCast(row.FindControl("txtProcTerm"), TextBox)
+                Dim txtProcTime As TextBox = DirectCast(row.FindControl("txtProcTime"), TextBox)
+
+                dtN.Rows.Add(ltRowNumberProc.Text, txtProcStep.Text, txtProcTerm.Text, txtProcTime.Text)
+            Next
+            tbl2 = dtN
+            If tbl1.Rows.Count <> tbl2.Rows.Count Then
+                Return False
+            End If
+
+
+            For i As Integer = 0 To tbl1.Rows.Count - 1
+                If Not Equals(tbl1.Rows(i)(3).ToString(), tbl2.Rows(i)(1).ToString()) Then
+                    Return False
+                End If
+                If Not Equals(tbl1.Rows(i)(4).ToString(), tbl2.Rows(i)(2).ToString()) Then
+                    Return False
+                End If
+                If Not Equals(tbl1.Rows(i)(5).ToString(), tbl2.Rows(i)(3).ToString()) Then
+                    Return False
+                End If
+
+            Next
+        End If
+        Return True
+    End Function
+#End Region
+    Public Sub GetRecipeDynamic()
+        Try
+            Dim strArr() As String
+            Dim TemStr As String = ""
+            Dim NameStr As String = ""
+            Dim UrlStr As String = ""
+            Dim IconStr As String = ""
+            Dim ColorStr As String = ""
+            Dim CategoryStr As String = ""
+            Dim dtPrivi As New DataTable
+            Dim strHTML As New StringBuilder
+
+            Dim dt As DataSet = LMSBLL.FillGridByID(9, "FillDynamic")
+            ' Dim dt As DataSet = LMSBLL.FillGridByID(ddlFormulationNo.SelectedValue, "FillDynamic")
+
+            dtPrivi = dt.Tables(0)
+
+            For i As Integer = 0 To dtPrivi.Rows.Count - 1
+                '/Checking details page privilege here/
+                TemStr = dtPrivi.Rows(i).Item("Recipe_Id").ToString()
+                strArr = TemStr.Split(",")
+                NameStr = dtPrivi.Rows(i).Item("Recipe_No").ToString()
+                'UrlStr = dtPrivi.Rows(i).Item("Menu_URL").ToString()
+                'IconStr = dtPrivi.Rows(i).Item("Menu_Icon").ToString()
+                TemStr = NameStr.Replace(" ", "")
+                CategoryStr = "ABC" 'dtPrivi.Rows(i).Item("Recipe_ProductId").ToString()
+
+                strHTML.Append("<div id=")
+                strHTML.Append(TemStr)
+                strHTML.Append(" class='col-sm-2 col-lg-1'>")
+                strHTML.Append(" <div class='media-items animation-fadeInQuickInv' data-category='")
+                strHTML.Append(CategoryStr)
+                strHTML.Append("'> <a href=")
+                strHTML.Append(UrlStr)
+                strHTML.Append(" class='")
+                strHTML.Append(ColorStr)
+                strHTML.Append("  '> <div class='media-items-content' style='padding: 1px 0 30px 0;'><i class='")
+                strHTML.Append(IconStr)
+                strHTML.Append(" fa-4x")
+                strHTML.Append(ColorStr)
+                strHTML.Append(" pull-left'></i></div><h4 style='font-size: 16px; padding-bottom: 7px; margin-top:-13px;'><strong>")
+                strHTML.Append(NameStr)
+                strHTML.Append("    </strong><br> </h4></a></div></div>")
+            Next
+            'divAdminMenu.InnerHtml = strHTML.ToString()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+#Region "Recipe History"
+
+    Protected Sub ddlFormulationNo_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddlFormulationNo.SelectedIndexChanged
+        Try
+            ViewState("Formulation_Id") = ddlFormulationNo.SelectedValue
+            If ddlFormulationNo.SelectedValue <> 0 Then
+                divRecipeHistory.Visible = True
+                FillRecipeHistory()
+            Else
+                divRecipeHistory.Visible = False
+            End If
+            If MainID = 0 Then
+                btnRecipeSaveApprove.Visible = False
+                btnRecipeDisApprove.Visible = False
+                btnRecipeSaveNext.Visible = False
+            Else
+                If Session("LMSUserId") = 1 Then
+                    btnRecipeSaveApprove.Visible = True
+                    btnRecipeDisApprove.Visible = True
+                Else
+                    btnRecipeSaveApprove.Visible = False
+                    btnRecipeDisApprove.Visible = False
+                End If
+                btnRecipeSaveNext.Visible = True
+            End If
+            btnRecipeSaveNew.Visible = True
+            If ddlFormulationNo.SelectedValue = 0 Then
+                lblFormNoTab.Text = ""
+            Else
+                lblFormNoTab.Text = ddlFormulationNo.SelectedItem.Text
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub FillRecipeHistory()
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            If Request.QueryString("Fid") <> Nothing Then
+                Fid = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Fid")))
+            End If
+            If MainID = 0 Then
+                If Fid = 0 Then
+                    Dim value As String() = ddlProduct.SelectedValue.Split("^")
+
+                    If value(1) = 0 Then
+                        rpRecipeHistory.DataSource = LMSBLL.DropdownByIDName("getRecipeNoByName", Session("LMSUserRoleID"), value(0))
+                        'rpRecipeHistory.DataSource = LMSBLL.DropdownWithUserId("getRecipeNo", Session("LMSUserRoleID"), ddlProduct.SelectedValue)
+                    Else
+                        rpRecipeHistory.DataSource = LMSBLL.DropdownWithUserId("getRecipeNo", Session("LMSUserRoleID"), value(1))
+                    End If
+                    'rpRecipeHistory.DataSource = LMSBLL.DropdownWithUserId("getRecipeNo", Session("LMSUserRoleID"), ddlFormulationNo.SelectedValue)
+                Else
+                    rpRecipeHistory.DataSource = LMSBLL.DropdownWithUserId("getRecipeNo", Session("LMSUserRoleID"), Fid)
+                End If
+            Else
+                If Fid = 0 Then
+                    rpRecipeHistory.DataSource = LMSBLL.DropdownWithUserId("getRecipeNo", Session("LMSUserRoleID"), MainID)
+                Else
+                    rpRecipeHistory.DataSource = LMSBLL.DropdownWithUserId("getRecipeNo", Session("LMSUserRoleID"), Fid)
+                End If
+            End If
+            'If MainID = 0 Then
+            '    If Fid = 0 Then
+            '        rpRecipeHistory.DataSource = LMSBLL.FillGridByID(ddlFormulationNo.SelectedValue, "getRecipeCode")
+            '    Else
+            '        rpRecipeHistory.DataSource = LMSBLL.FillGridByID(Fid, "getRecipeCode")
+            '    End If
+            'Else
+            '    If Fid = 0 Then
+            '        rpRecipeHistory.DataSource = LMSBLL.FillGridByID(MainID, "getRecipeCode")
+            '    Else
+            '        rpRecipeHistory.DataSource = LMSBLL.FillGridByID(Fid, "getRecipeCode")
+            '    End If
+            'End If
+            rpRecipeHistory.DataBind()
+
+            Dim totalcount As Integer = rpRecipeHistory.Items.Count
+            If totalcount > 0 Then
+                lblRecipeHistory.Text = "Recipe History (" + totalcount.ToString + ")"
+            Else
+                divRecipeHistory.Visible = False
+                'lblRecipeHistory.Text = "No Recipe History"
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub rpRecipeHistory_ItemCommand(source As Object, e As RepeaterCommandEventArgs) Handles rpRecipeHistory.ItemCommand
+        Try
+            If e.CommandName = "CopyRecipe" Then
+                Dim btnCopyRecipe As LinkButton = DirectCast(e.Item.FindControl("btnCopyRecipe"), LinkButton)
+                Dim lblRecipe_Id As Label = DirectCast(e.Item.FindControl("lblRecipe_Id"), Label)
+                ViewState("RecipeIDForFill") = lblRecipe_Id.Text
+                CopyDetailRecipe()
+                'FillDetailRecipe()
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub rpRecipeHistory_ItemDataBound(sender As Object, e As RepeaterItemEventArgs) Handles rpRecipeHistory.ItemDataBound
+        Try
+            Dim lblRecipe_Id As Label = DirectCast(e.Item.FindControl("lblRecipe_Id"), Label)
+
+            Dim gvRecipeIngDisplay As GridView = TryCast(e.Item.FindControl("gvRecipeIngDisplay"), GridView)
+            Dim dt As DataSet = LMSBLL.FillGridByID(Convert.ToInt32(lblRecipe_Id.Text), "DispRecipeIngredients")
+            gvRecipeIngDisplay.DataSource = dt.Tables(1)
+            gvRecipeIngDisplay.DataBind()
+
+            Dim gvRecipeProcDisplay As GridView = TryCast(e.Item.FindControl("gvRecipeProcDisplay"), GridView)
+            gvRecipeProcDisplay.DataSource = dt.Tables(2)
+            gvRecipeProcDisplay.DataBind()
+            'Dim btnCopyRecipe As LinkButton = DirectCast(e.Item.FindControl("btnCopyRecipe"), LinkButton)
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+#End Region
+#Region "PopUp"
+
+    Public Sub FillPopUp()
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            If Request.QueryString("Fid") <> Nothing Then
+                Fid = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Fid")))
+            End If
+            rpPopUp.DataSource = LMSBLL.DropdownWithUserId("getRecipeCode", Session("LMSUserRoleID"), Fid)
+            rpPopUp.DataBind()
+
+            Dim totalcount As Integer = rpPopUp.Items.Count
+            If totalcount > 0 Then
+                lblRecipePop.Text = "Recipe (" + totalcount.ToString + ")"
+            Else
+                divPopup.Visible = False
+                'lblRecipeHistory.Text = "No Recipe History"
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+
+    'Protected Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+    '    Try
+    '        mpe.Show()
+    '        FillPopUp()
+    '    Catch ex As Exception
+
+    '    End Try
+    'End Sub
+
+    Protected Sub rpPopUp_ItemCommand(source As Object, e As RepeaterCommandEventArgs) Handles rpPopUp.ItemCommand
+        Try
+            If e.CommandName = "EditRecipe" Then
+                Dim btnEditRecipePop As LinkButton = DirectCast(e.Item.FindControl("btnEditRecipePop"), LinkButton)
+                Dim lblRecipe_IdPop As Label = DirectCast(e.Item.FindControl("lblRecipe_IdPop"), Label)
+                Response.Redirect("ModifyRecipe.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(lblRecipe_IdPop.Text)) + "&returnurl=y")
+                ' ViewState("RecipeIDForFill") = lblRecipe_Id.Text
+                ' FillDetailRecipe()
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub rpPopUp_ItemDataBound(sender As Object, e As RepeaterItemEventArgs) Handles rpPopUp.ItemDataBound
+        Try
+            Dim lblRecipe_IdPop As Label = DirectCast(e.Item.FindControl("lblRecipe_IdPop"), Label)
+
+            Dim gvRecipeIngPOP As GridView = TryCast(e.Item.FindControl("gvRecipeIngPOP"), GridView)
+            Dim dt As DataSet = LMSBLL.FillGridByID(Convert.ToInt32(lblRecipe_IdPop.Text), "DispRecipeIngredients")
+            gvRecipeIngPOP.DataSource = dt.Tables(1)
+            gvRecipeIngPOP.DataBind()
+
+            'Dim gvRecipeProcDisplay As GridView = TryCast(e.Item.FindControl("gvRecipeProcDisplay"), GridView)
+            'gvRecipeProcDisplay.DataSource = dt.Tables(2)
+            'gvRecipeProcDisplay.DataBind()
+            'Dim btnCopyRecipe As LinkButton = DirectCast(e.Item.FindControl("btnCopyRecipe"), LinkButton)
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+#End Region
+    Protected Sub btnprint_ServerClick(sender As Object, e As EventArgs) Handles btnprint.ServerClick
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            Response.Redirect("Printrecipe.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)))
+        Catch ex As Exception
+
+        End Try
+
+    End Sub
+
+
+    Protected Sub btnprintblank_ServerClick(sender As Object, e As EventArgs) Handles btnprintblank.ServerClick
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            Response.Redirect("Printrecipe.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&print=b")
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+End Class

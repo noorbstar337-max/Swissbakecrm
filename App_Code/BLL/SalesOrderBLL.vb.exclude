@@ -1,0 +1,30 @@
+﻿Imports Microsoft.VisualBasic
+Imports APPCODE.DAL
+
+Public Class SalesOrderBLL
+    Private Shared _spname As String = "_spOrder"
+    Public Shared Function Insert(ByVal Order_Type As String, ByVal Order_TypeID As Integer, ByVal OrderTaxMode As String, ByVal Order_PODate As Date, ByVal Order_PONumber As String, ByVal _Order_OrderStatus As String,
+                                  ByVal Order_duedate As String, ByVal _Order_TotalVat As Double, ByVal _Order_Freight As String,
+                                  ByVal _Order_CreatedID As Integer, ByVal Order_PoNo As String, ByVal Order_PoDate As String, ByVal Order_CreatedDate As String,
+                                  ByVal Order_TermsDelivery As String, ByVal Order_TermsPayment As String, ByVal Order_Dispach As String, ByVal Order_Billedfrom As Integer) As Integer
+        Dim sqlparams(15) As SqlParameter
+        Try
+            sqlparams(0) = New SqlParameter("@Mode", "Insert")
+            sqlparams(1) = New SqlParameter("@Order_Type", Order_Type)
+            sqlparams(2) = New SqlParameter("@Order_TypeID", Order_TypeID)
+            sqlparams(3) = New SqlParameter("@Order_TaxMode", OrderTaxMode)
+            sqlparams(4) = New SqlParameter("@Order_PODate", Order_PODate)
+            sqlparams(5) = New SqlParameter("@Order_PONumber", Order_PONumber)
+            sqlparams(6) = New SqlParameter("@Order_OrderStatus", _Order_OrderStatus)
+            sqlparams(8) = New SqlParameter("@Order_duedate", Order_duedate)
+            sqlparams(9) = New SqlParameter("@Order_PoNo", Order_PoNo)
+            sqlparams(12) = New SqlParameter("@Order_TermsDelivery", Order_TermsDelivery)
+            sqlparams(13) = New SqlParameter("@Order_TermsPayment", Order_TermsPayment)
+            sqlparams(14) = New SqlParameter("@Order_Dispach", Order_Dispach)
+            sqlparams(15) = New SqlParameter("@Order_Billedfrom", Order_Billedfrom)
+            Return DBBridge.ExecuteScalar(_spname, sqlparams)
+        Catch ex As Exception
+            Throw ex
+        End Try
+    End Function
+End Class

@@ -1,0 +1,1032 @@
+﻿Imports DynamicparcelEnumerations
+Imports System.Data
+Imports System.Data.SqlClient
+Imports System.Net
+
+Partial Class ModifyFormulation
+    ' Inherits _PageBaseClass
+    Inherits System.Web.UI.Page
+    Dim Flag As Integer
+    Dim Flag1 As Integer
+    Dim MainID As Integer
+
+    Protected Sub Page_Init(sender As Object, e As EventArgs) Handles Me.Init
+        Try
+            If Session("LMSUserRoleID") = Nothing Then
+
+                TryCast(Me.Master, LMSMasterPage).MaintainSession()
+                If (Request.QueryString("Id") = Nothing) Then
+                    Response.Redirect("LMSDashboard.aspx")
+                End If
+                If Request.QueryString("chk") = "v" Then
+                    DisableViewMode()
+                Else
+
+                End If
+                LMSBLL.CheckLMSPrivilegeForModify(Session("LMSUserRoleID"), "Formulation.aspx")
+            Else
+                If (Request.QueryString("Id") = Nothing) Then
+                    Response.Redirect("LMSDashboard.aspx")
+                End If
+                If Request.QueryString("chk") = "v" Then
+                    DisableViewMode()
+                Else
+
+                End If
+                LMSBLL.CheckLMSPrivilegeForModify(Session("LMSUserRoleID"), "Formulation.aspx")
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert("ModifyFormulation", "Page_Init", error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "');window.location='LMSDashboard.aspx';", True)
+        End Try
+    End Sub
+
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        Try
+            If Not IsPostBack Then
+                Dim dt As DataSet = LMSPrivilegeBLL.CheckLMSPrivilege(Session("LMSUserRoleID"), "Formulation.aspx")
+                If dt.Tables(0).Rows.Count > 0 Then
+                    If Request.QueryString("chk") = "e" Then
+                        If dt.Tables(0).Rows(0)("Prvg_RUpdate") = True Then
+                        Else
+                            Response.Redirect("LMSDashboard.aspx")
+                        End If
+                    Else
+                        If dt.Tables(0).Rows(0)("Prvg_Rview") = True Then
+                        Else
+                            Response.Redirect("LMSDashboard.aspx")
+                        End If
+                        If dt.Tables(0).Rows(0)("Prvg_RAdd") = True Then
+                        Else
+                            Response.Redirect("LMSDashboard.aspx")
+                        End If
+                    End If
+                Else
+                    Response.Redirect("LMSDashboard.aspx")
+                End If
+                'If Request.QueryString("chk") = "v" Then
+                '    DisableViewMode()
+                'Else
+
+                'End If
+                MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+                LMSassigncontrol.Uhftype.Value = "Formulation"
+                LMSassigncontrol.Uhftypeid.Value = MainID
+                'MultiView1.ActiveViewIndex = 0
+                liFormulation.Attributes("class") = "active"
+
+                'If Request.QueryString("chk") = "v" Then
+                '    FillddlProductForm()
+                '    FillFormulationNo()
+                '    FillDetailForm()
+
+                '    DisableViewMode()
+                'Else
+                If MainID = 0 Then
+                    lnkRecipe.NavigateUrl = "ModifyRecipe.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) '+ "&Fid=" + HttpUtility.UrlEncode(Security.Encrypt(MainID))
+                    btnprint.Visible = False
+                    btnprintblank.Visible = False
+                    modifyspan.Visible = False
+
+                    FillddlProductForm()
+                    FillFormulationNo()
+                Else
+
+                    Dim dt1 As DataSet = LMSBLL.FillGridByID(MainID, "CountRecipe")
+
+                    If dt1.Tables(0).Rows.Count = 0 Then
+                        lnkRecipe.NavigateUrl = "ModifyRecipe.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(0)) + "&Fid=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&M=" + HttpUtility.UrlEncode(Security.Encrypt(0))
+                    Else
+                        lnkRecipe.NavigateUrl = "ModifyRecipe.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(dt1.Tables(0).Rows(0)(0))) + "&Fid=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&M=" + HttpUtility.UrlEncode(Security.Encrypt(0))
+
+                    End If
+                    btnprint.Visible = True
+                    btnprintblank.Visible = True
+                    modifyspan.Visible = True
+
+                    DisableProdz()
+                    FillddlProductForm()
+                    gvLMS.Visible = True
+                    btnFormulationSaveNext.Visible = True
+                    btnFormulationSave.Visible = True
+                    btnFormulationSaveApprove.Visible = True
+                    btnCalc.Visible = True
+                    FillDetailForm()
+                    btnCalc_Click(Nothing, Nothing)
+                    If Request.QueryString("chk") = "v" Then
+                        DisableViewMode()
+                    End If
+                End If
+                'End If
+
+                lnkFormulation.Enabled = False
+                lnkTrial.Enabled = False
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+#Region "Formulation"
+    Private Sub FillFormulationNo()
+        Try
+            Dim FormulationNo As String = LMSBLL.FormulationNo()
+            lblFormulationNo.Text = FormulationNo
+            LMSassigncontrol.UhfTypeCode.Value = FormulationNo
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub btnCalc_Click(sender As Object, e As EventArgs) Handles btnCalc.Click
+        Try
+            TotalCost()
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub btnFormulationSaveNext_Click(sender As Object, e As EventArgs) Handles btnFormulationSaveNext.Click
+        Try
+            InsertFormulation()
+
+            If MainID = 0 Then
+                Response.Redirect("ModifyRecipe.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&Fid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Formulation_Id"))))
+            Else
+                Dim dt As DataSet = LMSBLL.FillGridByID(ViewState("Formulation_Id"), "CountRecipe")
+                If dt.Tables(0).Rows.Count <> 0 Then
+                    If dt.Tables(0).Rows.Count > 1 Then
+                        Response.Redirect("ModifyRecipe.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(dt.Tables(0).Rows(0)(0))) + "&Fid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Formulation_Id"))) + "&M=" + HttpUtility.UrlEncode(Security.Encrypt(1)))
+                    Else
+                        If dt.Tables(0).Rows(0)(0) = Nothing Then
+                            Response.Redirect("ModifyRecipe.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(0)) + "&Fid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Formulation_Id"))) + "&M=" + HttpUtility.UrlEncode(Security.Encrypt(0)))
+                        Else
+                            Response.Redirect("ModifyRecipe.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(dt.Tables(0).Rows(0)(0))) + "&Fid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Formulation_Id"))) + "&M=" + HttpUtility.UrlEncode(Security.Encrypt(0)))
+                        End If
+                    End If
+                Else
+                    Response.Redirect("ModifyRecipe.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(0)) + "&Fid=" + HttpUtility.UrlEncode(Security.Encrypt(ViewState("Formulation_Id"))))
+                End If
+
+            End If
+
+            'Response.Redirect("LabManagement.aspx?view=RecipeView" + "&id=" + Security.Encrypt(HttpUtility.UrlEncode(MainID.ToString)))
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub btnFormulationSave_Click(sender As Object, e As EventArgs) Handles btnFormulationSave.Click
+        Try
+            InsertFormulation()
+            Response.Redirect("Formulation.aspx")
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub btnFormulationCancel_Click(sender As Object, e As EventArgs) Handles btnFormulationCancel.Click
+        Try
+            Response.Redirect("Formulation.aspx")
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Private Sub InsertFormulation()
+        Try
+            Mainid = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            If Mainid = 0 Then
+                'Dim Formulation_Id As Integer
+                If ddlFormulationType.SelectedValue = 0 Then
+                    ViewState("Formulation_Id") = LMSBLL.InsertFormulation(ddlProduct.SelectedValue, ddlProduct.SelectedItem.Text, ddlMixTypeForm.SelectedValue, lblFormulationNo.Text, "Product", txtQuantityForm.Text, 0.01, Session("LMSUserId"), 0)
+                ElseIf ddlFormulationType.SelectedValue = 1 Then
+                    ViewState("Formulation_Id") = LMSBLL.InsertFormulation(0, txtProduct.Text, ddlMixTypeForm.SelectedValue, lblFormulationNo.Text, "Product", txtQuantityForm.Text, 0.01, Session("LMSUserId"), 0)
+                ElseIf ddlFormulationType.SelectedValue = 2 Then
+                    ViewState("Formulation_Id") = LMSBLL.InsertFormulation(0, txtProduct.Text, ddlMixTypeForm.SelectedValue, lblFormulationNo.Text, "Competitor", txtQuantityForm.Text, 0.01, Session("LMSUserId"), 0)
+                End If
+                For i As Integer = 0 To gvLMS.Rows.Count - 1
+                    Dim ddlRM As DropDownList = DirectCast(gvLMS.Rows(i).FindControl("ddlRM"), DropDownList)
+                    Dim txtPercentage As TextBox = DirectCast(gvLMS.Rows(i).FindControl("txtPercentage"), TextBox)
+                    Dim txtCost As TextBox = DirectCast(gvLMS.Rows(i).FindControl("txtCost"), TextBox)
+
+                    LMSBLL.InsertFRawMaterial(ViewState("Formulation_Id"), ddlRM.SelectedValue, txtPercentage.Text, txtCost.Text, Session("LMSUserId"))
+                Next
+                Dim FormulationNo As String = LMSBLL.FormulationNoForInsert(ViewState("Formulation_Id"))
+                LMSassigncontrol.UhfTypeCode.Value = FormulationNo
+                LMSassigncontrol.AddLMSAssignTo(ViewState("Formulation_Id"))
+
+            Else
+                ViewState("Formulation_Id") = MainID
+                Dim tablecheck As Boolean
+                tablecheck = AreTablesTheSame()
+                If tablecheck = False Then
+                    'If Session("FormulationViewMode") <> ViewState("GridRowItems") Then
+                    If ddlFormulationType.SelectedValue = 0 Then
+                        ViewState("Formulation_Id") = LMSBLL.InsertFormulation(ddlProduct.SelectedValue, ddlProduct.SelectedItem.Text, ddlMixTypeForm.SelectedValue, lblFormulationNo.Text, "Product", txtQuantityForm.Text, hfFormVersion.Value + 0.01, Session("LMSUserId"), MainID)
+                    ElseIf ddlFormulationType.SelectedValue = 1 Then
+                        ViewState("Formulation_Id") = LMSBLL.InsertFormulation(0, txtProduct.Text, ddlMixTypeForm.SelectedValue, lblFormulationNo.Text, "Product", txtQuantityForm.Text, 0.0, Session("LMSUserId"), MainID)
+                    ElseIf ddlFormulationType.SelectedValue = 2 Then
+                        ViewState("Formulation_Id") = LMSBLL.InsertFormulation(0, txtProduct.Text, ddlMixTypeForm.SelectedValue, lblFormulationNo.Text, "Competitor", txtQuantityForm.Text, 0.0, Session("LMSUserId"), MainID)
+                    End If
+                    For i As Integer = 0 To gvLMS.Rows.Count - 1
+                        Dim ddlRM As DropDownList = DirectCast(gvLMS.Rows(i).FindControl("ddlRM"), DropDownList)
+                        Dim txtPercentage As TextBox = DirectCast(gvLMS.Rows(i).FindControl("txtPercentage"), TextBox)
+                        Dim txtCost As TextBox = DirectCast(gvLMS.Rows(i).FindControl("txtCost"), TextBox)
+
+                        LMSBLL.InsertFRawMaterial(ViewState("Formulation_Id"), ddlRM.SelectedValue, txtPercentage.Text, txtCost.Text, Session("LMSUserId"))
+                    Next
+                End If
+                Dim FormulationNo As String = LMSBLL.FormulationNoForInsert(ViewState("Formulation_Id"))
+                LMSassigncontrol.UhfTypeCode.Value = FormulationNo
+                LMSassigncontrol.AddLMSAssignTo(ViewState("Formulation_Id"))
+            End If
+
+            'FillFormulationNo()
+            'Response.Redirect("Formulation.aspx")
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub ddlProduct_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddlProduct.SelectedIndexChanged
+        Try
+            Dim MixType As String = LMSBLL.MixTypeById(ddlProduct.SelectedValue)
+            If MixType <> "Bread" And MixType <> "Cake" Then
+                lblMixError.Visible = True
+                ddlMixTypeForm.Enabled = False
+                ddlMixTypeForm.Items.Insert(0, "")
+                ddlMixTypeForm.SelectedValue = "Bread"
+                btnSubmit.Visible = True
+                gvLMS.Visible = False
+                btnFormulationSaveNext.Visible = False
+                btnFormulationSave.Visible = False
+                btnFormulationSaveApprove.Visible = False
+            Else
+                Dim dt As DataSet = LMSBLL.FillGridByID(ddlProduct.SelectedValue, "fillformulationbyproduct")
+                If dt.Tables(0).Rows.Count <> 0 Then
+                    Dim dtUser As New DataTable
+                    dtUser = dt.Tables(0)
+                    Dim drLogin As DataRow
+                    drLogin = dtUser.Rows(0)
+                    If dtUser.Rows.Count <> Nothing Then
+                        Response.Redirect("ModifyFormulation.aspx?ID=" + HttpUtility.UrlEncode(Security.Encrypt(dt.Tables(0).Rows(0)(0))))
+                    End If
+                End If
+                lblMixError.Visible = False
+                ddlMixTypeForm.SelectedValue = MixType
+                ddlMixTypeForm.Enabled = False
+                btnSubmit.Visible = True
+                gvLMS.Visible = True
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub FillddlProductForm()
+        Try
+            Dim ds As DataSet
+            ds = LMSBLL.Dropdown("FillProductByMixType")
+            ddlProduct.DataSource = ds.Tables(0)
+            ddlProduct.DataTextField = "Product_Name"
+            ddlProduct.DataValueField = "Product_Id"
+            ddlProduct.DataBind()
+            ddlProduct.Items.Insert(0, New ListItem("Select Product", "0"))
+            'ddlProduct.Items.Insert(0, "Select Product")
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub ddlFormulationType_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddlFormulationType.SelectedIndexChanged
+        Try
+            If ddlFormulationType.SelectedValue = 0 Then
+                divDDLProduct.Visible = True
+                divTxtProduct.Visible = False
+                ' gvLMS.Visible = True
+                ddlMixTypeForm.Enabled = False
+            Else
+                divDDLProduct.Visible = False
+                divTxtProduct.Visible = True
+                gvLMS.Visible = False
+                ddlMixTypeForm.Enabled = True
+                lblMixError.Visible = False
+                txtQuantityForm.Text = ""
+                txtProduct.Text = ""
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub gvLMS_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvLMS.RowCommand
+        Try
+            Flag = 0
+            If e.CommandName = "AddFormulaNewRow" Then
+                AddFormulaNewRow()
+
+            ElseIf e.CommandName = "deleteLink" Then
+                If ViewState("GridRowItems") IsNot Nothing Then
+                    Dim dt As DataTable = DirectCast(ViewState("GridRowItems"), DataTable)
+                    Dim drCurrentRow As DataRow = Nothing
+                    Dim rowIndex As Integer = Convert.ToInt32(e.CommandArgument)
+                    If dt.Rows.Count > 0 Then
+                        dt.Rows.Remove(dt.Rows(rowIndex))
+                        drCurrentRow = dt.NewRow()
+                        ViewState("GridRowItems") = dt
+                        Flag = rowIndex
+
+                        gvLMS.DataSource = dt
+                        gvLMS.DataBind()
+
+                        If gvLMS.Rows.Count <= 1 Then
+                            Dim lnkdelete As LinkButton = DirectCast(gvLMS.Rows(0).FindControl("lnkdelete"), LinkButton)
+                            lnkdelete.Visible = False
+                        Else
+                            For i As Integer = 0 To gvLMS.Rows.Count - 1
+                                Dim lnkdelete As LinkButton = DirectCast(gvLMS.Rows(i).FindControl("lnkdelete"), LinkButton)
+                                lnkdelete.Visible = True
+                            Next
+                        End If
+                        For i As Integer = 0 To gvLMS.Rows.Count - 2
+                            gvLMS.Rows(i).Cells(0).Text = Convert.ToString(i + 1)
+                        Next
+                    End If
+                    SetPreviousData()
+                End If
+            ElseIf e.CommandName = "TotalCost" Then
+                TotalCost()
+            End If
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+
+        End Try
+    End Sub
+
+    Private Sub TotalCost()
+        Try
+            Dim rowIndex As Integer = 0
+            Dim CTotal As Double = 0
+            If ViewState("GridRowItems") IsNot Nothing Then
+                Dim dtCurrentTable As DataTable = DirectCast(ViewState("GridRowItems"), DataTable)
+                Dim drCurrentRow As DataRow = Nothing
+                If dtCurrentTable.Rows.Count > 0 Then
+                    For i As Integer = 0 To dtCurrentTable.Rows.Count - 1
+                        Dim ddlRM As DropDownList = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("ddlRM"), DropDownList)
+                        Dim txtPercentage As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtPercentage"), TextBox)
+                        Dim txtCost As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtCost"), TextBox)
+
+                        If txtCost.Text = "" Then
+                            txtCost.Text = 0
+                        End If
+                        CTotal = CTotal + txtCost.Text
+
+                        rowIndex += 1
+                    Next
+                End If
+            End If
+            SetPreviousData()
+            Dim lblQuantityFoot As Label = DirectCast(gvLMS.FooterRow.FindControl("lblQuantityFoot"), Label)
+            Dim lblQGmfoot As Label = DirectCast(gvLMS.FooterRow.FindControl("lblQGmfoot"), Label)
+            Dim lblPercentFoot As Label = DirectCast(gvLMS.FooterRow.FindControl("lblPercentFoot"), Label)
+            Dim lblTotalCost As Label = DirectCast(gvLMS.FooterRow.FindControl("lblTotalCost"), Label)
+            Dim lblTotCostGm As Label = DirectCast(gvLMS.FooterRow.FindControl("lblTotCostGm"), Label)
+            Dim lblTotCost As Label = DirectCast(gvLMS.FooterRow.FindControl("lblTotCost"), Label)
+            Dim lblTotCostKg As Label = DirectCast(gvLMS.FooterRow.FindControl("lblTotCostKg"), Label)
+            Dim lblQuanFoot As Label = DirectCast(gvLMS.FooterRow.FindControl("lblQuanFoot"), Label)
+            Dim hr1 As HtmlGenericControl = DirectCast(gvLMS.FooterRow.FindControl("hr1"), HtmlGenericControl)
+            Dim hr2 As HtmlGenericControl = DirectCast(gvLMS.FooterRow.FindControl("hr2"), HtmlGenericControl)
+            Dim hr3 As HtmlGenericControl = DirectCast(gvLMS.FooterRow.FindControl("hr3"), HtmlGenericControl)
+            Dim hr4 As HtmlGenericControl = DirectCast(gvLMS.FooterRow.FindControl("hr4"), HtmlGenericControl)
+            lblQuantityFoot.Visible = True
+            lblQuantityFoot.Text = ViewState("Qtotal")
+            lblQGmfoot.Text = lblQuantityFoot.Text * 1000
+            lblPercentFoot.Text = lblQuantityFoot.Text / txtQuantityForm.Text * 100
+            lblTotCost.Visible = True
+            lblTotCostKg.Visible = True
+            lblQuanFoot.Visible = True
+            lblTotalCost.Visible = True
+
+            hr1.Visible = True
+            hr2.Visible = True
+            hr3.Visible = True
+            hr4.Visible = True
+            lblTotalCost.Text = "₹" + CTotal.ToString("N2")
+            lblTotCostGm.Visible = True
+            lblTotCostGm.Text = "₹" + (CTotal / txtQuantityForm.Text).ToString("N2") + "/KG"
+            lblQuantityFoot.Text = CDbl(lblQuantityFoot.Text).ToString("N2") + " KG"
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            Throw ex
+
+        End Try
+    End Sub
+    Private Sub AddFormulaNewRow()
+        Try
+            Dim Costing As Double = 0
+            Dim FinalCost As Double = 0
+            Dim rowIndex As Integer = 0
+            If ViewState("GridRowItems") IsNot Nothing Then
+                Dim dtCurrentTable As DataTable = DirectCast(ViewState("GridRowItems"), DataTable)
+                Dim drCurrentRow As DataRow = Nothing
+                If dtCurrentTable.Rows.Count > 0 Then
+                    For i As Integer = 1 To dtCurrentTable.Rows.Count
+                        Dim ddlRM As DropDownList = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("ddlRM"), DropDownList)
+                        Dim txtPercentage As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtPercentage"), TextBox)
+                        Dim txtQ_kg As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtQ_kg"), TextBox)
+                        Dim txtQ_gm As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtQ_gm"), TextBox)
+                        Dim txtCost As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtCost"), TextBox)
+
+                        drCurrentRow = dtCurrentTable.NewRow()
+                        drCurrentRow("RowNumber") = i + 1
+                        strrowcount.Value = drCurrentRow("RowNumber")
+
+                        ' drCurrentRow("FRawM_RawMID") = ltRMat.Text
+                        drCurrentRow("FRawM_RawMID") = 0
+                        drCurrentRow("FRawM_Percentage") = CDbl((txtQuantityForm.Text - ViewState("Qtotal")) / txtQuantityForm.Text * 100)
+
+                        Dim UnitKg As Double = CDbl((txtQuantityForm.Text - ViewState("Qtotal")))
+                        '   Dim UnitKg As Double = txtQuantity.Text * CInt(drCurrentRow("FRawM_Percentage")) / 100
+                        drCurrentRow("FRawM_QtyKg") = UnitKg
+                        drCurrentRow("FRawM_QtyGm") = UnitKg * 1000
+                        'Costing = LMSBLL.Costing(CInt(drCurrentRow("FRawM_RawMID")))
+                        'FinalCost = Costing * (txtQuantity.Text * CInt(drCurrentRow("FRawM_Percentage")) / 100)
+                        'drCurrentRow("FRawM_Cost") = FinalCost
+                        drCurrentRow("FRawM_Cost") = FinalCost
+
+                        dtCurrentTable.Rows(i - 1)("FRawM_RawMID") = ddlRM.SelectedValue
+                        dtCurrentTable.Rows(i - 1)("FRawM_Percentage") = txtPercentage.Text
+                        dtCurrentTable.Rows(i - 1)("FRawM_QtyKg") = txtQ_kg.Text
+                        dtCurrentTable.Rows(i - 1)("FRawM_QtyGm") = txtQ_gm.Text
+                        'dtCurrentTable.Rows(i - 1)("FRawM_QtyKg") = txtQuantity.Text * txtPercentage.Text / 100
+                        'dtCurrentTable.Rows(i - 1)("FRawM_QtyGm") = txtQuantity.Text * txtPercentage.Text * 10
+                        dtCurrentTable.Rows(i - 1)("FRawM_Cost") = txtCost.Text
+
+                        rowIndex += 1
+                    Next
+                    dtCurrentTable.Rows.Add(drCurrentRow)
+                    ViewState("GridRowItems") = dtCurrentTable
+                    gvLMS.DataSource = dtCurrentTable
+                    gvLMS.DataBind()
+                End If
+            End If
+            SetPreviousData()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            Throw ex
+
+        End Try
+    End Sub
+
+    Private Sub SetPreviousData()
+        Try
+            Dim rowIndex As Integer = 0
+            Dim PerTotal As Double = 0
+            Dim Costing As Double = 0
+            Dim FinalCost As Double = 0
+            If ViewState("GridRowItems") IsNot Nothing Then
+                Dim dt As DataTable = DirectCast(ViewState("GridRowItems"), DataTable)
+                If dt.Rows.Count > 0 Then
+                    For i As Integer = 0 To dt.Rows.Count - 1
+                        Dim ddlRM As DropDownList = DirectCast(gvLMS.Rows(rowIndex).Cells(1).FindControl("ddlRM"), DropDownList)
+                        Dim txtPercentage As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(2).FindControl("txtPercentage"), TextBox)
+                        Dim txtQ_kg As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(3).FindControl("txtQ_kg"), TextBox)
+                        Dim txtQ_gm As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(4).FindControl("txtQ_gm"), TextBox)
+                        Dim txtCost As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(5).FindControl("txtCost"), TextBox)
+
+                        gvLMS.Rows(i).Cells(0).Text = Convert.ToString(i + 1)
+
+                        If txtPercentage.Text = "" Then
+                            txtPercentage.Text = 0
+                        End If
+                        PerTotal = PerTotal + txtQ_kg.Text
+                        If txtQuantityForm.Text = "" Then
+                            txtQuantityForm.Text = 0
+                        End If
+
+                        dt.Rows(i)("FRawM_RawMID") = ddlRM.SelectedValue
+                        dt.Rows(i)("FRawM_Percentage") = txtPercentage.Text
+                        dt.Rows(i)("FRawM_QtyKg") = txtQ_kg.Text
+                        dt.Rows(i)("FRawM_QtyGm") = txtQ_gm.Text
+                        'dt.Rows(i)("FRawM_Cost") = FinalCost
+                        If txtCost.Text = "" Or txtCost.Text = "0" Or txtCost.Text = "0.00" Then
+                            Costing = LMSBLL.Costing(ddlRM.SelectedValue)
+                            FinalCost = Costing * (txtQ_kg.Text)
+                            dt.Rows(i)("FRawM_Cost") = FinalCost
+                        Else
+                            dt.Rows(i)("FRawM_Cost") = txtCost.Text
+                        End If
+                        '' ''  dt.Rows(i)("FRawM_Cost") = txtCost.Text
+                        '' ''dt.Rows(i)("Unit_gm") = FinalCost / 1000
+                        ViewState("Qtotal") = PerTotal
+                        '' ''ViewState("Qtotal") = PerTotal * txtQuantity.Text / 100
+                        rowIndex += 1
+
+                        ddlRM.SelectedValue = dt.Rows(i)("FRawM_RawMID").ToString
+                        txtPercentage.Text = dt.Rows(i)("FRawM_Percentage").ToString
+                        txtQ_kg.Text = dt.Rows(i)("FRawM_QtyKg").ToString
+                        txtQ_gm.Text = dt.Rows(i)("FRawM_QtyGm").ToString
+                        txtCost.Text = dt.Rows(i)("FRawM_Cost").ToString
+                        If i < dt.Rows.Count - 1 Then
+                            ddlRM.Enabled = False
+                        End If
+                    Next
+                    ViewState("GridRowItems") = dt
+                    gvLMS.DataSource = dt
+                    gvLMS.DataBind()
+                    Dim lnkdelete As LinkButton = DirectCast(gvLMS.Rows(0).FindControl("lnkdelete"), LinkButton)
+                    If gvLMS.Rows.Count <= 1 Then
+                        lnkdelete.Visible = False
+                    Else
+                        For i As Integer = 0 To gvLMS.Rows.Count - 1
+                            'Dim lnkdelete As LinkButton = DirectCast(gvLMS.Rows(i).FindControl("lnkdelete"), LinkButton)
+                            lnkdelete.Visible = True
+                        Next
+                    End If
+                    Dim lblQuantityFoot As Label = DirectCast(gvLMS.FooterRow.FindControl("lblQuantityFoot"), Label)
+                    Dim lnkadd As LinkButton = DirectCast(gvLMS.FooterRow.FindControl("lnkadd"), LinkButton)
+                    Dim lblQFootError As Label = DirectCast(gvLMS.FooterRow.FindControl("lblQFootError"), Label)
+                    lblQuantityFoot.Text = ViewState("Qtotal")
+                    If (CDbl(lblQuantityFoot.Text) < CDbl(txtQuantityForm.Text)) Then
+                        lnkadd.Visible = True
+                        lblQFootError.Visible = False
+                    Else
+                        lnkadd.Visible = False
+                        If (CDbl(lblQuantityFoot.Text) > CDbl(txtQuantityForm.Text)) Then
+                            lblQFootError.Visible = True
+                        End If
+                        'If (CDbl(lblQuantityFoot.Text) = CDbl(txtQuantity.Text)) Then
+                        '    'lblQFootError.Text = "Reduce selected material to add new"
+                        '    'lblQFootError.Attributes.Add("Style", "color:darkcyan")
+                        '    'lblQFootError.Visible = True
+                        'End If
+                    End If
+
+                    'If (CDbl(lblQuantityFoot.Text) = CDbl(txtQuantity.Text)) Then
+                    '    ' btnCalc.Visible = True
+                    '    btnSave.Visible = True
+                    'Else
+                    '    '  btnCalc.Visible = False
+                    '    btnSave.Visible = False
+                    'End If
+                End If
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Private Sub AddFormulaFirstRow()
+        Try
+            Dim Costing As Double = 0
+            Dim FinalCost As Double = 0
+
+            Dim dt As New DataTable()
+            Dim dr As DataRow = Nothing
+
+            dt.Columns.Add(New DataColumn("RowNumber", GetType(String)))
+            dt.Columns.Add(New DataColumn("FRawM_RawMID", GetType(String)))
+            dt.Columns.Add(New DataColumn("FRawM_Percentage", GetType(String)))
+            dt.Columns.Add(New DataColumn("FRawM_QtyKg", GetType(String)))
+            dt.Columns.Add(New DataColumn("FRawM_QtyGm", GetType(String)))
+            dt.Columns.Add(New DataColumn("FRawM_Cost", GetType(String)))
+            'dt.Columns.Add(New DataColumn("Unit_gm", GetType(String)))
+
+            dr = dt.NewRow()
+            dr("RowNumber") = 1
+            strrowcount.Value = dr("RowNumber")
+            dr("FRawM_RawMID") = 1
+            dr("FRawM_Percentage") = 100
+            'dr("FRawM_Percentage") = String.Empty
+            Dim UnitKg As Integer = txtQuantityForm.Text * CInt(dr("FRawM_Percentage")) / 100
+            dr("FRawM_QtyKg") = UnitKg
+            dr("FRawM_QtyGm") = UnitKg * 1000
+
+            Costing = LMSBLL.Costing(CInt(dr("FRawM_RawMID")))
+            FinalCost = Costing * (txtQuantityForm.Text * CInt(dr("FRawM_Percentage")) / 100)
+            dr("FRawM_Cost") = FinalCost
+            'dr("FRawM_Cost") = String.Empty
+
+            dt.Rows.Add(dr)
+            ViewState("GridRowItems") = dt
+
+            gvLMS.DataSource = dt
+            gvLMS.DataBind()
+
+            SetPreviousData()
+
+            Dim lnkdelete As LinkButton = DirectCast(gvLMS.Rows(0).FindControl("lnkdelete"), LinkButton)
+            lnkdelete.Visible = False
+            Dim lblQuantityFoot As Label = DirectCast(gvLMS.FooterRow.FindControl("lblQuantityFoot"), Label)
+            Dim lnkadd As LinkButton = DirectCast(gvLMS.FooterRow.FindControl("lnkadd"), LinkButton)
+            Dim lblQFootError As Label = DirectCast(gvLMS.FooterRow.FindControl("lblQFootError"), Label)
+            If (CDbl(lblQuantityFoot.Text) = CDbl(txtQuantityForm.Text)) Then
+                lblQFootError.Text = "Reduce selected material to add new"
+                lblQFootError.Attributes.Add("Style", "color:darkcyan")
+                lblQFootError.Visible = True
+            End If
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+        End Try
+    End Sub
+    Protected Sub gvLMS_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles gvLMS.RowDataBound
+        Try
+            If e.Row.RowType = DataControlRowType.DataRow Then
+                Dim ddlRM As DropDownList = DirectCast(e.Row.FindControl("ddlRM"), DropDownList)
+                Dim txtPercentage As TextBox = DirectCast(e.Row.FindControl("txtPercentage"), TextBox)
+                Dim ltRMat As Literal = DirectCast(e.Row.FindControl("ltRMat"), Literal)
+
+                Dim ds As New DataSet
+
+                ds = LMSBLL.Dropdown("FillRawMaterial")
+                ddlRM.DataSource = ds.Tables(0)
+                ddlRM.DataTextField = "Rm_Name"
+                ddlRM.DataValueField = "Rm_ID"
+                ddlRM.DataBind()
+                ddlRM.SelectedValue = ltRMat.Text
+
+                If ltRMat.Text <> "" Then
+                    'If CInt(ltRMat.Text) <> 0 Then
+                    For x As Integer = 0 To gvLMS.Rows.Count - 1
+                        Dim ddRM1 As DropDownList = TryCast(gvLMS.Rows(x).FindControl("ddlRM"), DropDownList)
+
+                        ddlRM.Items.Remove(ddlRM.Items.FindByValue(ddRM1.Text))
+                    Next
+
+                End If
+            End If
+        Catch ex As Exception
+            Dim errorMsg As String = ex.Message.Replace(Chr(34), "")
+            errorMsg = errorMsg.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, errorMsg, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (errorMsg.ToString).ToString + "')", True)
+        End Try
+    End Sub
+
+    Protected Sub ddlRM_SelectedIndexChanged(sender As Object, e As EventArgs)
+        Try
+            Dim Costing As Double = 0
+            Dim FinalCost As Double = 0
+            Dim ddlRM As DropDownList = CType(sender, DropDownList)
+            Dim gvRow As GridViewRow = CType(ddlRM.Parent.Parent, GridViewRow)
+            Dim rowIndex As Integer = Convert.ToInt32(gvRow.RowIndex)
+            Dim txtPercentage As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtPercentage"), TextBox)
+            'Dim txtQ_kg As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtQ_kg"), TextBox)
+            'Dim txtQ_gm As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtQ_gm"), TextBox)
+            Dim txtCost As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtCost"), TextBox)
+            Costing = LMSBLL.Costing(ddlRM.SelectedValue)
+            FinalCost = Costing * (txtQuantityForm.Text * txtPercentage.Text / 100)
+            txtCost.Text = FinalCost
+            SetPreviousData()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub txtPercentage_TextChanged(sender As Object, e As EventArgs)
+        Try
+            Dim Costing As Double = 0
+            Dim FinalCost As Double = 0
+            Dim txtPercentage As TextBox = CType(sender, TextBox)
+            Dim gvRow As GridViewRow = CType(txtPercentage.Parent.Parent, GridViewRow)
+            Dim rowIndex As Integer = Convert.ToInt32(gvRow.RowIndex)
+            Dim ddlRM As DropDownList = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("ddlRM"), DropDownList)
+            Dim txtQ_kg As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtQ_kg"), TextBox)
+            Dim txtQ_gm As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtQ_gm"), TextBox)
+            Dim txtCost As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtCost"), TextBox)
+
+            'Dim cost As Double = txtCost.Text / txtQ_kg.Text
+            txtQ_kg.Text = txtQuantityForm.Text * txtPercentage.Text / 100
+            txtQ_gm.Text = txtQ_kg.Text * 1000
+            'txtCost.Text = cost * txtQ_kg.Text
+            Costing = LMSBLL.Costing(ddlRM.SelectedValue)
+            FinalCost = Costing * (txtQuantityForm.Text * txtPercentage.Text / 100)
+            txtCost.Text = FinalCost
+
+            SetPreviousData()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub txtQ_kg_TextChanged(sender As Object, e As EventArgs)
+        Try
+            Dim Costing As Double = 0
+            Dim FinalCost As Double = 0
+            Dim txtQ_kg As TextBox = CType(sender, TextBox)
+            Dim gvRow As GridViewRow = CType(txtQ_kg.Parent.Parent, GridViewRow)
+            Dim rowIndex As Integer = Convert.ToInt32(gvRow.RowIndex)
+            Dim ddlRM As DropDownList = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("ddlRM"), DropDownList)
+            Dim txtPercentage As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtPercentage"), TextBox)
+            Dim txtQ_gm As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtQ_gm"), TextBox)
+            Dim txtCost As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtCost"), TextBox)
+
+            'Dim cost As Double = txtCost.Text / (txtQuantity.Text * txtPercentage.Text / 100)
+            txtPercentage.Text = txtQ_kg.Text / txtQuantityForm.Text * 100
+            txtQ_gm.Text = txtQ_kg.Text * 1000
+            'txtCost.Text = cost * txtQ_kg.Text
+            Costing = LMSBLL.Costing(ddlRM.SelectedValue)
+            FinalCost = Costing * (txtQuantityForm.Text * txtPercentage.Text / 100)
+            txtCost.Text = FinalCost
+
+            SetPreviousData()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub txtQ_gm_TextChanged(sender As Object, e As EventArgs)
+        Try
+            Dim Costing As Double = 0
+            Dim FinalCost As Double = 0
+            Dim txtQ_gm As TextBox = CType(sender, TextBox)
+            Dim gvRow As GridViewRow = CType(txtQ_gm.Parent.Parent, GridViewRow)
+            Dim rowIndex As Integer = Convert.ToInt32(gvRow.RowIndex)
+            Dim ddlRM As DropDownList = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("ddlRM"), DropDownList)
+            Dim txtPercentage As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtPercentage"), TextBox)
+            Dim txtQ_kg As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtQ_kg"), TextBox)
+            Dim txtCost As TextBox = DirectCast(gvLMS.Rows(rowIndex).Cells(0).FindControl("txtCost"), TextBox)
+            'Dim lblQuantityFoot As Label = DirectCast(gvLMS.FooterRow.FindControl("lblQuantityFoot"), Label)
+
+            Dim cost As Double = txtCost.Text / txtQ_kg.Text
+            txtQ_kg.Text = txtQ_gm.Text / 1000
+            txtPercentage.Text = txtQ_kg.Text / txtQuantityForm.Text * 100
+            'txtCost.Text = cost * txtQ_kg.Text
+            Costing = LMSBLL.Costing(ddlRM.SelectedValue)
+            FinalCost = Costing * (txtQuantityForm.Text * txtPercentage.Text / 100)
+            txtCost.Text = FinalCost
+
+            SetPreviousData()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub txtCost_TextChanged(sender As Object, e As EventArgs)
+        Try
+            SetPreviousData()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Protected Sub btnSubmit_Click(sender As Object, e As EventArgs) Handles btnSubmit.Click
+        Try
+            If lblMixError.Visible = True Then
+                ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('Please update Mix Type of selected Product')", True)
+            Else
+                gvLMS.Visible = True
+                AddFormulaFirstRow()
+                btnCalc.Visible = True
+
+                btnFormulationSaveNext.Visible = True
+                btnFormulationSave.Visible = True
+                btnFormulationSaveApprove.Visible = True
+
+            End If
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Public Sub FillDetailForm()
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            'hfBtnPrint.Value = MainID
+            Dim dt As DataSet = LMSBLL.FillGridByID(Mainid, "DisplayFormulation")
+            Dim dtUser As New DataTable
+            dtUser = dt.Tables(0)
+            Dim drLogin As DataRow
+            drLogin = dtUser.Rows(0)
+            If DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_Approved")) = True Then
+                lblapproved.Text = "Approved"
+                btnFormulationSaveApprove.Visible = False
+            Else
+                lblapproved.Text = ""
+            End If
+            hfFormVersion.Value = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_Version"))
+            lblFormulationNo.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_No"))
+            txtQuantityForm.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_Qty"))
+            lblmodifiedname.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("U_FirstName"))
+            lblmodifieddate.Text = DynamicparcelDataManipulation.AlphaDateFormat(DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_ModifiedDate")).ToString())
+            Dim ProdID As Integer = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_ProductID"))
+            Dim FType As String = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_Type"))
+            If FType = "Product" And ProdID = 0 Then
+                ddlFormulationType.SelectedValue = 1
+            ElseIf FType = "Competitor" And ProdID = 0 Then
+                ddlFormulationType.SelectedValue = 2
+            ElseIf FType = "Product" And ProdID <> 0 Then
+                ddlFormulationType.SelectedValue = 0
+            End If
+            If ProdID = 0 Then
+                divDDLProduct.Visible = False
+                divTxtProduct.Visible = True
+                txtProduct.Text = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_ProdName"))
+            Else
+                divDDLProduct.Visible = True
+                divTxtProduct.Visible = False
+                ddlProduct.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_ProductID"))
+            End If
+            ddlMixTypeForm.SelectedValue = DynamicparcelDataManipulation.FixNullFromDB(drLogin("Formulation_ProdCategory"))
+
+            gvLMS.DataSource = dt.Tables(0)
+            Session("FormulationViewMode") = dt.Tables(0)
+            ViewState("GridRowItems") = dt.Tables(0)
+            gvLMS.DataBind()
+            SetPreviousData()
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+            Throw ex
+        End Try
+    End Sub
+    Private Sub DisableProdz()
+        Try
+            ddlFormulationType.Enabled = False
+            ddlProduct.Enabled = False
+            txtProduct.Enabled = False
+            ddlMixTypeForm.Enabled = False
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            Throw ex
+
+        End Try
+    End Sub
+    Private Sub DisableViewMode()
+        Try
+            DisableProdz()
+            txtQuantityForm.Enabled = False
+            btnSubmit.Visible = False
+            gvLMS.Enabled = False
+            'LMSassigncontrol.
+            btnCalc.Visible = False
+            btnFormulationSaveApprove.Visible = False
+            btnFormulationSaveNext.Visible = False
+            btnFormulationSave.Visible = False
+
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            Throw ex
+
+        End Try
+    End Sub
+    Public Function AreTablesTheSame() As Boolean
+        Dim tbl1 As DataTable = Session("FormulationViewMode")
+        Dim tbl2 As DataTable
+        '----starts
+        Dim dtN As New DataTable()
+        '   For i As Integer = 0 To grditemproduct.Columns.Count - 1
+        'dtN.Columns.Add("column" + i.ToString())
+        'Dim count As Integer = 82
+        dtN.Columns.Add("RowNumber", GetType(String))
+        dtN.Columns.Add("FRawM_RawMID", GetType(String))
+        dtN.Columns.Add("FRawM_Percentage", GetType(String))
+        dtN.Columns.Add("FRawM_QtyKg", GetType(String))
+        dtN.Columns.Add("FRawM_QtyGm", GetType(String))
+        dtN.Columns.Add("FRawM_Cost", GetType(String))
+
+        For Each row In gvLMS.Rows
+            Dim ltRowNumber As Literal = DirectCast(row.FindControl("ltRowNumber"), Literal)
+            Dim ddlRM As DropDownList = DirectCast(row.FindControl("ddlRM"), DropDownList)
+            Dim txtPercentage As TextBox = DirectCast(row.FindControl("txtPercentage"), TextBox)
+            Dim txtQ_kg As TextBox = DirectCast(row.FindControl("txtQ_kg"), TextBox)
+            Dim txtQ_gm As TextBox = DirectCast(row.FindControl("txtQ_gm"), TextBox)
+            Dim txtCost As TextBox = DirectCast(row.FindControl("txtCost"), TextBox)
+
+            dtN.Rows.Add(ltRowNumber.Text, ddlRM.SelectedValue, txtPercentage.Text, txtQ_kg.Text, txtQ_gm.Text, txtCost.Text)
+            'dtN.Rows.Add(count, ltProductId.Text, ltproductname.Text, ltproductcode.Text, ltpackingpacking.Text,
+            '             ltproductWeight.Text, ltrate1.Text.Replace(",", ""), txtquantity.Text, ltkg.Text, ltsumamount.Text.Replace(",", ""),
+            '             ltproductrate.Text.Replace(",", ""),
+            '             ltmarginp.Text, lblprductcost.Text, ltsumamount.Text.Replace(",", ""), ltproductrate.Text.Replace(",", ""), txtdmarginp.Text)
+            'count = count + 1
+            ''check txtquantity.Text(7)
+            '' ltsumamount.Text(9)
+            ''ltrate.Text(10)
+        Next
+        tbl2 = dtN
+        'If tbl1.Rows.Count <> tbl2.Rows.Count OrElse tbl1.Columns.Count <> tbl2.Columns.Count Then
+        If tbl1.Rows.Count <> tbl2.Rows.Count Then
+            Return False
+        End If
+
+
+        For i As Integer = 0 To tbl1.Rows.Count - 1
+            If Not Equals(tbl1.Rows(i)(10).ToString(), tbl2.Rows(i)(1).ToString()) Then
+                Return False
+            End If
+            If Not Equals(tbl1.Rows(i)(11).ToString(), tbl2.Rows(i)(2).ToString()) Then
+                Return False
+            End If
+            If Not Equals(tbl1.Rows(i)(12).ToString(), tbl2.Rows(i)(5).ToString()) Then
+                Return False
+            End If
+
+        Next
+        Return True
+    End Function
+    Protected Sub btnFormulationSaveApprove_Click(sender As Object, e As EventArgs) Handles btnFormulationSaveApprove.Click
+        Try
+            InsertFormulation()
+            UpdateFormulationApprove()
+            Response.Redirect("Formulation.aspx")
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('" + (error1.ToString).ToString + "')", True)
+        End Try
+    End Sub
+    Private Sub UpdateFormulationApprove()
+        Try
+            If ddlFormulationType.SelectedValue = 0 Then
+                LMSBLL.UpdateFormulationApprove("UpdateFormulationApprove", ViewState("Formulation_Id"), Session("LMSUserId"), ddlProduct.SelectedValue, 0)
+            Else
+                LMSBLL.UpdateFormulationApprove("UpdateFormulationApprove", ViewState("Formulation_Id"), Session("LMSUserId"), txtProduct.Text, 1)
+            End If
+            ScriptManager.RegisterStartupScript(Page, Me.[GetType](), "Call", "alert('Formulation has been approved')", True)
+        Catch ex As Exception
+            Dim error1 As String = ex.Message.Replace(Chr(34), "")
+            error1 = error1.Replace(Chr(39), "")
+            ExecptionBLL.Insert(System.IO.Path.GetFileName(Request.Url.AbsolutePath), System.Reflection.MethodBase.GetCurrentMethod().Name, error1, Session("LMSUserId"))
+            Throw ex
+        End Try
+    End Sub
+#End Region
+
+    Protected Sub txtProduct_TextChanged(sender As Object, e As EventArgs) Handles txtProduct.TextChanged
+        Try
+            Dim Exist As String = LMSBLL.CheckProdExist(txtProduct.Text)
+            If Exist = "True" Then
+                lblProdExist.Visible = True
+                btnSubmit.Visible = False
+            Else
+                lblProdExist.Visible = False
+                btnSubmit.Visible = True
+            End If
+        Catch ex As Exception
+
+        End Try
+    End Sub
+
+    Protected Sub btnprint_ServerClick(sender As Object, e As EventArgs) Handles btnprint.ServerClick
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            Response.Redirect("PrintFormulation.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)))
+        Catch ex As Exception
+
+        End Try
+
+    End Sub
+
+
+    Protected Sub btnprintblank_ServerClick(sender As Object, e As EventArgs) Handles btnprintblank.ServerClick
+        Try
+            MainID = Security.Decrypt(HttpUtility.UrlDecode(Request.QueryString("Id")))
+            Response.Redirect("PrintFormulation.aspx?Id=" + HttpUtility.UrlEncode(Security.Encrypt(MainID)) + "&print=b")
+        Catch ex As Exception
+
+        End Try
+    End Sub
+End Class

@@ -1,0 +1,24 @@
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.cache
+# Old backup folders
+/crystalReport-stop-o2sep26 working foruatcrm/
+/crystalReport-stopfor workinguat-06aug26/
+# Local temporary files 
+*/.tmp
+*.log
+# Old Crystal Report backup files
+/CrystalReport/*-stop*
+/CrystalReport/*-Copy*
+CrystalReport/* 25jly26
+/CrystalReport/* 31jly26
+/CrystalReport/*.exclude
+Old Backup folders
+/CrystalReport-stop-02sep26 working foruatcrm/
+/CrystalReport-stopfor workinguat-06aug26/
+# Temporary files
+*.tmp
+*.log

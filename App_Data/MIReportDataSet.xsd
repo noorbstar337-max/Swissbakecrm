@@ -1,0 +1,1250 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="MIReportDataSet" targetNamespace="http://tempuri.org/MIReportDataSet.xsd" xmlns:mstns="http://tempuri.org/MIReportDataSet.xsd" xmlns="http://tempuri.org/MIReportDataSet.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="3" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="Web.config" AppSettingsPropertyName="connectionString" IsAppSettingsProperty="true" Modifier="Assembly" Name="connectionString (Web.config)" ParameterPrefix="@" PropertyReference="AppConfig.System.Configuration.ConfigurationManager.0.ConnectionStrings.connectionString.ConnectionString" Provider="System.Data.SqlClient" />
+          <Connection AppSettingsObjectName="Web.config" AppSettingsPropertyName="db_swissbakeConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="db_swissbakeConnectionString (Web.config)" ParameterPrefix="@" PropertyReference="AppConfig.System.Configuration.ConfigurationManager.0.ConnectionStrings.db_swissbakeConnectionString.ConnectionString" Provider="System.Data.SqlClient" />
+          <Connection AppSettingsObjectName="Web.config" AppSettingsPropertyName="mvc_swissbakeConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="mvc_swissbakeConnectionString (Web.config)" ParameterPrefix="@" PropertyReference="AppConfig.System.Configuration.ConfigurationManager.0.ConnectionStrings.mvc_swissbakeConnectionString.ConnectionString" Provider="System.Data.SqlClient" />
+          <Connection AppSettingsObjectName="Web.config" AppSettingsPropertyName="db_swissbakeConnectionString1" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="db_swissbakeConnectionString1 (Web.config)" ParameterPrefix="@" PropertyReference="AppConfig.System.Configuration.ConfigurationManager.0.ConnectionStrings.db_swissbakeConnectionString1.ConnectionString" Provider="System.Data.SqlClient" />
+        </Connections>
+        <Tables>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="CryRt_CustBillTableAdapter" Name="CryRt_CustBill">
+            <MainSource>
+              <DbSource ConnectionRef="connectionString (Web.config)" DbObjectName="db_swissbake.dbo.CryRt_CustBill" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="false">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                    <CommandText>SELECT Acc_Id, Acc_Name, Cust_StoreName, Desig_Name, Contact_ContactPerson, Contact_Email, Contact_Landline, Contact_Mobile, Cust_AList, Cust_CForm, AccAddr_Name, AccAddr_Email, AccAddr_Mobile, CountryName, StateName, AccAddr_City, AccAddr_Pincode, AccAddr_Type, AccAddr_Address, Cust_Tin, Cust_Pan, Cust_Vat, AccAddr_Country, AccAddr_State, Cust_Password, Acc_CreatedDate, Acc_ModifiedID, Acc_ModifiedDate, AccAddr_Telephone, AccAddr_ModifiedDate, AccAddr_ModifiedId, Acc_Type, Acc_Status, Acc_IndustryId, Acc_Description, Acc_SourceID, Acc_CampaignID, Acc_Website, Acc_TurnOver, Acc_Code, Acc_CompanyTypeID, Cust_Gst, Contact_Title FROM dbo.CryRt_CustBill</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="Acc_Id" DataSetColumn="Acc_Id" />
+              <Mapping SourceColumn="Acc_Name" DataSetColumn="Acc_Name" />
+              <Mapping SourceColumn="Cust_StoreName" DataSetColumn="Cust_StoreName" />
+              <Mapping SourceColumn="Desig_Name" DataSetColumn="Desig_Name" />
+              <Mapping SourceColumn="Contact_ContactPerson" DataSetColumn="Contact_ContactPerson" />
+              <Mapping SourceColumn="Contact_Email" DataSetColumn="Contact_Email" />
+              <Mapping SourceColumn="Contact_Landline" DataSetColumn="Contact_Landline" />
+              <Mapping SourceColumn="Contact_Mobile" DataSetColumn="Contact_Mobile" />
+              <Mapping SourceColumn="Cust_AList" DataSetColumn="Cust_AList" />
+              <Mapping SourceColumn="Cust_CForm" DataSetColumn="Cust_CForm" />
+              <Mapping SourceColumn="AccAddr_Name" DataSetColumn="AccAddr_Name" />
+              <Mapping SourceColumn="AccAddr_Email" DataSetColumn="AccAddr_Email" />
+              <Mapping SourceColumn="AccAddr_Mobile" DataSetColumn="AccAddr_Mobile" />
+              <Mapping SourceColumn="CountryName" DataSetColumn="CountryName" />
+              <Mapping SourceColumn="StateName" DataSetColumn="StateName" />
+              <Mapping SourceColumn="AccAddr_City" DataSetColumn="AccAddr_City" />
+              <Mapping SourceColumn="AccAddr_Pincode" DataSetColumn="AccAddr_Pincode" />
+              <Mapping SourceColumn="AccAddr_Type" DataSetColumn="AccAddr_Type" />
+              <Mapping SourceColumn="AccAddr_Address" DataSetColumn="AccAddr_Address" />
+              <Mapping SourceColumn="Cust_Tin" DataSetColumn="Cust_Tin" />
+              <Mapping SourceColumn="Cust_Pan" DataSetColumn="Cust_Pan" />
+              <Mapping SourceColumn="Cust_Vat" DataSetColumn="Cust_Vat" />
+              <Mapping SourceColumn="AccAddr_Country" DataSetColumn="AccAddr_Country" />
+              <Mapping SourceColumn="AccAddr_State" DataSetColumn="AccAddr_State" />
+              <Mapping SourceColumn="Cust_Password" DataSetColumn="Cust_Password" />
+              <Mapping SourceColumn="Acc_CreatedDate" DataSetColumn="Acc_CreatedDate" />
+              <Mapping SourceColumn="Acc_ModifiedID" DataSetColumn="Acc_ModifiedID" />
+              <Mapping SourceColumn="Acc_ModifiedDate" DataSetColumn="Acc_ModifiedDate" />
+              <Mapping SourceColumn="AccAddr_Telephone" DataSetColumn="AccAddr_Telephone" />
+              <Mapping SourceColumn="AccAddr_ModifiedDate" DataSetColumn="AccAddr_ModifiedDate" />
+              <Mapping SourceColumn="AccAddr_ModifiedId" DataSetColumn="AccAddr_ModifiedId" />
+              <Mapping SourceColumn="Acc_Type" DataSetColumn="Acc_Type" />
+              <Mapping SourceColumn="Acc_Status" DataSetColumn="Acc_Status" />
+              <Mapping SourceColumn="Acc_IndustryId" DataSetColumn="Acc_IndustryId" />
+              <Mapping SourceColumn="Acc_Description" DataSetColumn="Acc_Description" />
+              <Mapping SourceColumn="Acc_SourceID" DataSetColumn="Acc_SourceID" />
+              <Mapping SourceColumn="Acc_CampaignID" DataSetColumn="Acc_CampaignID" />
+              <Mapping SourceColumn="Acc_Website" DataSetColumn="Acc_Website" />
+              <Mapping SourceColumn="Acc_TurnOver" DataSetColumn="Acc_TurnOver" />
+              <Mapping SourceColumn="Acc_Code" DataSetColumn="Acc_Code" />
+              <Mapping SourceColumn="Acc_CompanyTypeID" DataSetColumn="Acc_CompanyTypeID" />
+              <Mapping SourceColumn="Cust_Gst" DataSetColumn="Cust_Gst" />
+              <Mapping SourceColumn="Contact_Title" DataSetColumn="Contact_Title" />
+              <Mapping SourceColumn="StateCode" DataSetColumn="StateCode" />
+              <Mapping SourceColumn="State_No" DataSetColumn="State_No" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="CryRt_CustShipTableAdapter" Name="CryRt_CustShip">
+            <MainSource>
+              <DbSource ConnectionRef="connectionString (Web.config)" DbObjectName="db_swissbake.dbo.CryRt_CustShip" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="false">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="true">
+                    <CommandText>SELECT        Acc_Id, Acc_Name, Cust_StoreName, Desig_Name, Contact_ContactPerson, Contact_Email, Contact_Landline, Contact_Mobile, Cust_AList, Cust_CForm, AccAddr_Name, AccAddr_Email, AccAddr_Mobile, CountryName, 
+                         StateName, AccAddr_City, AccAddr_Pincode, AccAddr_Type, AccAddr_Address, Cust_Tin, Cust_Pan, Cust_Vat, AccAddr_Country, AccAddr_State, Cust_Password, Acc_CreatedDate, Acc_ModifiedID, Acc_ModifiedDate, 
+                         AccAddr_Telephone, AccAddr_ModifiedDate, AccAddr_ModifiedId, Acc_Type, Acc_Status, Acc_IndustryId, Acc_Description, Acc_SourceID, Acc_CampaignID, Acc_Website, Acc_TurnOver, Acc_Code, Acc_CompanyTypeID, Cust_Gst, 
+                         Contact_Title
+FROM            CryRt_CustShip</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="Acc_Id" DataSetColumn="Acc_Id" />
+              <Mapping SourceColumn="Acc_Name" DataSetColumn="Acc_Name" />
+              <Mapping SourceColumn="Cust_StoreName" DataSetColumn="Cust_StoreName" />
+              <Mapping SourceColumn="Desig_Name" DataSetColumn="Desig_Name" />
+              <Mapping SourceColumn="Contact_ContactPerson" DataSetColumn="Contact_ContactPerson" />
+              <Mapping SourceColumn="Contact_Email" DataSetColumn="Contact_Email" />
+              <Mapping SourceColumn="Contact_Landline" DataSetColumn="Contact_Landline" />
+              <Mapping SourceColumn="Contact_Mobile" DataSetColumn="Contact_Mobile" />
+              <Mapping SourceColumn="Cust_AList" DataSetColumn="Cust_AList" />
+              <Mapping SourceColumn="Cust_CForm" DataSetColumn="Cust_CForm" />
+              <Mapping SourceColumn="AccAddr_Name" DataSetColumn="AccAddr_Name" />
+              <Mapping SourceColumn="AccAddr_Email" DataSetColumn="AccAddr_Email" />
+              <Mapping SourceColumn="AccAddr_Mobile" DataSetColumn="AccAddr_Mobile" />
+              <Mapping SourceColumn="CountryName" DataSetColumn="CountryName" />
+              <Mapping SourceColumn="StateName" DataSetColumn="StateName" />
+              <Mapping SourceColumn="AccAddr_City" DataSetColumn="AccAddr_City" />
+              <Mapping SourceColumn="AccAddr_Pincode" DataSetColumn="AccAddr_Pincode" />
+              <Mapping SourceColumn="AccAddr_Type" DataSetColumn="AccAddr_Type" />
+              <Mapping SourceColumn="AccAddr_Address" DataSetColumn="AccAddr_Address" />
+              <Mapping SourceColumn="Cust_Tin" DataSetColumn="Cust_Tin" />
+              <Mapping SourceColumn="Cust_Pan" DataSetColumn="Cust_Pan" />
+              <Mapping SourceColumn="Cust_Vat" DataSetColumn="Cust_Vat" />
+              <Mapping SourceColumn="AccAddr_Country" DataSetColumn="AccAddr_Country" />
+              <Mapping SourceColumn="AccAddr_State" DataSetColumn="AccAddr_State" />
+              <Mapping SourceColumn="Cust_Password" DataSetColumn="Cust_Password" />
+              <Mapping SourceColumn="Acc_CreatedDate" DataSetColumn="Acc_CreatedDate" />
+              <Mapping SourceColumn="Acc_ModifiedID" DataSetColumn="Acc_ModifiedID" />
+              <Mapping SourceColumn="Acc_ModifiedDate" DataSetColumn="Acc_ModifiedDate" />
+              <Mapping SourceColumn="AccAddr_Telephone" DataSetColumn="AccAddr_Telephone" />
+              <Mapping SourceColumn="AccAddr_ModifiedDate" DataSetColumn="AccAddr_ModifiedDate" />
+              <Mapping SourceColumn="AccAddr_ModifiedId" DataSetColumn="AccAddr_ModifiedId" />
+              <Mapping SourceColumn="Acc_Type" DataSetColumn="Acc_Type" />
+              <Mapping SourceColumn="Acc_Status" DataSetColumn="Acc_Status" />
+              <Mapping SourceColumn="Acc_IndustryId" DataSetColumn="Acc_IndustryId" />
+              <Mapping SourceColumn="Acc_Description" DataSetColumn="Acc_Description" />
+              <Mapping SourceColumn="Acc_SourceID" DataSetColumn="Acc_SourceID" />
+              <Mapping SourceColumn="Acc_CampaignID" DataSetColumn="Acc_CampaignID" />
+              <Mapping SourceColumn="Acc_Website" DataSetColumn="Acc_Website" />
+              <Mapping SourceColumn="Acc_TurnOver" DataSetColumn="Acc_TurnOver" />
+              <Mapping SourceColumn="Acc_Code" DataSetColumn="Acc_Code" />
+              <Mapping SourceColumn="Acc_CompanyTypeID" DataSetColumn="Acc_CompanyTypeID" />
+              <Mapping SourceColumn="Cust_Gst" DataSetColumn="Cust_Gst" />
+              <Mapping SourceColumn="Contact_Title" DataSetColumn="Contact_Title" />
+              <Mapping SourceColumn="StateCode" DataSetColumn="StateCode" />
+              <Mapping SourceColumn="State_No" DataSetColumn="State_No" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="CryRt_ProformaTableAdapter" Name="CryRt_Proforma">
+            <MainSource>
+              <DbSource ConnectionRef="db_swissbakeConnectionString (Web.config)" DbObjectName="db_swissbake.dbo.CryRt_Proforma" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="false">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                    <CommandText>SELECT Proforma_Id, Proforma_No, Proforma_Type, Proforma_TypeID, Proforma_Date, Proforma_Term_Condition, Proforma_Pdf, Proforma_OwnerID, Proforma_QuotAmount, Proforma_PayableNow, Proforma_CreatedID, Proforma_CreatedDate, Proforma_ModifiedID, Proforma_ModifiedDate, Proforma_Del, Proforma_Status, Quotation_No, Quotation_Type, Quotation_TypeID, Quotation_Validity, Quotation_Date FROM dbo.CryRt_Proforma</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="Proforma_Id" DataSetColumn="Proforma_Id" />
+              <Mapping SourceColumn="Proforma_No" DataSetColumn="Proforma_No" />
+              <Mapping SourceColumn="Proforma_Type" DataSetColumn="Proforma_Type" />
+              <Mapping SourceColumn="Proforma_TypeID" DataSetColumn="Proforma_TypeID" />
+              <Mapping SourceColumn="Proforma_Date" DataSetColumn="Proforma_Date" />
+              <Mapping SourceColumn="Proforma_Term_Condition" DataSetColumn="Proforma_Term_Condition" />
+              <Mapping SourceColumn="Proforma_Pdf" DataSetColumn="Proforma_Pdf" />
+              <Mapping SourceColumn="Proforma_OwnerID" DataSetColumn="Proforma_OwnerID" />
+              <Mapping SourceColumn="Proforma_QuotAmount" DataSetColumn="Proforma_QuotAmount" />
+              <Mapping SourceColumn="Proforma_PayableNow" DataSetColumn="Proforma_PayableNow" />
+              <Mapping SourceColumn="Proforma_CreatedID" DataSetColumn="Proforma_CreatedID" />
+              <Mapping SourceColumn="Proforma_CreatedDate" DataSetColumn="Proforma_CreatedDate" />
+              <Mapping SourceColumn="Proforma_ModifiedID" DataSetColumn="Proforma_ModifiedID" />
+              <Mapping SourceColumn="Proforma_ModifiedDate" DataSetColumn="Proforma_ModifiedDate" />
+              <Mapping SourceColumn="Proforma_Del" DataSetColumn="Proforma_Del" />
+              <Mapping SourceColumn="Proforma_Status" DataSetColumn="Proforma_Status" />
+              <Mapping SourceColumn="Quotation_No" DataSetColumn="Quotation_No" />
+              <Mapping SourceColumn="Quotation_Type" DataSetColumn="Quotation_Type" />
+              <Mapping SourceColumn="Quotation_TypeID" DataSetColumn="Quotation_TypeID" />
+              <Mapping SourceColumn="Quotation_Validity" DataSetColumn="Quotation_Validity" />
+              <Mapping SourceColumn="Quotation_Date" DataSetColumn="Quotation_Date" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="CryRt_BilledfromTableAdapter" Name="CryRt_Billedfrom">
+            <MainSource>
+              <DbSource ConnectionRef="db_swissbakeConnectionString (Web.config)" DbObjectName="db_swissbake.dbo.CryRt_Billedfrom" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="false">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                    <CommandText>SELECT Company_ID, Company_Name, Company_Address, Company_Pincode, Company_Phone, Company_Mobile, Company_EmailId, CountryName, StateName, StateCode, State_No, Company_GST, Company_VAT, Company_CST, Company_TIN, Company_PAN, Company_Twitter, Company_Facebook, Company_Website, Company_Fax FROM dbo.CryRt_Billedfrom</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="Company_ID" DataSetColumn="Company_ID" />
+              <Mapping SourceColumn="Company_Name" DataSetColumn="Company_Name" />
+              <Mapping SourceColumn="Company_Address" DataSetColumn="Company_Address" />
+              <Mapping SourceColumn="Company_Pincode" DataSetColumn="Company_Pincode" />
+              <Mapping SourceColumn="Company_Phone" DataSetColumn="Company_Phone" />
+              <Mapping SourceColumn="Company_Mobile" DataSetColumn="Company_Mobile" />
+              <Mapping SourceColumn="Company_EmailId" DataSetColumn="Company_EmailId" />
+              <Mapping SourceColumn="CountryName" DataSetColumn="CountryName" />
+              <Mapping SourceColumn="StateName" DataSetColumn="StateName" />
+              <Mapping SourceColumn="StateCode" DataSetColumn="StateCode" />
+              <Mapping SourceColumn="State_No" DataSetColumn="State_No" />
+              <Mapping SourceColumn="Company_GST" DataSetColumn="Company_GST" />
+              <Mapping SourceColumn="Company_VAT" DataSetColumn="Company_VAT" />
+              <Mapping SourceColumn="Company_CST" DataSetColumn="Company_CST" />
+              <Mapping SourceColumn="Company_TIN" DataSetColumn="Company_TIN" />
+              <Mapping SourceColumn="Company_PAN" DataSetColumn="Company_PAN" />
+              <Mapping SourceColumn="Company_Twitter" DataSetColumn="Company_Twitter" />
+              <Mapping SourceColumn="Company_Facebook" DataSetColumn="Company_Facebook" />
+              <Mapping SourceColumn="Company_Website" DataSetColumn="Company_Website" />
+              <Mapping SourceColumn="Company_Fax" DataSetColumn="Company_Fax" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="CryRt_QtnItemsTableAdapter" Name="CryRt_QtnItems">
+            <MainSource>
+              <DbSource ConnectionRef="db_swissbakeConnectionString1 (Web.config)" DbObjectName="db_swissbake.dbo.CryRt_QtnItems" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="false">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                    <CommandText>SELECT Product_Id, Product_Name, Product_Code, Product_Rate, Quotation_CurrencyRate, Product_DollarRate, ItemDt_DollarAmount, Product_Type, Product_Vat, Product_HSCODE, Product_Desc, Product_Msdc, Product_ForType, Product_AccId, Product_Cost, Product_Margin, Product_CostSKU, Product_Link, ItemDt_ID, ItemDt_Type, ItemDt_TypeId, ItemDt_ProductId, ItemDt_Qty, ItemDt_Rate, ItemDt_Amount, ItemDt_Vat, ItemDt_DesiredMargin, Packing_Weight, Packing_Packing, KG, Quotation_Id, Quotation_No, Quotation_TypeID, Quotation_QuoStatus, Quotation_Date, Quotation_ModeOFPayment, Quotation_Validity, Quotation_TermOFDelivery, Quotation_DispatchThrough, Quotation_AuthSign, Quotation_ExpClosing, Quotation_Freight, Quotation_isChild, Quotation_Currency, Quotation_TermsOfPayment, Quotation_ModeOfTransport, Quotation_CountryOfOrigin, Quotation_CountryOfFinalDestination, Quotation_PortOfLoading, Quotation_PortOfDischarge, Quotation_FinalDestination, Quotation_FlightNo, Quotation_TrmsPyt_Card_doc, Quotation_WithFreight, Quotation_Insurance, Quotation_OceanFreight, Quotation_Doc_Clearance, Product_CategoryId, Quotation_PrintIn, Quotation_FreightTaxPer FROM dbo.CryRt_QtnItems</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="Product_Id" DataSetColumn="Product_Id" />
+              <Mapping SourceColumn="Product_Name" DataSetColumn="Product_Name" />
+              <Mapping SourceColumn="Product_Code" DataSetColumn="Product_Code" />
+              <Mapping SourceColumn="Product_Rate" DataSetColumn="Product_Rate" />
+              <Mapping SourceColumn="Quotation_CurrencyRate" DataSetColumn="Quotation_CurrencyRate" />
+              <Mapping SourceColumn="Product_DollarRate" DataSetColumn="Product_DollarRate" />
+              <Mapping SourceColumn="ItemDt_DollarAmount" DataSetColumn="ItemDt_DollarAmount" />
+              <Mapping SourceColumn="Product_Type" DataSetColumn="Product_Type" />
+              <Mapping SourceColumn="Product_Vat" DataSetColumn="Product_Vat" />
+              <Mapping SourceColumn="Product_HSCODE" DataSetColumn="Product_HSCODE" />
+              <Mapping SourceColumn="Product_Desc" DataSetColumn="Product_Desc" />
+              <Mapping SourceColumn="Product_Msdc" DataSetColumn="Product_Msdc" />
+              <Mapping SourceColumn="Product_ForType" DataSetColumn="Product_ForType" />
+              <Mapping SourceColumn="Product_AccId" DataSetColumn="Product_AccId" />
+              <Mapping SourceColumn="Product_Cost" DataSetColumn="Product_Cost" />
+              <Mapping SourceColumn="Product_Margin" DataSetColumn="Product_Margin" />
+              <Mapping SourceColumn="Product_CostSKU" DataSetColumn="Product_CostSKU" />
+              <Mapping SourceColumn="Product_Link" DataSetColumn="Product_Link" />
+              <Mapping SourceColumn="ItemDt_ID" DataSetColumn="ItemDt_ID" />
+              <Mapping SourceColumn="ItemDt_Type" DataSetColumn="ItemDt_Type" />
+              <Mapping SourceColumn="ItemDt_TypeId" DataSetColumn="ItemDt_TypeId" />
+              <Mapping SourceColumn="ItemDt_ProductId" DataSetColumn="ItemDt_ProductId" />
+              <Mapping SourceColumn="ItemDt_Qty" DataSetColumn="ItemDt_Qty" />
+              <Mapping SourceColumn="ItemDt_Rate" DataSetColumn="ItemDt_Rate" />
+              <Mapping SourceColumn="ItemDt_Amount" DataSetColumn="ItemDt_Amount" />
+              <Mapping SourceColumn="ItemDt_Vat" DataSetColumn="ItemDt_Vat" />
+              <Mapping SourceColumn="ItemDt_DesiredMargin" DataSetColumn="ItemDt_DesiredMargin" />
+              <Mapping SourceColumn="Packing_Weight" DataSetColumn="Packing_Weight" />
+              <Mapping SourceColumn="Packing_Packing" DataSetColumn="Packing_Packing" />
+              <Mapping SourceColumn="KG" DataSetColumn="KG" />
+              <Mapping SourceColumn="Quotation_Id" DataSetColumn="Quotation_Id" />
+              <Mapping SourceColumn="Quotation_No" DataSetColumn="Quotation_No" />
+              <Mapping SourceColumn="Quotation_TypeID" DataSetColumn="Quotation_TypeID" />
+              <Mapping SourceColumn="Quotation_QuoStatus" DataSetColumn="Quotation_QuoStatus" />
+              <Mapping SourceColumn="Quotation_Date" DataSetColumn="Quotation_Date" />
+              <Mapping SourceColumn="Quotation_ModeOFPayment" DataSetColumn="Quotation_ModeOFPayment" />
+              <Mapping SourceColumn="Quotation_Validity" DataSetColumn="Quotation_Validity" />
+              <Mapping SourceColumn="Quotation_TermOFDelivery" DataSetColumn="Quotation_TermOFDelivery" />
+              <Mapping SourceColumn="Quotation_DispatchThrough" DataSetColumn="Quotation_DispatchThrough" />
+              <Mapping SourceColumn="Quotation_AuthSign" DataSetColumn="Quotation_AuthSign" />
+              <Mapping SourceColumn="Quotation_ExpClosing" DataSetColumn="Quotation_ExpClosing" />
+              <Mapping SourceColumn="Quotation_Freight" DataSetColumn="Quotation_Freight" />
+              <Mapping SourceColumn="Quotation_isChild" DataSetColumn="Quotation_isChild" />
+              <Mapping SourceColumn="Quotation_Currency" DataSetColumn="Quotation_Currency" />
+              <Mapping SourceColumn="Quotation_TermsOfPayment" DataSetColumn="Quotation_TermsOfPayment" />
+              <Mapping SourceColumn="Quotation_ModeOfTransport" DataSetColumn="Quotation_ModeOfTransport" />
+              <Mapping SourceColumn="Quotation_CountryOfOrigin" DataSetColumn="Quotation_CountryOfOrigin" />
+              <Mapping SourceColumn="Quotation_CountryOfFinalDestination" DataSetColumn="Quotation_CountryOfFinalDestination" />
+              <Mapping SourceColumn="Quotation_PortOfLoading" DataSetColumn="Quotation_PortOfLoading" />
+              <Mapping SourceColumn="Quotation_PortOfDischarge" DataSetColumn="Quotation_PortOfDischarge" />
+              <Mapping SourceColumn="Quotation_FinalDestination" DataSetColumn="Quotation_FinalDestination" />
+              <Mapping SourceColumn="Quotation_FlightNo" DataSetColumn="Quotation_FlightNo" />
+              <Mapping SourceColumn="Quotation_TrmsPyt_Card_doc" DataSetColumn="Quotation_TrmsPyt_Card_doc" />
+              <Mapping SourceColumn="Quotation_WithFreight" DataSetColumn="Quotation_WithFreight" />
+              <Mapping SourceColumn="Quotation_Insurance" DataSetColumn="Quotation_Insurance" />
+              <Mapping SourceColumn="Quotation_OceanFreight" DataSetColumn="Quotation_OceanFreight" />
+              <Mapping SourceColumn="Quotation_Doc_Clearance" DataSetColumn="Quotation_Doc_Clearance" />
+              <Mapping SourceColumn="Product_CategoryId" DataSetColumn="Product_CategoryId" />
+              <Mapping SourceColumn="Quotation_PrintIn" DataSetColumn="Quotation_PrintIn" />
+              <Mapping SourceColumn="Quotation_FreightTaxPer" DataSetColumn="Quotation_FreightTaxPer" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+        </Tables>
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="MIReportDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_DataSetName="MIReportDataSet" msprop:Generator_UserDSName="MIReportDataSet">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="CryRt_CustBill">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Acc_Id" type="xs:long" />
+              <xs:element name="Acc_Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_StoreName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Desig_Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Contact_ContactPerson" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Contact_Email" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Contact_Landline" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Contact_Mobile" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_AList" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_CForm" type="xs:boolean" minOccurs="0" />
+              <xs:element name="AccAddr_Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Email" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Mobile" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CountryName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="StateName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_City" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Pincode" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Type" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Address" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_Tin" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_Pan" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_Vat" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Country" type="xs:int" minOccurs="0" />
+              <xs:element name="AccAddr_State" type="xs:int" minOccurs="0" />
+              <xs:element name="Cust_Password" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_CreatedDate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Acc_ModifiedID" type="xs:long" minOccurs="0" />
+              <xs:element name="Acc_ModifiedDate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="AccAddr_Telephone" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_ModifiedDate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="AccAddr_ModifiedId" type="xs:int" minOccurs="0" />
+              <xs:element name="Acc_Type" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_Status" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_IndustryId" type="xs:int" minOccurs="0" />
+              <xs:element name="Acc_Description" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_SourceID" type="xs:int" minOccurs="0" />
+              <xs:element name="Acc_CampaignID" type="xs:int" minOccurs="0" />
+              <xs:element name="Acc_Website" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_TurnOver" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_Code" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_CompanyTypeID" type="xs:int" minOccurs="0" />
+              <xs:element name="Cust_Gst" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Contact_Title" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="StateCode" type="xs:string" minOccurs="0" />
+              <xs:element name="State_No" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="CryRt_CustShip">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Acc_Id" type="xs:long" />
+              <xs:element name="Acc_Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_StoreName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Desig_Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Contact_ContactPerson" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Contact_Email" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Contact_Landline" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Contact_Mobile" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_AList" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_CForm" type="xs:boolean" minOccurs="0" />
+              <xs:element name="AccAddr_Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Email" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Mobile" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CountryName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="StateName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_City" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Pincode" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Type" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Address" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_Tin" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_Pan" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cust_Vat" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_Country" type="xs:int" minOccurs="0" />
+              <xs:element name="AccAddr_State" type="xs:int" minOccurs="0" />
+              <xs:element name="Cust_Password" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_CreatedDate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Acc_ModifiedID" type="xs:long" minOccurs="0" />
+              <xs:element name="Acc_ModifiedDate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="AccAddr_Telephone" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="AccAddr_ModifiedDate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="AccAddr_ModifiedId" type="xs:int" minOccurs="0" />
+              <xs:element name="Acc_Type" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_Status" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_IndustryId" type="xs:int" minOccurs="0" />
+              <xs:element name="Acc_Description" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_SourceID" type="xs:int" minOccurs="0" />
+              <xs:element name="Acc_CampaignID" type="xs:int" minOccurs="0" />
+              <xs:element name="Acc_Website" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_TurnOver" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_Code" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Acc_CompanyTypeID" type="xs:int" minOccurs="0" />
+              <xs:element name="Cust_Gst" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Contact_Title" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="State_No" type="xs:string" minOccurs="0" />
+              <xs:element name="StateCode" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="CryRt_Proforma">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Proforma_Id" type="xs:long" />
+              <xs:element name="Proforma_No" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Proforma_Type" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Proforma_TypeID" type="xs:long" minOccurs="0" />
+              <xs:element name="Proforma_Date" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Proforma_Term_Condition" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Proforma_Pdf" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Proforma_OwnerID" type="xs:long" minOccurs="0" />
+              <xs:element name="Proforma_QuotAmount" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Proforma_PayableNow" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Proforma_CreatedID" type="xs:long" minOccurs="0" />
+              <xs:element name="Proforma_CreatedDate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Proforma_ModifiedID" type="xs:long" minOccurs="0" />
+              <xs:element name="Proforma_ModifiedDate" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Proforma_Del" type="xs:boolean" minOccurs="0" />
+              <xs:element name="Proforma_Status" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_No" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_Type" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_TypeID" type="xs:long" minOccurs="0" />
+              <xs:element name="Quotation_Validity" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_Date" type="xs:dateTime" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="dtPricelist">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Product_Id" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Name" type="xs:string" minOccurs="0" />
+              <xs:element name="PrdCategory_Name" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Margin" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_CostSKU" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Cost" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Rate" type="xs:string" minOccurs="0" />
+              <xs:element name="Discounted_Rate" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Code" type="xs:string" minOccurs="0" />
+              <xs:element name="Packing_Packing" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Vat" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Vat1" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Stock" type="xs:string" minOccurs="0" />
+              <xs:element name="Discount_Discount" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Usage" type="xs:string" minOccurs="0" />
+              <xs:element name="Packing_weight" type="xs:string" minOccurs="0" />
+              <xs:element name="PrdCategory_ID" type="xs:string" minOccurs="0" />
+              <xs:element name="acc_id" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Link" type="xs:string" minOccurs="0" />
+              <xs:element name="Product_Salt" type="xs:boolean" minOccurs="0" />
+              <xs:element name="Product_Improver" type="xs:boolean" minOccurs="0" />
+              <xs:element name="Product_New" type="xs:boolean" minOccurs="0" />
+              <xs:element name="Product_Dosage" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="CryRt_Billedfrom">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Company_ID" type="xs:int" />
+              <xs:element name="Company_Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_Address" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="2147483647" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_Pincode" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_Phone" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="25" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_Mobile" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_EmailId" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="70" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="CountryName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="StateName">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="StateCode" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="State_No" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_GST" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_VAT" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_CST" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_TIN" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_PAN" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_Twitter" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_Facebook" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_Website" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="100" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Company_Fax" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="CryRt_QtnItems">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Product_Id" type="xs:int" />
+              <xs:element name="Product_Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="60" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Product_Code" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Product_Rate" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Quotation_CurrencyRate" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Product_DollarRate" msdata:ReadOnly="true" type="xs:decimal" minOccurs="0" />
+              <xs:element name="ItemDt_DollarAmount" msdata:ReadOnly="true" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Product_Type" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Product_Vat" msdata:ReadOnly="true" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Product_HSCODE" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Product_Desc" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Product_Msdc" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Product_ForType" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Product_AccId" type="xs:int" minOccurs="0" />
+              <xs:element name="Product_Cost" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Product_Margin" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Product_CostSKU" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Product_Link" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ItemDt_ID" type="xs:long" />
+              <xs:element name="ItemDt_Type" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ItemDt_TypeId" type="xs:long" minOccurs="0" />
+              <xs:element name="ItemDt_ProductId" type="xs:long" minOccurs="0" />
+              <xs:element name="ItemDt_Qty" type="xs:int" minOccurs="0" />
+              <xs:element name="ItemDt_Rate" type="xs:decimal" minOccurs="0" />
+              <xs:element name="ItemDt_Amount" type="xs:decimal" minOccurs="0" />
+              <xs:element name="ItemDt_Vat" type="xs:decimal" minOccurs="0" />
+              <xs:element name="ItemDt_DesiredMargin" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Packing_Weight" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Packing_Packing" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="60" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="KG" msdata:ReadOnly="true" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Quotation_Id" type="xs:long" />
+              <xs:element name="Quotation_No" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_TypeID" type="xs:long" minOccurs="0" />
+              <xs:element name="Quotation_QuoStatus" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_Date" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Quotation_ModeOFPayment" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_Validity" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_TermOFDelivery" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_DispatchThrough" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_AuthSign" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="150" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_ExpClosing" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Quotation_Freight" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Quotation_isChild" type="xs:int" minOccurs="0" />
+              <xs:element name="Quotation_Currency" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_TermsOfPayment" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_ModeOfTransport" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_CountryOfOrigin" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_CountryOfFinalDestination" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_PortOfLoading" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_PortOfDischarge" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_FinalDestination" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_FlightNo" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_TrmsPyt_Card_doc" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="500" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_WithFreight" type="xs:boolean" minOccurs="0" />
+              <xs:element name="Quotation_Insurance" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Quotation_OceanFreight" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Quotation_Doc_Clearance" type="xs:decimal" minOccurs="0" />
+              <xs:element name="Product_CategoryId" type="xs:int" minOccurs="0" />
+              <xs:element name="Quotation_PrintIn" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Quotation_FreightTaxPer" type="xs:decimal" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+    <xs:unique name="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:CryRt_CustBill" />
+      <xs:field xpath="mstns:Acc_Id" />
+    </xs:unique>
+    <xs:unique name="CryRt_CustShip_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:CryRt_CustShip" />
+      <xs:field xpath="mstns:Acc_Id" />
+    </xs:unique>
+    <xs:unique name="CryRt_Proforma_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:CryRt_Proforma" />
+      <xs:field xpath="mstns:Proforma_Id" />
+    </xs:unique>
+    <xs:unique name="CryRt_Billedfrom_Constraint1" msdata:ConstraintName="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:CryRt_Billedfrom" />
+      <xs:field xpath="mstns:Company_ID" />
+    </xs:unique>
+  </xs:element>
+</xs:schema>
